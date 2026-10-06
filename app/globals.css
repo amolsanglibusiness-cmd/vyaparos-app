@@ -1,0 +1,4119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 199 89% 94%;
+    --accent-foreground: 199 89% 30%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 199 89% 48%;
+    --chart-1: 199 89% 48%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.625rem;
+    --glass-bg: 255 255 255 / 0.65;
+    --glass-border: 255 255 255 / 0.3;
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  .dark {
+    --background: 219 62% 6%;
+    --foreground: 210 40% 97%;
+    --card: 217 55% 9%;
+    --card-foreground: 210 40% 97%;
+    --popover: 217 55% 9%;
+    --popover-foreground: 210 40% 97%;
+    --primary: 190 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 216 42% 13%;
+    --secondary-foreground: 210 40% 97%;
+    --muted: 216 38% 14%;
+    --muted-foreground: 214 22% 68%;
+    --accent: 216 42% 17%;
+    --accent-foreground: 210 40% 97%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 65% 48%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 85% 52%;
+    --warning-foreground: 0 0% 10%;
+    --border: 208 60% 20%;
+    --input: 208 60% 20%;
+    --ring: 190 100% 50%;
+    --chart-1: 199 89% 52%;
+    --chart-2: 142 65% 48%;
+    --chart-3: 38 85% 52%;
+    --chart-4: 280 55% 58%;
+    --chart-5: 340 70% 55%;
+    --glass-bg: 255 255 255 / 0.05;
+    --glass-border: 255 255 255 / 0.1;
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(var(--glass-bg));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
+    opacity: 0;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
+    opacity: 0;
+  }
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out forwards;
+    opacity: 0;
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.4s ease-out forwards;
+    opacity: 0;
+  }
+}
+
+
+/* Mobile entry screens: match the full-screen invoice-style action bar. Desktop remains unchanged. */
+@media (max-width: 1023px) {
+  .mobile-entry-screen {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    transform: none !important;
+    border-radius: 0 !important;
+    padding: 16px 16px 88px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .add-item-mobile-screen {
+    padding: 0 !important;
+  }
+
+  .mobile-entry-footer {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 80 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 0 env(safe-area-inset-bottom) !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+    background: hsl(var(--background)) !important;
+    box-shadow: 0 -4px 14px rgb(0 0 0 / 0.06);
+  }
+
+  .mobile-entry-footer > button {
+    width: 100% !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border-width: 0 !important;
+    box-shadow: none !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+  }
+
+  .mobile-entry-footer > button:last-child {
+    background: #ef1738 !important;
+    color: #fff !important;
+    border-color: #ef1738 !important;
+  }
+
+  .mobile-entry-footer > button:last-child:hover {
+    background: #dc1231 !important;
+  }
+
+  .mobile-entry-save {
+    background: #ef1738 !important;
+    color: #fff !important;
+  }
+
+  .mobile-entry-save:hover {
+    background: #dc1231 !important;
+  }
+
+  .mobile-entry-inline-footer {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 80 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 0 !important;
+    padding: 0 0 env(safe-area-inset-bottom) !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+    background: hsl(var(--background)) !important;
+    box-shadow: 0 -4px 14px rgb(0 0 0 / 0.06);
+  }
+
+  .mobile-entry-inline-footer > button {
+    height: 64px !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    font-size: 1rem !important;
+  }
+
+  .mobile-entry-inline-footer > button:last-child {
+    background: #ef1738 !important;
+    color: #fff !important;
+  }
+}
+
+/* Invoice preview destructive action: keep Delete red regardless of Button/theme styles. */
+.invoice-preview-delete-btn,
+.invoice-preview-delete-btn[type="button"] {
+  background-color: #dc2626 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+}
+.invoice-preview-delete-btn:hover,
+.invoice-preview-delete-btn:focus-visible {
+  background-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+.invoice-preview-delete-btn:active {
+  background-color: #991b1b !important;
+  color: #ffffff !important;
+}
+
+/* Compact typography for all mobile entry/form screens. Desktop is unchanged. */
+@media (max-width: 1023px) {
+  .mobile-entry-screen :is(input, textarea, select, button, [role="combobox"]) {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+  }
+
+  .mobile-entry-screen :is(input, textarea)::placeholder {
+    font-size: 14px !important;
+  }
+
+  .mobile-entry-screen label,
+  .mobile-entry-screen [data-slot="form-label"] {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+  }
+
+  .mobile-entry-screen .text-sm {
+    font-size: 13px !important;
+  }
+
+  .mobile-entry-screen .text-base {
+    font-size: 14px !important;
+  }
+
+  .mobile-entry-screen .text-lg {
+    font-size: 16px !important;
+  }
+
+  .mobile-entry-screen .text-xl {
+    font-size: 18px !important;
+  }
+}
+
+/* ================================================================
+   VyaparOS Reference UI Theme
+   Visual-only layer: no business logic/state/API behavior changes.
+   ================================================================ */
+
+:root {
+  --vy-glow-cyan: #00d9ff;
+  --vy-glow-blue: #2d7dff;
+  --vy-glow-purple: #9b5cff;
+  --vy-surface-light: #ffffff;
+  --vy-surface-soft: #f5f9ff;
+  --vy-surface-dark: #06162a;
+  --vy-surface-dark-2: #081d35;
+}
+
+@layer base {
+  html {
+    background: hsl(var(--background));
+  }
+
+  body {
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at 15% -10%, rgba(0, 217, 255, 0.08), transparent 32%),
+      radial-gradient(circle at 95% 0%, rgba(155, 92, 255, 0.08), transparent 30%),
+      hsl(var(--background));
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at 12% -8%, rgba(0, 217, 255, 0.13), transparent 30%),
+      radial-gradient(circle at 92% 4%, rgba(155, 92, 255, 0.14), transparent 32%),
+      linear-gradient(180deg, #03101f 0%, #05182c 55%, #03111f 100%);
+  }
+}
+
+.vyaparos-app,
+.vyaparos-auth {
+  position: relative;
+  isolation: isolate;
+}
+
+.vyaparos-app {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 10% -5%, rgba(0, 217, 255, 0.07), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(155, 92, 255, 0.07), transparent 28%),
+    linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%) !important;
+}
+
+.dark .vyaparos-app {
+  background:
+    radial-gradient(circle at 8% -8%, rgba(0, 217, 255, 0.12), transparent 28%),
+    radial-gradient(circle at 100% 0%, rgba(155, 92, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, #03101f 0%, #06182b 55%, #041221 100%) !important;
+}
+
+/* Replace legacy hard-coded page backgrounds with the theme surfaces. */
+.vyaparos-app [class*="from-slate-50"],
+.vyaparos-app [class*="bg-gray-50"],
+.vyaparos-app [class*="bg-sky-50"] {
+  background-image: none !important;
+  background-color: hsl(var(--background)) !important;
+}
+
+.dark .vyaparos-app [class*="from-slate-950"],
+.dark .vyaparos-app [class*="bg-slate-950"],
+.dark .vyaparos-app [class*="bg-slate-900"] {
+  background-image: none !important;
+  background-color: hsl(var(--background)) !important;
+}
+
+.vyaparos-app [class~="bg-white"] {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark .vyaparos-app [class~="bg-white"] {
+  background-color: hsl(var(--card)) !important;
+}
+
+/* Headers */
+.vyaparos-app header.sticky,
+.vyaparos-app header[class*="sticky"] {
+  background: color-mix(in srgb, hsl(var(--background)) 88%, transparent) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: 0 8px 26px rgba(2, 31, 60, 0.06) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.dark .vyaparos-app header.sticky,
+.dark .vyaparos-app header[class*="sticky"] {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.24) !important;
+}
+
+/* Shared cards/panels */
+.vyaparos-app [class~="bg-card"] {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, hsl(var(--card)) 96%, var(--vy-glow-cyan) 4%), hsl(var(--card))) !important;
+  border-color: color-mix(in srgb, hsl(var(--border)) 78%, var(--vy-glow-cyan) 22%) !important;
+}
+
+.vyaparos-app [class~="bg-card"][class*="rounded"] {
+  box-shadow:
+    0 10px 28px rgba(11, 67, 116, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+}
+
+.dark .vyaparos-app [class~="bg-card"] {
+  background:
+    linear-gradient(145deg, rgba(8, 31, 55, 0.98), rgba(5, 22, 40, 0.98)) !important;
+  border-color: rgba(0, 217, 255, 0.22) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+/* Borders and controls */
+.vyaparos-app input,
+.vyaparos-app textarea,
+.vyaparos-app select,
+.vyaparos-app [role="combobox"] {
+  border-color: hsl(var(--border));
+  background-color: color-mix(in srgb, hsl(var(--card)) 92%, hsl(var(--primary)) 8%);
+  color: hsl(var(--foreground));
+}
+
+.dark .vyaparos-app input,
+.dark .vyaparos-app textarea,
+.dark .vyaparos-app select,
+.dark .vyaparos-app [role="combobox"] {
+  background-color: rgba(4, 22, 40, 0.92);
+  border-color: rgba(0, 217, 255, 0.25);
+}
+
+.vyaparos-app input:focus,
+.vyaparos-app textarea:focus,
+.vyaparos-app select:focus,
+.vyaparos-app [role="combobox"]:focus-visible {
+  border-color: var(--vy-glow-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.12) !important;
+  outline: none;
+}
+
+/* Primary actions use the cyan-to-violet reference gradient. */
+.vyaparos-app [class~="bg-primary"] {
+  background-image: linear-gradient(100deg, var(--vy-glow-cyan) 0%, var(--vy-glow-blue) 48%, var(--vy-glow-purple) 100%) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 22px rgba(45, 125, 255, 0.22);
+}
+
+.vyaparos-app [class~="bg-primary"]:hover {
+  filter: brightness(1.06) saturate(1.04);
+}
+
+.dark .vyaparos-app [class~="bg-primary"] {
+  box-shadow: 0 0 24px rgba(0, 217, 255, 0.14), 0 10px 24px rgba(85, 76, 255, 0.16);
+}
+
+/* Outline buttons and small icon buttons */
+.vyaparos-app button[class*="border"],
+.vyaparos-app a[class*="border"] {
+  transition: border-color .18s ease, background-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.vyaparos-app button[class*="border"]:hover,
+.vyaparos-app a[class*="border"]:hover {
+  border-color: color-mix(in srgb, var(--vy-glow-cyan) 42%, hsl(var(--border))) !important;
+}
+
+/* Navigation */
+.vyaparos-app aside {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(242,248,255,.96)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .vyaparos-app aside {
+  background:
+    linear-gradient(180deg, #041527 0%, #061d35 100%) !important;
+  border-color: rgba(0, 217, 255, 0.18) !important;
+}
+
+.vyaparos-app nav[aria-hidden="false"] {
+  background: color-mix(in srgb, hsl(var(--background)) 90%, transparent) !important;
+  border-color: color-mix(in srgb, var(--vy-glow-cyan) 20%, hsl(var(--border))) !important;
+  box-shadow: 0 -10px 30px rgba(0, 30, 70, 0.08);
+}
+
+.dark .vyaparos-app nav[aria-hidden="false"] {
+  background: rgba(3, 16, 31, 0.92) !important;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.vyaparos-app nav[aria-hidden="false"] button[aria-label="AI Voice Assistant"] {
+  background-image: linear-gradient(135deg, var(--vy-glow-cyan), var(--vy-glow-blue) 48%, var(--vy-glow-purple)) !important;
+  box-shadow: 0 0 0 5px rgba(0, 217, 255, .07), 0 0 30px rgba(112, 84, 255, .28), 0 12px 28px rgba(21, 79, 175, .28) !important;
+}
+
+/* Common rounded panels get the reference proportions without touching logic. */
+.vyaparos-app [class*="rounded-xl"][class*="border"],
+.vyaparos-app [class*="rounded-2xl"][class*="border"],
+.vyaparos-app [class*="rounded-3xl"][class*="border"] {
+  border-color: color-mix(in srgb, hsl(var(--border)) 82%, var(--vy-glow-cyan) 18%);
+}
+
+.dark .vyaparos-app [class*="rounded-xl"][class*="border"],
+.dark .vyaparos-app [class*="rounded-2xl"][class*="border"],
+.dark .vyaparos-app [class*="rounded-3xl"][class*="border"] {
+  border-color: rgba(0, 217, 255, 0.20);
+}
+
+/* Status accents */
+.vyaparos-app [class*="text-emerald-600"],
+.vyaparos-app [class*="text-emerald-700"] { color: #00c78a !important; }
+.vyaparos-app [class*="text-rose-600"] { color: #ff5576 !important; }
+.dark .vyaparos-app [class*="text-emerald-600"],
+.dark .vyaparos-app [class*="text-emerald-700"] { color: #22e7a4 !important; }
+.dark .vyaparos-app [class*="text-rose-600"] { color: #ff6682 !important; }
+
+/* AI Assistant inherits the same theme instead of keeping a separate light UI. */
+.vyaparos-app .ai-assistant,
+.vyaparos-app [class*="max-w-2xl"][class*="bg-gray-50"] {
+  background-color: transparent !important;
+}
+
+/* Invoice preview is intentionally paper-like; preserve white paper in both modes. */
+.vyaparos-app .invoice-paper,
+.vyaparos-app [class*="bg-white"][class*="text-slate-900"] {
+  background: #ffffff !important;
+  color: #0b1727 !important;
+}
+
+/* Auth / login screen follows the same reference language. */
+.vyaparos-auth {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(0, 217, 255, .14), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(155, 92, 255, .14), transparent 30%),
+    linear-gradient(180deg, #f7fbff 0%, #edf5ff 100%) !important;
+}
+
+.dark .vyaparos-auth {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(0, 217, 255, .16), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(155, 92, 255, .16), transparent 30%),
+    linear-gradient(180deg, #03101f 0%, #061c34 100%) !important;
+}
+
+.vyaparos-auth > div {
+  border-color: rgba(0, 217, 255, .22) !important;
+  box-shadow: 0 24px 70px rgba(17, 71, 130, .14), 0 0 0 1px rgba(0, 217, 255, .06) !important;
+}
+
+.dark .vyaparos-auth > div {
+  background: linear-gradient(145deg, rgba(6, 28, 50, .97), rgba(3, 18, 34, .98)) !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .42), 0 0 36px rgba(0, 217, 255, .05) !important;
+}
+
+/* Mobile forms / entry windows */
+@media (max-width: 1023px) {
+  .vyaparos-app .mobile-entry-screen,
+  .vyaparos-app [role="dialog"] {
+    border-color: rgba(0, 217, 255, .20);
+  }
+
+  .vyaparos-app .mobile-entry-footer,
+  .vyaparos-app .mobile-entry-inline-footer {
+    background: color-mix(in srgb, hsl(var(--background)) 94%, transparent) !important;
+    border-top-color: rgba(0, 217, 255, .20) !important;
+    backdrop-filter: blur(18px);
+  }
+
+  .vyaparos-app .mobile-entry-save,
+  .vyaparos-app .mobile-entry-footer > button:last-child,
+  .vyaparos-app .mobile-entry-inline-footer > button:last-child {
+    background-image: linear-gradient(100deg, var(--vy-glow-cyan), var(--vy-glow-blue) 48%, var(--vy-glow-purple)) !important;
+  }
+}
+
+/* Respect reduced motion while keeping the visual design. */
+@media (prefers-reduced-motion: reduce) {
+  .vyaparos-app *,
+  .vyaparos-auth * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
+/* =====================================================================
+   VyaparOS Reference UI v2
+   Scoped visual layer for Dashboard / Transactions / Invoice and shared
+   surfaces. Styling only: no data, state, event, API or business logic.
+   ===================================================================== */
+:root {
+  --vy-page-light: #f4f8ff;
+  --vy-card-light: rgba(255,255,255,.92);
+  --vy-border-light: #cfe2f8;
+  --vy-text-light: #10233b;
+  --vy-page-dark: #031225;
+  --vy-card-dark: linear-gradient(145deg,#082544 0%,#04172c 100%);
+  --vy-border-dark: rgba(0,207,255,.34);
+  --vy-cyan: #00d9ff;
+  --vy-blue: #1688ff;
+  --vy-purple: #9b4dff;
+  --vy-green: #00e0a1;
+  --vy-red: #ff3f67;
+}
+
+.vy-page-dashboard,
+.vy-page-transactions,
+.vy-page-invoice {
+  color: hsl(var(--foreground));
+}
+
+/* Consistent page background */
+.vy-page-dashboard,
+.vy-page-transactions,
+.vy-page-invoice {
+  position: relative;
+  isolation: isolate;
+}
+
+.vy-page-dashboard::before,
+.vy-page-transactions::before,
+.vy-page-invoice::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(0,217,255,.07), transparent 28%),
+    radial-gradient(circle at 96% 4%, rgba(155,77,255,.07), transparent 28%),
+    linear-gradient(180deg,#f8fbff 0%,#eef5ff 100%);
+}
+
+.dark .vy-page-dashboard::before,
+.dark .vy-page-transactions::before,
+.dark .vy-page-invoice::before {
+  background:
+    radial-gradient(circle at 7% 0%, rgba(0,217,255,.14), transparent 27%),
+    radial-gradient(circle at 97% 2%, rgba(155,77,255,.15), transparent 30%),
+    linear-gradient(180deg,#020d1c 0%,#04182d 52%,#02101f 100%);
+}
+
+/* Page headings */
+.vy-page-dashboard h1,
+.vy-page-dashboard h2,
+.vy-page-dashboard h3,
+.vy-page-transactions h1,
+.vy-page-transactions h2,
+.vy-page-transactions h3,
+.vy-page-invoice h1,
+.vy-page-invoice h2,
+.vy-page-invoice h3 {
+  letter-spacing: -.015em;
+}
+
+/* Dashboard: every major surface uses the same reference card */
+.vy-page-dashboard > * > [class*="rounded"],
+.vy-page-dashboard > [class*="rounded"],
+.vy-page-dashboard section,
+.vy-page-dashboard [class~="bg-card"] {
+  border-color: var(--vy-border-light) !important;
+  background: var(--vy-card-light) !important;
+  box-shadow: 0 10px 28px rgba(16,67,116,.07), inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+
+.dark .vy-page-dashboard > * > [class*="rounded"],
+.dark .vy-page-dashboard > [class*="rounded"],
+.dark .vy-page-dashboard section,
+.dark .vy-page-dashboard [class~="bg-card"] {
+  border-color: var(--vy-border-dark) !important;
+  background: var(--vy-card-dark) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+/* Dashboard date/filter controls */
+.vy-page-dashboard button,
+.vy-page-dashboard [role="button"] {
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.vy-page-dashboard button:not([class*="bg-primary"]):hover,
+.vy-page-dashboard [role="button"]:hover {
+  border-color: rgba(0,217,255,.42) !important;
+}
+
+/* Dashboard quick actions: cyan / violet / orange visual hierarchy */
+.vy-page-dashboard a[class*="bg-primary"],
+.vy-page-dashboard button[class*="bg-primary"] {
+  background-image: linear-gradient(105deg,var(--vy-cyan),var(--vy-blue) 48%,var(--vy-purple)) !important;
+}
+
+/* Transaction page */
+.vy-page-transactions > div {
+  position: relative;
+}
+
+.vy-page-transactions .rounded-2xl.border,
+.vy-page-transactions .rounded-xl.border,
+.vy-page-transactions .rounded-lg.border {
+  border-color: var(--vy-border-light) !important;
+  background: var(--vy-card-light) !important;
+  box-shadow: 0 8px 22px rgba(17,71,125,.06) !important;
+}
+
+.dark .vy-page-transactions .rounded-2xl.border,
+.dark .vy-page-transactions .rounded-xl.border,
+.dark .vy-page-transactions .rounded-lg.border {
+  border-color: var(--vy-border-dark) !important;
+  background: var(--vy-card-dark) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.27), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+/* Transaction summary cards become compact neon-accent cards instead of large solid blocks */
+.vy-page-transactions .rounded-2xl.border-0[class*="bg-gradient-to-br"] {
+  background: linear-gradient(145deg,#0a2b4b,#061b32) !important;
+  border: 1px solid rgba(0,217,255,.28) !important;
+  box-shadow: 0 0 22px rgba(0,145,255,.08), inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+
+.vy-page-transactions .rounded-2xl.border-0[class*="bg-gradient-to-br"] p {
+  color: #fff !important;
+}
+
+.vy-page-transactions .rounded-2xl.border-0[class*="bg-gradient-to-br"] .bg-white\/20 {
+  border: 1px solid rgba(0,217,255,.22);
+  background: rgba(0,217,255,.10) !important;
+}
+
+/* Transaction tabs are reference-style pills */
+.vy-page-transactions [role="tablist"] {
+  gap: 6px;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.vy-page-transactions [role="tab"] {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 999px !important;
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+  box-shadow: none !important;
+}
+
+.vy-page-transactions [role="tab"][data-state="active"] {
+  border-color: transparent !important;
+  background: linear-gradient(105deg,var(--vy-cyan),var(--vy-blue)) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(0,145,255,.22) !important;
+}
+
+/* Transaction table/list rows */
+.vy-page-transactions table tbody tr,
+.vy-page-transactions [data-slot="table-row"] {
+  border-color: rgba(0,217,255,.16) !important;
+}
+
+.dark .vy-page-transactions table tbody tr:hover,
+.dark .vy-page-transactions [data-slot="table-row"]:hover {
+  background: rgba(0,217,255,.045) !important;
+}
+
+/* Invoice entry screens */
+.vy-page-invoice > header,
+.vy-page-invoice > main > section,
+.vy-page-invoice main > section,
+.vy-page-invoice main > div:not(.invoice-paper) > section {
+  border-color: var(--vy-border-light) !important;
+}
+
+.dark .vy-page-invoice > header,
+.dark .vy-page-invoice > main > section,
+.dark .vy-page-invoice main > section {
+  border-color: var(--vy-border-dark) !important;
+}
+
+.vy-page-invoice main > section,
+.vy-page-invoice .bg-background.rounded-xl,
+.vy-page-invoice .bg-background.rounded-2xl {
+  border: 1px solid var(--vy-border-light);
+  background: var(--vy-card-light) !important;
+  box-shadow: 0 8px 24px rgba(17,71,125,.06);
+}
+
+.dark .vy-page-invoice main > section,
+.dark .vy-page-invoice .bg-background.rounded-xl,
+.dark .vy-page-invoice .bg-background.rounded-2xl {
+  border-color: var(--vy-border-dark) !important;
+  background: var(--vy-card-dark) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* Invoice item rows */
+.vy-page-invoice main .rounded-xl.border:not(.invoice-paper),
+.vy-page-invoice main .rounded-lg.border:not(.invoice-paper) {
+  border-color: rgba(45,125,255,.24) !important;
+}
+
+.dark .vy-page-invoice main .rounded-xl.border:not(.invoice-paper),
+.dark .vy-page-invoice main .rounded-lg.border:not(.invoice-paper) {
+  border-color: rgba(0,217,255,.24) !important;
+  background: rgba(5,25,46,.82) !important;
+}
+
+/* Invoice amount emphasis */
+.vy-page-invoice .text-2xl.font-bold,
+.vy-page-invoice .text-xl.font-bold {
+  letter-spacing: -.025em;
+}
+
+.dark .vy-page-invoice .text-emerald-700 {
+  color: #20e6a6 !important;
+}
+
+/* Shared search/input treatment */
+.vy-page-dashboard input,
+.vy-page-dashboard textarea,
+.vy-page-dashboard [role="combobox"],
+.vy-page-transactions input,
+.vy-page-transactions textarea,
+.vy-page-transactions [role="combobox"],
+.vy-page-invoice input,
+.vy-page-invoice textarea,
+.vy-page-invoice [role="combobox"] {
+  border-radius: .78rem !important;
+}
+
+.dark .vy-page-dashboard input,
+.dark .vy-page-dashboard textarea,
+.dark .vy-page-dashboard [role="combobox"],
+.dark .vy-page-transactions input,
+.dark .vy-page-transactions textarea,
+.dark .vy-page-transactions [role="combobox"],
+.dark .vy-page-invoice input,
+.dark .vy-page-invoice textarea,
+.dark .vy-page-invoice [role="combobox"] {
+  background: rgba(2,18,34,.78) !important;
+  border-color: rgba(0,217,255,.25) !important;
+  color: #f3f8ff !important;
+}
+
+/* Bottom action bars use the same reference glass + gradient */
+.vy-page-invoice > .fixed.bottom-0,
+.vy-page-invoice > .fixed.inset-x-0.bottom-0 {
+  background: rgba(246,250,255,.94) !important;
+  border-color: var(--vy-border-light) !important;
+  backdrop-filter: blur(18px);
+}
+
+.dark .vy-page-invoice > .fixed.bottom-0,
+.dark .vy-page-invoice > .fixed.inset-x-0.bottom-0 {
+  background: rgba(2,13,27,.92) !important;
+  border-color: rgba(0,217,255,.22) !important;
+}
+
+.vy-page-invoice > .fixed.bottom-0 button[class*="bg-primary"],
+.vy-page-invoice > .fixed.inset-x-0.bottom-0 button[class*="bg-primary"] {
+  background-image: linear-gradient(105deg,var(--vy-cyan),var(--vy-blue) 48%,var(--vy-purple)) !important;
+}
+
+/* Reference-style mobile density */
+@media (max-width: 1023px) {
+  .vy-page-dashboard,
+  .vy-page-transactions,
+  .vy-page-invoice {
+    min-height: calc(100dvh - 1px);
+  }
+
+  .vy-page-dashboard > *,
+  .vy-page-transactions > div,
+  .vy-page-invoice main {
+    max-width: 100%;
+  }
+
+  .vy-page-dashboard [class*="rounded-2xl"],
+  .vy-page-dashboard [class*="rounded-xl"],
+  .vy-page-transactions [class*="rounded-2xl"],
+  .vy-page-transactions [class*="rounded-xl"],
+  .vy-page-invoice [class*="rounded-2xl"],
+  .vy-page-invoice [class*="rounded-xl"] {
+    border-radius: .78rem !important;
+  }
+
+  .vy-page-dashboard .text-2xl,
+  .vy-page-dashboard .text-3xl {
+    line-height: 1.05;
+  }
+
+  /* Make the main action areas resemble the reference's compact two-column cards. */
+  .vy-page-dashboard .grid.grid-cols-1.gap-4.lg\:grid-cols-2 {
+    gap: .6rem !important;
+  }
+
+  .vy-page-transactions .grid.grid-cols-1.gap-4.sm\:grid-cols-2.lg\:grid-cols-3 {
+    gap: .55rem !important;
+  }
+
+  .vy-page-invoice main > section {
+    margin-left: .55rem !important;
+    margin-right: .55rem !important;
+  }
+}
+
+/* Light mode keeps the same geometry, accents and hierarchy as dark mode. */
+:not(.dark) .vy-page-dashboard .text-muted-foreground,
+:not(.dark) .vy-page-transactions .text-muted-foreground,
+:not(.dark) .vy-page-invoice .text-muted-foreground {
+  color: #526b85 !important;
+}
+
+/* Ensure the shared mobile navigation always looks like the reference */
+.vyaparos-app nav[aria-hidden="false"] {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+}
+
+.vyaparos-app nav[aria-hidden="false"] > div {
+  height: 74px !important;
+}
+
+.vyaparos-app nav[aria-hidden="false"] button[aria-label="AI Voice Assistant"] {
+  width: 58px !important;
+  height: 58px !important;
+  margin-top: -26px !important;
+  border: 2px solid rgba(255,255,255,.22) !important;
+}
+
+.dark .vyaparos-app nav[aria-hidden="false"] {
+  background: rgba(2,12,25,.90) !important;
+  border-color: rgba(0,217,255,.25) !important;
+}
+
+/* =========================================================
+   VYAPAROS REFERENCE UI — DASHBOARD / INVENTORY / INVOICE / LEDGER
+   Mobile-first visual skin. Business logic remains in page components.
+   ========================================================= */
+@layer components {
+  .vy-ref-shell {
+    --ref-cyan: #16c7ff;
+    --ref-blue: #1977ff;
+    --ref-purple: #8d32ff;
+    --ref-pink: #ff20c8;
+    --ref-green: #00e5b0;
+    --ref-panel: rgba(2, 25, 58, .78);
+  }
+
+  .dark .vy-ref-shell {
+    background:
+      radial-gradient(circle at 50% -10%, rgba(0, 128, 255, .18), transparent 34%),
+      radial-gradient(circle at 0% 50%, rgba(34, 73, 255, .08), transparent 32%),
+      linear-gradient(180deg, #020c1d 0%, #001329 52%, #010916 100%) !important;
+    color: #eef7ff;
+  }
+
+  .dark .vy-ref-shell .vy-ref-home-header {
+    background: linear-gradient(180deg, rgba(0, 12, 30, .98), rgba(0, 13, 30, .82));
+    border-bottom: 1px solid rgba(0, 177, 255, .18);
+  }
+
+  .vy-ref-vlogo-lg {
+    display:flex; align-items:center; justify-content:center;
+    width:44px; height:44px; flex:0 0 44px; border-radius:13px;
+    font-size:29px; font-weight:950; font-style:italic; color:#fff;
+    background:linear-gradient(145deg,#00c9ff 5%,#146dff 48%,#8f27ff 88%);
+    box-shadow:0 0 24px rgba(0,174,255,.32), inset 0 0 12px rgba(255,255,255,.16);
+  }
+  .vy-ref-brand-name { font-size:20px; line-height:1; font-weight:800; letter-spacing:-.04em; }
+  .vy-ref-brand-name span { color:#149fff; }
+  .vy-ref-brand-sub { margin-top:3px; font-size:10px; color:#8ecfff; }
+  .vy-ref-bell,.vy-ref-avatar { position:relative; display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:13px; border:1px solid rgba(44,166,255,.42); background:rgba(8,35,72,.72); color:#eff9ff; overflow:hidden; }
+  .vy-ref-bell i { position:absolute; top:6px; right:7px; width:6px; height:6px; border-radius:50%; background:#ff315d; box-shadow:0 0 8px #ff315d; }
+
+  .dark .vy-ref-shell nav[aria-hidden="false"] {
+    height:calc(84px + env(safe-area-inset-bottom));
+    border-top:1px solid rgba(0,178,255,.45);
+    background:linear-gradient(180deg,rgba(1,17,39,.94),rgba(0,7,19,.99));
+    box-shadow:0 -10px 34px rgba(0,126,255,.13), 0 -1px 0 rgba(153,48,255,.2);
+  }
+  .dark .vy-ref-shell nav[aria-hidden="false"] > div { height:84px; }
+  .dark .vy-ref-shell nav[aria-hidden="false"] a { color:#a8c9ef; text-shadow:0 0 8px rgba(55,159,255,.08); }
+  .dark .vy-ref-shell nav[aria-hidden="false"] a.text-primary { color:#11bfff; }
+  .dark .vy-ref-shell nav[aria-hidden="false"] svg { filter:drop-shadow(0 0 5px rgba(0,181,255,.22)); }
+  .dark .vy-ref-shell nav[aria-hidden="false"] button {
+    width:68px; height:68px; margin-top:-25px; border:2px solid #5edaff;
+    background:radial-gradient(circle at 35% 30%,#19bfff,#1649ff 47%,#7d20ff 78%);
+    box-shadow:0 0 18px #008dff,0 0 34px rgba(134,33,255,.7), inset 0 0 12px rgba(255,255,255,.32);
+  }
+  .dark .vy-ref-shell nav[aria-hidden="false"] button span { border:2px solid rgba(73,228,255,.55); }
+
+  .vy-ref-dashboard { color:inherit; }
+  .dark .vy-ref-dashboard { padding-bottom:8px; }
+  .vy-ref-dashboard-hero { display:grid; gap:14px; }
+  .vy-ref-greeting-copy h1 { margin:0; font-size:25px; font-weight:800; letter-spacing:-.035em; }
+  .vy-ref-greeting-copy h1 span { font-size:.9em; }
+  .vy-ref-greeting-copy p { margin-top:3px; font-size:13px; color:#62cfff; }
+  .vy-ref-ai-card { display:flex; align-items:center; gap:13px; min-height:78px; padding:10px 14px; border:1px solid #078fff; border-radius:19px; background:linear-gradient(105deg,rgba(0,107,207,.32),rgba(40,17,123,.48)); color:inherit; box-shadow:0 0 22px rgba(0,136,255,.13), inset 0 0 24px rgba(0,151,255,.07); }
+  .vy-ref-ai-card > span:nth-child(2) { flex:1; }
+  .vy-ref-ai-card b,.vy-ref-ai-card small { display:block; }
+  .vy-ref-ai-card b { font-size:14px; }
+  .vy-ref-ai-card small { margin-top:4px; color:#c7e9ff; font-size:12px; }
+  .vy-ref-ai-card > svg { color:#b7e8ff; }
+  .vy-ref-mic-orb { display:flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; color:#fff; background:radial-gradient(circle,#16d4ff 0%,#1a75ff 44%,#7e1cff 78%); box-shadow:0 0 16px #08cfff,0 0 30px rgba(124,38,255,.6); }
+  .vy-ref-mic-orb svg { width:28px; height:28px; }
+
+  .vy-ref-dashboard .vy-ref-dashboard-hero + .animate-fade-in,
+  .vy-ref-dashboard .animate-fade-in { background:transparent; border-color:rgba(0,157,255,.35); box-shadow:none; }
+  .vy-ref-dashboard .animate-fade-in button { border:1px solid rgba(0,157,255,.5); border-radius:999px; background:rgba(3,35,72,.55); color:inherit; }
+  .dark .vy-ref-dashboard .animate-fade-in button { background:rgba(4,32,65,.72); color:#bfe7ff; }
+
+  .vy-ref-overview-card,.vy-ref-quick-card,.vy-ref-sales-card { border:1px solid rgba(0,158,255,.62); border-radius:22px; background:linear-gradient(135deg,rgba(2,30,63,.88),rgba(3,19,45,.78)); box-shadow:inset 0 0 26px rgba(0,107,255,.06),0 10px 32px rgba(0,0,0,.12); overflow:hidden; }
+  .dark .vy-ref-overview-card,.dark .vy-ref-quick-card,.dark .vy-ref-sales-card { color:#f2f8ff; }
+  .vy-ref-section-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:15px 15px 10px; }
+  .vy-ref-section-heading h2,.vy-ref-section-title h2 { margin:0; font-size:17px; font-weight:750; }
+  .vy-ref-section-heading p { margin:3px 0 0; font-size:11px; color:#91cfff; }
+  .vy-ref-section-heading > span { display:flex; align-items:center; gap:6px; padding:8px 11px; border:1px solid rgba(0,143,255,.5); border-radius:13px; color:#c6eaff; font-size:11px; }
+  .vy-ref-section-heading > span svg { width:15px; transform:rotate(90deg); }
+  .vy-ref-overview-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; padding:0 15px 15px; }
+  .vy-ref-overview-stat { min-height:100px; padding:12px; border:1px solid rgba(0,150,255,.5); border-radius:16px; background:rgba(1,26,58,.74); }
+  .vy-ref-overview-stat span,.vy-ref-overview-stat b,.vy-ref-overview-stat em { display:block; }
+  .vy-ref-overview-stat span { color:#b7d9fa; font-size:11px; }
+  .vy-ref-overview-stat b { margin-top:5px; font-size:18px; letter-spacing:-.03em; }
+  .vy-ref-overview-stat em { margin-top:4px; font-size:11px; font-style:normal; font-weight:700; color:#00e4ba; }
+  .vy-ref-overview-stat.pink em { color:#ff3d8b; }
+  .vy-ref-overview-stat.cyan { box-shadow:inset 0 0 20px rgba(0,209,255,.06); }
+  .vy-ref-overview-stat.pink { border-color:rgba(214,20,255,.5); }
+  .vy-ref-overview-stat.blue { border-color:rgba(0,125,255,.6); }
+  .vy-ref-overview-stat.purple { border-color:rgba(150,37,255,.62); }
+
+  .vy-ref-quick-card { padding-bottom:15px; }
+  .vy-ref-section-title { padding:14px 15px 8px; }
+  .vy-ref-quick-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; padding:0 15px; }
+  .vy-ref-action-card { display:grid; grid-template-columns:44px 1fr; grid-template-rows:auto auto; column-gap:10px; align-items:center; min-height:76px; padding:10px; border-radius:16px; border:1px solid; text-align:left; color:#fff; }
+  .vy-ref-action-card > span { grid-row:1 / span 2; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:12px; background:rgba(255,255,255,.14); }
+  .vy-ref-action-card > span svg { width:23px; height:23px; }
+  .vy-ref-action-card b { font-size:13px; }
+  .vy-ref-action-card small { margin-top:2px; color:#b8e2ff; font-size:9px; }
+  .vy-ref-action-card.green { border-color:#00d9b2; background:linear-gradient(135deg,rgba(0,159,139,.42),rgba(0,74,91,.36)); }
+  .vy-ref-action-card.purple { border-color:#8e32ff; background:linear-gradient(135deg,rgba(101,19,196,.5),rgba(16,45,122,.4)); }
+  .vy-ref-action-card.amber { border-color:#ff9d16; background:linear-gradient(135deg,rgba(128,70,0,.52),rgba(63,35,8,.44)); }
+  .vy-ref-action-card.blue { border-color:#138dff; background:linear-gradient(135deg,rgba(0,89,178,.46),rgba(10,39,108,.4)); }
+  .vy-ref-insight-card { display:flex; align-items:center; gap:11px; padding:13px 15px; border:1px solid rgba(0,196,161,.55); border-radius:18px; background:linear-gradient(90deg,rgba(8,82,68,.42),rgba(15,36,110,.5)); color:inherit; }
+  .vy-ref-insight-card > span { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:linear-gradient(145deg,#ffca32,#ff8a00); color:#fff; box-shadow:0 0 15px rgba(255,174,0,.35); }
+  .vy-ref-insight-card > div { flex:1; }
+  .vy-ref-insight-card b,.vy-ref-insight-card small { display:block; }
+  .vy-ref-insight-card b { font-size:13px; }
+  .vy-ref-insight-card small { margin-top:2px; color:#b7dcfa; font-size:10px; }
+  .vy-ref-sales-card { padding-bottom:10px; }
+
+  /* Inventory */
+  .vy-ref-inventory { color:inherit; }
+  .dark .vy-ref-inventory { color:#eef7ff; }
+  .vy-ref-inventory > header { background:rgba(1,15,34,.88) !important; border-color:rgba(0,157,255,.34) !important; box-shadow:none !important; }
+  .dark .vy-ref-inventory > header h1 { font-size:21px; }
+  .vy-ref-summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  .vy-ref-summary-stat { min-height:110px; padding:12px; border:1px solid rgba(0,148,255,.62); border-radius:17px; background:linear-gradient(145deg,rgba(4,35,73,.9),rgba(2,21,46,.85)); }
+  .vy-ref-summary-stat > span { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; color:#fff; background:linear-gradient(145deg,#214cff,#7526ff); box-shadow:0 0 15px rgba(54,76,255,.3); }
+  .vy-ref-summary-stat small,.vy-ref-summary-stat b,.vy-ref-summary-stat em { display:block; }
+  .vy-ref-summary-stat small { margin-top:8px; color:#b5d8f8; font-size:10px; }
+  .vy-ref-summary-stat b { margin-top:2px; font-size:20px; }
+  .vy-ref-summary-stat em { margin-top:2px; color:#00e2ba; font-size:10px; font-style:normal; font-weight:700; }
+  .vy-ref-summary-stat.amber { border-color:rgba(255,154,0,.62); }
+  .vy-ref-summary-stat.amber > span { background:linear-gradient(145deg,#ffb300,#ff6f00); }
+  .vy-ref-summary-stat.amber em { color:#ff506d; }
+  .vy-ref-summary-stat.purple { border-color:rgba(150,39,255,.65); }
+  .vy-ref-summary-stat.purple > span { background:linear-gradient(145deg,#7b23ff,#e41fba); }
+  .vy-ref-inventory .mb-4.flex.flex-col { gap:10px; }
+  .dark .vy-ref-inventory input,.dark .vy-ref-inventory [role="combobox"] { border-color:rgba(0,146,255,.56); background:rgba(1,25,53,.78); color:#eff9ff; }
+  .dark .vy-ref-inventory input::placeholder { color:#80a8cb; }
+  .vy-ref-inventory .lg\:hidden > div { border-color:rgba(0,154,255,.58) !important; background:linear-gradient(145deg,rgba(3,33,68,.92),rgba(2,19,42,.92)) !important; box-shadow:0 5px 20px rgba(0,0,0,.18); }
+  .vy-ref-inventory .lg\:hidden .relative.h-44 { width:76px; height:76px; flex:0 0 76px; border-radius:14px; }
+  .vy-ref-inventory .lg\:hidden .relative.h-44 + div { padding:11px 10px; }
+  .vy-ref-inventory .lg\:hidden > div { display:flex; }
+  .vy-ref-inventory .lg\:hidden > div > div:last-child { flex:1; min-width:0; }
+
+  /* Invoice list */
+  .vy-ref-invoice { background:linear-gradient(180deg,#020d1f,#00152e 55%,#010916); color:#f4f9ff; }
+  .vy-ref-invoice-header { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; min-height:68px; padding:10px 16px; background:rgba(1,12,29,.94); border-bottom:1px solid rgba(0,159,255,.26); backdrop-filter:blur(14px); }
+  .vy-ref-brand { display:flex; align-items:center; gap:10px; }
+  .vy-ref-brand > div:last-child b { display:block; font-size:18px; letter-spacing:-.04em; }
+  .vy-ref-brand > div:last-child b span { color:#16aaff; }
+  .vy-ref-brand > div:last-child small { display:block; margin-top:1px; color:#9ad9ff; font-size:8px; }
+  .vy-ref-vlogo { display:flex; align-items:center; justify-content:center; width:34px; height:34px; font-size:25px; font-weight:950; font-style:italic; color:#fff; border-radius:10px; background:linear-gradient(145deg,#00caff,#2e6dff 48%,#9d22ff); box-shadow:0 0 17px rgba(0,191,255,.35); }
+  .vy-ref-icon-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(0,145,255,.55); border-radius:13px; color:#bfeaff; background:rgba(3,30,63,.75); }
+  .vy-ref-invoice-list { max-width:980px; margin:auto; padding:16px 14px 100px; }
+  .vy-ref-title-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .vy-ref-title-row > div:first-child { display:flex; align-items:center; gap:11px; }
+  .vy-ref-title-icon { display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:14px; border:1px solid #00b7ff; color:#fff; background:linear-gradient(145deg,#00aaff,#1268ff); box-shadow:0 0 18px rgba(0,174,255,.22); }
+  .vy-ref-title-row h1 { margin:0; font-size:25px; letter-spacing:-.04em; }
+  .vy-ref-title-row p { margin:2px 0 0; color:#8ed7ff; font-size:11px; }
+  .vy-ref-gradient-btn { display:flex; align-items:center; gap:6px; height:42px; padding:0 15px; border:0; border-radius:14px; color:#fff; font-weight:750; background:linear-gradient(100deg,#00baff,#5a41ff 58%,#d029ff); box-shadow:0 0 20px rgba(0,145,255,.25); }
+  .vy-ref-search-row { display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:16px; }
+  .vy-ref-search,.vy-ref-filter-btn { display:flex; align-items:center; gap:9px; min-height:48px; padding:0 14px; border:1px solid rgba(0,149,255,.58); border-radius:14px; background:rgba(2,26,56,.76); color:#bde4ff; }
+  .vy-ref-search input { width:100%; border:0; outline:0; background:transparent; color:#fff; }
+  .vy-ref-filter-btn select { min-width:0; border:0; outline:0; appearance:none; background:transparent; color:inherit; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+  .vy-ref-filter-btn option { color:#12263f; background:#fff; }
+  .vy-ref-search input::placeholder { color:#6f9cc1; }
+  .vy-ref-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:16px; }
+  .vy-ref-stat-card { min-height:122px; padding:13px; border:1px solid rgba(0,153,255,.62); border-radius:17px; background:linear-gradient(145deg,rgba(4,38,78,.9),rgba(2,20,45,.9)); }
+  .vy-ref-stat-card > svg,.vy-ref-stat-card > span:first-child { display:flex; align-items:center; justify-content:center; width:35px; height:35px; border-radius:50%; color:#fff; background:linear-gradient(145deg,#00bfff,#2350ff); }
+  .vy-ref-stat-card > span:not(:first-child) { display:block; margin-top:8px; color:#acd5f5; font-size:11px; }
+  .vy-ref-stat-card b { display:block; margin-top:2px; font-size:20px; }
+  .vy-ref-stat-card em { display:block; margin-top:3px; color:#00e5b4; font-size:10px; font-style:normal; font-weight:700; }
+  .vy-ref-stat-card.green { border-color:#00bda8; }.vy-ref-stat-card.green > span:first-child { background:linear-gradient(145deg,#00d4bb,#006eff); }
+  .vy-ref-stat-card.purple { border-color:#8f35ff; }.vy-ref-stat-card.purple > span:first-child { background:linear-gradient(145deg,#9a34ff,#e420cf); }
+  .vy-ref-progress { height:7px; margin-top:8px; border-radius:99px; background:rgba(27,102,150,.38); overflow:hidden; }.vy-ref-progress i { display:block; height:100%; border-radius:99px; background:#00d7bd; }.vy-ref-progress.purple i { background:#b33cff; }
+  .vy-ref-tabs { display:flex; gap:10px; margin:18px 0 10px; }.vy-ref-tabs button { padding:9px 18px; border:1px solid rgba(0,130,255,.45); border-radius:999px; color:#9bc9ec; background:rgba(2,32,66,.68); }.vy-ref-tabs button.active { color:#fff; border-color:#13bfff; background:linear-gradient(100deg,#00bfff,#5939ff); box-shadow:0 0 16px rgba(0,162,255,.22); }
+  .vy-ref-invoice-items { display:grid; gap:9px; }
+  .vy-ref-invoice-row { display:flex; align-items:center; gap:11px; width:100%; min-height:91px; padding:11px 12px; border:1px solid rgba(0,149,255,.62); border-radius:17px; text-align:left; color:#fff; background:linear-gradient(145deg,rgba(3,38,77,.9),rgba(2,19,42,.9)); }
+  .vy-ref-invoice-row.purple { border-color:#8d32ff; }.vy-ref-invoice-row.amber { border-color:#f0a016; }.vy-ref-invoice-row.red { border-color:#ff1c63; }
+  .vy-ref-row-icon { display:flex; align-items:center; justify-content:center; width:45px; height:45px; flex:0 0 45px; border-radius:50%; color:#fff; background:linear-gradient(145deg,#00bfff,#2952ff); box-shadow:0 0 15px rgba(0,170,255,.28); }.vy-ref-invoice-row.purple .vy-ref-row-icon{background:linear-gradient(145deg,#b332ff,#6a1cff);}.vy-ref-invoice-row.amber .vy-ref-row-icon{background:linear-gradient(145deg,#ffb11d,#ff6b00);}.vy-ref-invoice-row.red .vy-ref-row-icon{background:linear-gradient(145deg,#ff386a,#df164b);}
+  .vy-ref-row-main { min-width:0; flex:1; }.vy-ref-row-main b,.vy-ref-row-main strong,.vy-ref-row-main small { display:block; }.vy-ref-row-main b { font-size:13px; }.vy-ref-row-main strong { margin-top:2px; font-size:12px; font-weight:550; }.vy-ref-row-main small { margin-top:4px; color:#8ec8ee; font-size:9px; }.vy-ref-row-main i { margin:0 4px; font-style:normal; }.vy-ref-row-amount { min-width:80px; text-align:right; }.vy-ref-row-amount b { display:block; font-size:15px; }.vy-ref-row-amount em { display:inline-block; margin-top:5px; padding:4px 9px; border-radius:999px; border:1px solid #00d7bc; color:#00e5bf; font-size:9px; font-style:normal; }.vy-ref-row-amount em.pending{border-color:#158cff;color:#54b6ff;}.vy-ref-row-amount em.overdue{border-color:#ff1c63;color:#ff3e79;}
+  .vy-ref-empty { padding:50px 15px; text-align:center; color:#8fb4d3; border:1px dashed #167dc2; border-radius:18px; }
+
+  /* Ledger */
+  .vy-ref-ledger { color:inherit; }
+  .dark .vy-ref-ledger { color:#eef7ff; }
+  .vy-ref-ledger > header { background:rgba(1,14,34,.9) !important; border-color:rgba(0,158,255,.34) !important; box-shadow:none !important; }
+  .vy-ref-ledger .grid.grid-cols-2 { gap:10px; }
+  .vy-ref-ledger .rounded-2xl.border.border-border\/60.bg-card { border-color:rgba(0,154,255,.6) !important; background:linear-gradient(145deg,rgba(3,37,77,.88),rgba(2,20,44,.9)) !important; box-shadow:inset 0 0 20px rgba(0,132,255,.05),0 8px 20px rgba(0,0,0,.12) !important; }
+  .vy-ref-ledger .rounded-2xl.border.border-border\/60.bg-card:hover { border-color:#00baff !important; }
+  .vy-ref-ledger input { border-color:rgba(0,145,255,.55); }
+  .dark .vy-ref-ledger input { background:rgba(1,25,53,.82); color:#fff; }
+
+  /* Light mode: preserve the same geometry with a clean white/ice-blue surface. */
+  :root:not(.dark) .vy-ref-dashboard,
+  :root:not(.dark) .vy-ref-inventory,
+  :root:not(.dark) .vy-ref-ledger { color:#10243c; }
+  :root:not(.dark) .vy-ref-overview-card,
+  :root:not(.dark) .vy-ref-quick-card,
+  :root:not(.dark) .vy-ref-sales-card,
+  :root:not(.dark) .vy-ref-summary-stat,
+  :root:not(.dark) .vy-ref-ledger .rounded-2xl.border.border-border\/60.bg-card { background:linear-gradient(145deg,#ffffff,#edf7ff) !important; }
+  :root:not(.dark) .vy-ref-overview-stat,:root:not(.dark) .vy-ref-action-card { color:#10243c; }
+}
+
+@media (max-width: 767px) {
+  .vy-ref-shell main { padding-left:10px !important; padding-right:10px !important; }
+  .vy-ref-dashboard { padding-top:6px; }
+  .vy-ref-dashboard-hero { gap:11px; }
+  .vy-ref-greeting-copy h1 { font-size:23px; }
+  .vy-ref-dashboard .animate-fade-in { padding:7px 9px !important; border-radius:15px; }
+  .vy-ref-dashboard .animate-fade-in > div:first-child { overflow-x:auto; }
+  .vy-ref-dashboard .animate-fade-in .shrink-0 { font-size:10px; }
+  .vy-ref-dashboard .animate-fade-in .shrink-0.rounded-lg { padding:6px 9px; }
+  .vy-ref-dashboard .animate-fade-in > div:last-child { display:none; }
+  .vy-ref-overview-grid { gap:8px; }
+  .vy-ref-overview-stat { min-height:92px; padding:10px; }
+  .vy-ref-overview-stat b { font-size:17px; }
+  .vy-ref-action-card { min-height:72px; grid-template-columns:38px 1fr; padding:8px; }
+  .vy-ref-action-card > span { width:36px; height:36px; }
+  .vy-ref-action-card b { font-size:12px; }
+  .vy-ref-action-card small { font-size:8px; }
+  .vy-ref-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .vy-ref-summary-stat { min-height:100px; }
+  .vy-ref-inventory .mb-4.flex.flex-col { display:grid; grid-template-columns:1fr auto; }
+  .vy-ref-inventory .mb-4.flex.flex-col > div.relative { grid-column:1 / -1; }
+  .vy-ref-inventory .mb-4.flex.flex-col > button { min-width:130px; }
+  .vy-ref-invoice-list { padding-left:10px; padding-right:10px; }
+  .vy-ref-title-row { align-items:flex-start; }
+  .vy-ref-title-row h1 { font-size:23px; }
+  .vy-ref-title-row p { max-width:170px; }
+  .vy-ref-invoice-actions-row { justify-content:flex-start; }
+  .vy-ref-invoice .vy-ref-gradient-btn { display:none !important; }
+  .vy-ref-invoice .vy-ref-sale-btn { display:inline-flex !important; min-height:42px; padding:0 18px; font-size:12px; }
+  .vy-ref-gradient-btn { height:40px; padding:0 12px; font-size:11px; }
+  .vy-ref-invoice-list { padding-top:5px; }
+  .vy-ref-search-row { grid-template-columns:minmax(0,1fr) auto; gap:6px; margin-top:3px; }
+  .vy-ref-filter-btn { min-height:40px; height:40px; justify-content:center; gap:5px; padding:0 9px; border-radius:12px; }
+  .vy-ref-filter-btn select { max-width:82px; font-size:11px; }
+  .vy-ref-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .vy-ref-stat-card { min-height:108px; }
+  .vy-ref-invoice-row { min-height:84px; padding:9px; }
+  .vy-ref-row-icon { width:40px; height:40px; flex-basis:40px; }
+  .vy-ref-row-amount { min-width:72px; }
+  .vy-ref-row-amount b { font-size:13px; }
+  .vy-ref-tabs { overflow-x:auto; }
+}
+@layer components {
+  :root:not(.dark) .vy-ref-invoice {
+    background:linear-gradient(180deg,#f5faff,#eaf5ff 55%,#f8fbff);
+    color:#12263f;
+  }
+  :root:not(.dark) .vy-ref-invoice-header { background:rgba(255,255,255,.94); border-color:#c9e7fb; }
+  :root:not(.dark) .vy-ref-invoice .vy-ref-search,
+  :root:not(.dark) .vy-ref-invoice .vy-ref-filter-btn,
+  :root:not(.dark) .vy-ref-invoice-row,
+  :root:not(.dark) .vy-ref-stat-card { background:linear-gradient(145deg,#fff,#edf7ff); color:#12263f; }
+  :root:not(.dark) .vy-ref-invoice .vy-ref-search input { color:#12263f; }
+  :root:not(.dark) .vy-ref-invoice .vy-ref-row-main small,
+  :root:not(.dark) .vy-ref-invoice .vy-ref-title-row p { color:#557c9d; }
+  :root:not(.dark) .vy-ref-invoice .vy-ref-tabs button { color:#31597b; background:#fff; }
+  :root:not(.dark) .vy-ref-invoice .vy-ref-section-heading > span { color:#31597b; background:#fff; }
+}
+@layer components {
+  .vy-ref-ledger-balance { margin-bottom:8px; padding:10px 14px; border:1px solid rgba(0,158,255,.65); border-radius:20px; background:linear-gradient(100deg,rgba(2,49,93,.9),rgba(26,11,105,.88)); box-shadow:inset 0 0 28px rgba(0,155,255,.07); }
+  .vy-ref-ledger-balance > div { display:flex; align-items:center; gap:14px; }
+  .vy-ref-ledger-balance span { display:flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:50%; color:#fff; font-size:28px; background:linear-gradient(145deg,#00c8ff,#7534ff); box-shadow:0 0 22px rgba(0,183,255,.4); }
+  .vy-ref-ledger-balance small,.vy-ref-ledger-balance b,.vy-ref-ledger-balance em { display:block; }
+  .vy-ref-ledger-balance small { font-size:10px; color:#b7d8f5; }.vy-ref-ledger-balance b { margin-top:1px; font-size:24px; }.vy-ref-ledger-balance em { margin-top:2px; color:#00e7bb; font-size:11px; font-style:normal; font-weight:700; }.vy-ref-ledger-balance em i { margin-left:5px; color:#9ac8e8; font-style:normal; font-weight:400; }
+  .vy-ref-ledger-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  .vy-ref-ledger-stat-grid > div { min-height:84px; padding:8px 9px; border:1px solid rgba(0,154,255,.62); border-radius:17px; background:linear-gradient(145deg,rgba(3,38,77,.9),rgba(2,20,45,.9)); }
+  .vy-ref-ledger-stat-grid span { display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:11px; color:#fff; background:linear-gradient(145deg,#00bfff,#3b37ff); font-weight:800; }
+  .vy-ref-ledger-stat-grid small,.vy-ref-ledger-stat-grid b,.vy-ref-ledger-stat-grid em { display:block; }.vy-ref-ledger-stat-grid small { margin-top:4px; color:#b3d7f5; font-size:10px; }.vy-ref-ledger-stat-grid b { margin-top:1px; font-size:16px; }.vy-ref-ledger-stat-grid em { margin-top:1px; color:#00e4b8; font-size:10px; font-style:normal; font-weight:700; }.vy-ref-ledger-stat-grid em.down { color:#ff4a6f; }
+  :root:not(.dark) .vy-ref-ledger-balance { background:linear-gradient(100deg,#eefaff,#f0efff); color:#10243c; }:root:not(.dark) .vy-ref-ledger-stat-grid > div { background:linear-gradient(145deg,#fff,#edf7ff); }
+}
+@media (max-width:767px){
+  .vy-ref-ledger-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .vy-ref-ledger-balance b { font-size:25px; }
+}
+@media (max-width:767px){
+  .vy-ref-dashboard .animate-fade-in > div:first-child > button:nth-of-type(1),
+  .vy-ref-dashboard .animate-fade-in > div:first-child > button:nth-of-type(2),
+  .vy-ref-dashboard .animate-fade-in > div:first-child > button:nth-of-type(3),
+  .vy-ref-dashboard .animate-fade-in > div:first-child > button:nth-of-type(5) { display:none; }
+  .vy-ref-dashboard .animate-fade-in > div:first-child { width:100%; justify-content:flex-end; }
+}
+
+
+/* Force the shared application canvas to the reference dark environment.
+   Individual settings/theme state remains intact; only this presentation layer is dark. */
+.vy-ref-shell {
+  background:
+    radial-gradient(circle at 50% -10%, rgba(0, 128, 255, .17), transparent 34%),
+    radial-gradient(circle at 100% 42%, rgba(141, 69, 255, .09), transparent 28%),
+    linear-gradient(180deg, #020817 0%, #031326 52%, #010916 100%) !important;
+  color: #eef7ff;
+}
+
+.vy-ref-shell .vy-reference-page {
+  background: transparent !important;
+}
+
+/* =========================================================
+   VYAPAROS UNIFIED DARK REFERENCE UI — ALL BUSINESS PAGES
+   Visual-only layer. Existing data, commands, dialogs, fetchers,
+   state, API calls and business logic remain untouched.
+   ========================================================= */
+.vy-reference-page {
+  --v-ref-bg: #020817;
+  --v-ref-bg-2: #04152b;
+  --v-ref-card: rgba(5, 25, 52, .78);
+  --v-ref-card-strong: rgba(4, 20, 43, .92);
+  --v-ref-border: rgba(36, 156, 255, .34);
+  --v-ref-text: #f3f8ff;
+  --v-ref-muted: #8da7c4;
+  --v-ref-cyan: #18c8ff;
+  --v-ref-blue: #267cff;
+  --v-ref-purple: #8d45ff;
+  --v-ref-pink: #ff28cf;
+  --v-ref-green: #00e2ad;
+  --v-ref-amber: #ffad27;
+  color: var(--v-ref-text) !important;
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 8px);
+}
+
+.vy-reference-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% -12%, rgba(0, 156, 255, .16), transparent 31%),
+    radial-gradient(circle at 100% 35%, rgba(138, 67, 255, .11), transparent 30%),
+    radial-gradient(circle at 0% 72%, rgba(0, 217, 255, .07), transparent 28%),
+    linear-gradient(180deg, #010817 0%, #021126 48%, #020817 100%);
+}
+
+/* Neutralize old light-mode surfaces inside the reference scope. */
+.vy-reference-page .bg-background,
+.vy-reference-page .bg-card,
+.vy-reference-page .bg-muted,
+.vy-reference-page .bg-muted\/30,
+.vy-reference-page .bg-white,
+.vy-reference-page .bg-slate-50,
+.vy-reference-page .bg-slate-100,
+.vy-reference-page .bg-gray-50,
+.vy-reference-page .bg-gray-100 {
+  background: var(--v-ref-card) !important;
+  color: var(--v-ref-text) !important;
+}
+
+.vy-reference-page .bg-card,
+.vy-reference-page .bg-background {
+  border-color: var(--v-ref-border) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 14px 40px rgba(0,0,0,.24) !important;
+}
+
+.vy-reference-page [class*="rounded-xl"][class*="border"],
+.vy-reference-page [class*="rounded-2xl"][class*="border"],
+.vy-reference-page [class*="rounded-3xl"][class*="border"],
+.vy-reference-page [class*="rounded-lg"][class*="border"] {
+  border-color: rgba(45, 157, 255, .30) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 34px rgba(0,0,0,.22) !important;
+}
+
+.vy-reference-page .text-foreground,
+.vy-reference-page .text-slate-900,
+.vy-reference-page .text-gray-900,
+.vy-reference-page .text-gray-800 {
+  color: var(--v-ref-text) !important;
+}
+
+.vy-reference-page .text-muted-foreground,
+.vy-reference-page .text-slate-500,
+.vy-reference-page .text-slate-600,
+.vy-reference-page .text-gray-500,
+.vy-reference-page .text-gray-600 {
+  color: var(--v-ref-muted) !important;
+}
+
+.vy-reference-page input,
+.vy-reference-page textarea,
+.vy-reference-page select,
+.vy-reference-page [role="combobox"] {
+  color: var(--v-ref-text) !important;
+  background: rgba(1, 11, 26, .72) !important;
+  border-color: rgba(55, 162, 255, .30) !important;
+  border-radius: 14px !important;
+}
+
+.vy-reference-page input::placeholder,
+.vy-reference-page textarea::placeholder {
+  color: rgba(141, 167, 196, .72) !important;
+}
+
+.vy-reference-page input:focus,
+.vy-reference-page textarea:focus,
+.vy-reference-page select:focus,
+.vy-reference-page [role="combobox"]:focus-visible {
+  border-color: rgba(24, 200, 255, .75) !important;
+  box-shadow: 0 0 0 3px rgba(24, 200, 255, .10), 0 0 22px rgba(24, 200, 255, .08) !important;
+  outline: none !important;
+}
+
+.vy-reference-page .bg-primary,
+.vy-reference-page button[class*="bg-primary"] {
+  background: linear-gradient(115deg, #0fc8ff 0%, #287cff 48%, #9847ff 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 28px rgba(40,124,255,.25), 0 0 24px rgba(141,69,255,.12) !important;
+}
+
+.vy-reference-page .border-border,
+.vy-reference-page .border-border\/60,
+.vy-reference-page .border {
+  border-color: rgba(45,157,255,.22) !important;
+}
+
+.vy-reference-page .divide-border > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(45,157,255,.16) !important;
+}
+
+.vy-reference-page table thead,
+.vy-reference-page [data-slot="table-header"] {
+  background: rgba(10, 37, 70, .74) !important;
+}
+
+.vy-reference-page table tbody tr:hover,
+.vy-reference-page [data-slot="table-row"]:hover {
+  background: rgba(20, 141, 255, .055) !important;
+}
+
+.vy-reference-page .sticky {
+  background: rgba(2, 12, 29, .82) !important;
+  border-color: rgba(45,157,255,.20) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Shared page title geometry. */
+.vy-reference-page h1 { font-size: clamp(1.25rem, 2.8vw, 1.75rem); font-weight: 800; letter-spacing: -.025em; }
+.vy-reference-page h2 { font-weight: 750; letter-spacing: -.02em; }
+.vy-reference-page button,
+.vy-reference-page a { -webkit-tap-highlight-color: transparent; }
+
+/* Dialogs / sheets / popovers opened by existing commands. */
+.vyaparos-app [role="dialog"],
+.vyaparos-app [data-radix-popper-content-wrapper] > div,
+.vyaparos-app [data-radix-popover-content] {
+  background: linear-gradient(145deg, rgba(5,25,52,.98), rgba(2,14,31,.99)) !important;
+  color: #f3f8ff !important;
+  border-color: rgba(45,157,255,.32) !important;
+  box-shadow: 0 30px 90px rgba(0,0,0,.55), 0 0 35px rgba(0,155,255,.07) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.vyaparos-app [role="dialog"] input,
+.vyaparos-app [role="dialog"] textarea,
+.vyaparos-app [role="dialog"] select,
+.vyaparos-app [role="dialog"] [role="combobox"] {
+  background: rgba(1,11,26,.80) !important;
+  color: #f3f8ff !important;
+  border-color: rgba(45,157,255,.28) !important;
+}
+
+/* Keep printable invoice paper white. */
+.vy-reference-page .invoice-paper,
+.vy-reference-page [class*="bg-white"][class*="text-slate-900"] {
+  background: #fff !important;
+  color: #0f172a !important;
+}
+
+/* Menu — matched to the supplied Menu PNG. */
+.vy-menu-page { color: #eef7ff; padding: 4px 0 20px; }
+.vy-menu-header { display:flex; align-items:center; gap:12px; min-height:74px; padding:10px 4px 14px; }
+.vy-menu-header h1 { margin:0; font-size:1.55rem; font-weight:800; }
+.vy-menu-header p { margin:2px 0 0; color:#78b9ee; font-size:.78rem; }
+.vy-menu-back,
+.vy-menu-title-icon { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; flex:none; }
+.vy-menu-back { border:1px solid rgba(32,151,255,.55); background:rgba(5,31,66,.72); color:#dff3ff; }
+.vy-menu-title-icon { color:#fff; background:linear-gradient(135deg,#08c9ff,#3b74ff 55%,#9a43ff); box-shadow:0 0 26px rgba(35,132,255,.28); }
+.vy-menu-profile { margin-left:auto; display:flex; align-items:center; gap:9px; padding:8px 12px; border:1px solid rgba(32,151,255,.35); border-radius:18px; background:rgba(4,28,58,.70); min-width:0; }
+.vy-menu-profile b,.vy-menu-profile span { display:block; white-space:nowrap; max-width:125px; overflow:hidden; text-overflow:ellipsis; }
+.vy-menu-profile b { font-size:.8rem; }
+.vy-menu-profile span { color:#72b6ec; font-size:.68rem; margin-top:1px; }
+.vy-menu-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#36b6ff,#784bff); color:#fff; font-weight:800; font-size:.72rem; }
+.vy-menu-content { display:grid; gap:12px; }
+.vy-menu-list,
+.vy-menu-preferences { padding:8px; border:1px solid rgba(33,154,255,.28); border-radius:24px; background:linear-gradient(145deg,rgba(4,25,53,.82),rgba(2,14,32,.90)); box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 20px 55px rgba(0,0,0,.22); backdrop-filter:blur(20px); }
+.vy-menu-row { display:flex; align-items:center; gap:13px; min-height:64px; padding:8px 12px; border-radius:17px; color:#eaf6ff; transition:.18s ease; }
+.vy-menu-row + .vy-menu-row { margin-top:4px; }
+.vy-menu-row:hover,.vy-menu-row.active { background:linear-gradient(105deg,rgba(12,177,255,.13),rgba(112,55,255,.16)); box-shadow:inset 0 0 0 1px rgba(45,157,255,.18); }
+.vy-menu-row b,.vy-menu-row small { display:block; }
+.vy-menu-row b { font-size:.91rem; }
+.vy-menu-row small { color:#78a9d1; font-size:.72rem; margin-top:2px; }
+.vy-menu-row > svg { color:#8bcaff; }
+.vy-menu-icon,.vy-menu-setting-icon { width:43px; height:43px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex:none; color:#fff; box-shadow:0 0 22px rgba(35,137,255,.12); }
+.menu-icon-cyan { background:linear-gradient(135deg,#0fcfff,#3677ff); }
+.menu-icon-blue { background:linear-gradient(135deg,#18c8ff,#385dff); }
+.menu-icon-violet,.menu-icon-purple { background:linear-gradient(135deg,#7f48ff,#b438ff); }
+.menu-icon-indigo { background:linear-gradient(135deg,#3c71ff,#7253ff); }
+.menu-icon-green { background:linear-gradient(135deg,#08dba9,#16b4e8); }
+.menu-icon-amber { background:linear-gradient(135deg,#ffb11f,#ff6b2b); }
+.vy-menu-preferences { padding:12px 14px; }
+.vy-menu-setting-row { width:100%; min-height:68px; display:flex; align-items:center; gap:13px; color:#eef7ff; text-align:left; }
+.vy-menu-setting-row + .vy-menu-setting-row { border-top:1px solid rgba(45,157,255,.17); }
+.vy-menu-setting-row b,.vy-menu-setting-row small { display:block; }
+.vy-menu-setting-row b { font-size:.86rem; }
+.vy-menu-setting-row small { color:#78a9d1; font-size:.7rem; margin-top:2px; }
+.vy-menu-setting-icon { width:40px; height:40px; border:1px solid rgba(45,157,255,.22); background:rgba(16,68,120,.36); color:#7ed8ff; }
+.vy-menu-value { margin-left:auto; display:flex; align-items:center; gap:5px; border:1px solid rgba(45,157,255,.36); border-radius:999px; padding:8px 11px; color:#7ed8ff; font-size:.72rem; }
+.vy-menu-switch { margin-left:auto; width:48px; height:27px; border-radius:999px; padding:3px; background:#162d49; border:1px solid rgba(120,168,211,.20); }
+.vy-menu-switch i { display:block; width:19px; height:19px; border-radius:50%; background:#dceeff; transition:.2s; }
+.vy-menu-switch.on { background:linear-gradient(90deg,#2e7cff,#9847ff); box-shadow:0 0 18px rgba(85,91,255,.25); }
+.vy-menu-switch.on i { transform:translateX(20px); }
+.vy-menu-setting-row.danger { color:#ff8ba2; }
+.vy-menu-setting-row.danger .vy-menu-setting-icon { color:#ff6f8e; }
+.vy-menu-footer-note { display:flex; align-items:center; justify-content:center; gap:7px; color:#6689ac; font-size:.68rem; padding:5px 0 0; }
+
+/* Shared mobile density: tall screens remain comfortably scrollable without breaking functionality. */
+@media (max-width: 1023px) {
+  .vy-reference-page { min-height:calc(100dvh - 1px); }
+  .vy-reference-page > * { max-width:100%; }
+  .vy-reference-page [class*="rounded-3xl"] { border-radius:20px !important; }
+  .vy-reference-page [class*="rounded-2xl"] { border-radius:17px !important; }
+  .vy-reference-page [class*="rounded-xl"] { border-radius:14px !important; }
+  .vy-menu-page { padding-bottom:14px; }
+  .vy-menu-header { min-height:68px; }
+  .vy-menu-back,.vy-menu-title-icon { width:46px; height:46px; border-radius:14px; }
+  .vy-menu-profile { padding:6px 8px; }
+  .vy-menu-list,.vy-menu-preferences { border-radius:20px; }
+  .vy-menu-row { min-height:58px; padding:7px 9px; }
+  .vy-menu-icon { width:40px; height:40px; border-radius:13px; }
+}
+
+/* =========================================================
+   MOBILE HEADER / FILTER / INVOICE NAV FIXES
+   ========================================================= */
+.vy-ref-mobile-user-name { margin:0; font-size:13px; line-height:1.1; font-weight:800; letter-spacing:-.02em; color:#eff8ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.vy-ref-mobile-user-role { margin:3px 0 0; font-size:10px; line-height:1; color:#7fb8e8; white-space:nowrap; }
+.vy-ref-user-avatar { width:42px; height:42px; flex:0 0 42px; border-radius:14px; border-color:rgba(39,176,255,.58); background:linear-gradient(135deg,#0fcfff,#4268ff 55%,#9a35ff); box-shadow:0 0 18px rgba(0,166,255,.22); }
+.vy-ref-header-icon,.vy-ref-header-language { display:flex; align-items:center; justify-content:center; height:38px; border:1px solid rgba(44,166,255,.38); background:rgba(8,35,72,.72); color:#dff4ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
+.vy-ref-header-icon { width:38px; border-radius:12px; }
+.vy-ref-header-language { gap:4px; min-width:55px; padding:0 9px; border-radius:12px; font-size:10px; font-weight:750; }
+.dark .vy-ref-shell .vy-ref-home-header { padding-top:max(8px, env(safe-area-inset-top)); }
+
+@media (max-width: 767px) {
+  .vy-ref-date-filter { padding:8px !important; gap:7px !important; }
+  .vy-ref-date-filter-options { width:100%; padding-bottom:1px; }
+  .vy-ref-date-filter-options .shrink-0.rounded-lg { padding:6px 10px !important; }
+  .vy-ref-date-range { width:100%; text-align:center; padding:7px 9px !important; border:1px solid rgba(0,149,255,.18); }
+
+  /* Invoice has its own action bar; keep it above the persistent app navigation. */
+  .vy-page-invoice > .fixed.bottom-0.z-40 { bottom:84px !important; }
+  .vy-page-invoice { padding-bottom:168px !important; }
+}
+@media (max-width: 767px) {
+  .vy-ref-dashboard .vy-ref-date-filter > .vy-ref-date-range { display:block !important; }
+}
+
+/* =========================================================
+   DASHBOARD SALES / TRANSACTION ACTIONS
+   ========================================================= */
+.vy-ref-dashboard-actions {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.vy-ref-dashboard-action {
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 11px;
+  border-radius:16px;
+  border:1px solid rgba(45,157,255,.28);
+  background:linear-gradient(145deg,rgba(5,30,61,.88),rgba(3,17,39,.94));
+  color:#edf8ff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 12px 30px rgba(0,0,0,.16);
+}
+.vy-ref-dashboard-action > span {
+  width:38px;height:38px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.vy-ref-dashboard-action div { min-width:0; flex:1; }
+.vy-ref-dashboard-action b,.vy-ref-dashboard-action small { display:block; }
+.vy-ref-dashboard-action b { font-size:13px; }
+.vy-ref-dashboard-action small { margin-top:2px;font-size:9px;color:#82b7df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.vy-ref-dashboard-action svg:last-child { color:#78caff; }
+.vy-ref-dashboard-action.sale { border-color:rgba(0,218,178,.42); }
+.vy-ref-dashboard-action.sale > span { background:linear-gradient(135deg,#00d9b2,#0878ff);box-shadow:0 0 18px rgba(0,217,178,.18); }
+.vy-ref-dashboard-action.transaction { border-color:rgba(72,142,255,.42); }
+.vy-ref-dashboard-action.transaction > span { background:linear-gradient(135deg,#287cff,#7d42ff);box-shadow:0 0 18px rgba(74,110,255,.18); }
+
+/* Invoice list header Sale button */
+.vy-ref-invoice-header-actions { display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end; }
+.vy-ref-sale-btn {
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 15px;border-radius:14px;
+  border:0;background:linear-gradient(100deg,#00baff,#5a41ff 58%,#d029ff);color:#fff;font-size:12px;font-weight:800;
+  box-shadow:0 0 20px rgba(0,145,255,.25);
+}
+.vy-ref-sale-btn:hover { filter:brightness(1.05); }
+.vy-ref-invoice-nav-title { display:flex;align-items:center;gap:10px;min-width:0; }
+.vy-ref-invoice-nav-title h1 { margin:0;font-size:20px;font-weight:800;letter-spacing:-.03em; }
+
+/* =========================================================
+   MOBILE DATE FILTER — show every preset and the complete range
+   ========================================================= */
+@media (max-width: 767px) {
+  .vy-ref-date-filter {
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    width:100% !important;
+    overflow:visible !important;
+  }
+  .vy-ref-date-filter-options {
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    width:100% !important;
+    overflow:visible !important;
+    gap:5px !important;
+  }
+  .vy-ref-date-filter-options > svg { display:none !important; }
+  .vy-ref-date-filter-options .vy-ref-date-preset {
+    width:100% !important;
+    min-width:0 !important;
+    min-height:34px !important;
+    padding:5px 3px !important;
+    white-space:normal !important;
+    line-height:1.1 !important;
+    text-align:center !important;
+    border-radius:10px !important;
+    font-size:9px !important;
+  }
+  .vy-ref-date-range {
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    text-align:center !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    padding:8px 10px !important;
+  }
+  .vy-ref-dashboard-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .vy-ref-dashboard-action { min-height:54px; padding:8px; gap:8px; }
+  .vy-ref-dashboard-action > span { width:34px;height:34px;border-radius:10px; }
+  .vy-ref-dashboard-action b { font-size:11px; }
+  .vy-ref-dashboard-action small { font-size:8px; }
+  .vy-ref-invoice-header-actions { width:100%; display:grid; grid-template-columns:1fr 1.45fr; }
+  .vy-ref-invoice-header-actions > button { width:100%; }
+}
+
+/* =========================================================
+   AI COMMANDS — readable premium dark glass, not black
+   ========================================================= */
+.vy-ai-page {
+  background:
+    radial-gradient(circle at 50% -10%,rgba(16,185,255,.13),transparent 32%),
+    radial-gradient(circle at 100% 35%,rgba(139,92,246,.09),transparent 30%),
+    linear-gradient(180deg,#061326 0%,#071a31 52%,#04101f 100%);
+  color:#eaf6ff;
+}
+.vy-ai-shell { background:transparent; }
+.vy-ai-header {
+  background:rgba(5,18,38,.88) !important;
+  border-color:rgba(62,170,255,.18) !important;
+  box-shadow:0 12px 32px rgba(0,0,0,.18);
+}
+.vy-ai-header h1 { color:#f2f8ff !important; }
+.vy-ai-header .text-gray-500 { color:#78a9d1 !important; }
+.vy-ai-header .bg-white,
+.vy-ai-header .bg-gray-100,
+.vy-ai-header .bg-indigo-50 { background:rgba(15,48,84,.75) !important; }
+.vy-ai-header .text-gray-600,
+.vy-ai-header .text-indigo-700 { color:#b9ddfa !important; }
+.vy-ai-header .border-gray-200,
+.vy-ai-header .border-indigo-200 { border-color:rgba(71,167,255,.28) !important; }
+.vy-ai-chat {
+  background:linear-gradient(145deg,rgba(7,27,54,.88),rgba(3,17,36,.92)) !important;
+  border-color:rgba(47,160,255,.24) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 18px 50px rgba(0,0,0,.25) !important;
+}
+.vy-ai-chat .bg-blue-50 { background:rgba(23,112,255,.16) !important; }
+.vy-ai-chat .text-blue-600 { color:#59caff !important; }
+.vy-ai-chat .bg-white { background:rgba(14,43,77,.82) !important; }
+.vy-ai-chat .text-gray-800,
+.vy-ai-chat .text-gray-900 { color:#eaf6ff !important; }
+.vy-ai-chat .text-gray-500 { color:#82afd4 !important; }
+.vy-ai-chat .border-gray-200 { border-color:rgba(70,160,235,.20) !important; }
+.vy-ai-chat .bg-gray-50 { background:rgba(8,30,57,.76) !important; }
+.vy-ai-chat .text-emerald-600 { color:#38e0ad !important; }
+.vy-ai-chat .bg-emerald-600 { background:linear-gradient(135deg,#00c99b,#008fba) !important; }
+.vy-ai-chat .text-gray-700 { color:#c5e1f5 !important; }
+.vy-ai-composer-wrap {
+  background:rgba(4,15,31,.90) !important;
+  border-color:rgba(55,159,255,.20) !important;
+  box-shadow:0 -14px 35px rgba(0,0,0,.28);
+}
+.vy-ai-composer {
+  background:rgba(9,31,58,.94) !important;
+  border-color:rgba(66,168,255,.30) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.vy-ai-composer .bg-white { background:rgba(18,55,91,.80) !important; }
+.vy-ai-composer .text-gray-600 { color:#b7d8ef !important; }
+.vy-ai-composer .bg-blue-600 { background:linear-gradient(135deg,#06b6d4,#2563eb,#8b5cf6) !important; }
+.vy-ai-composer .disabled\:bg-gray-200:disabled { background:rgba(71,100,130,.42) !important; color:#8aa4ba !important; }
+.vy-ai-input { color:#f4fbff !important; caret-color:#4dd7ff; }
+.vy-ai-input::placeholder { color:#82a6c4 !important; opacity:1; }
+.vy-ai-teach-modal {
+  background:linear-gradient(145deg,#0a2342,#06172d) !important;
+  color:#eef8ff !important;
+  border:1px solid rgba(58,165,255,.30);
+}
+.vy-ai-teach-modal .text-gray-900,.vy-ai-teach-modal .text-gray-700 { color:#edf7ff !important; }
+.vy-ai-teach-modal .text-gray-500 { color:#80acd1 !important; }
+.vy-ai-teach-modal .bg-gray-50 { background:rgba(12,41,72,.75) !important; }
+.vy-ai-teach-modal .bg-blue-50 { background:rgba(19,116,230,.15) !important; }
+.vy-ai-teach-modal .text-blue-700 { color:#8ed6ff !important; }
+.vy-ai-teach-modal .border-gray-200 { border-color:rgba(65,159,235,.25) !important; }
+.vy-ai-teach-modal input,.vy-ai-teach-modal textarea { background:rgba(4,18,35,.72) !important; color:#eff9ff !important; border-color:rgba(65,159,235,.30) !important; }
+.vy-ai-teach-modal input::placeholder,.vy-ai-teach-modal textarea::placeholder { color:#7697b5 !important; }
+
+@media (max-width:767px) {
+  .vy-ai-header .flex.h-10 { min-width:0; }
+  .vy-ai-header .flex.items-center.gap-3 { min-width:0; }
+}
+
+/* =========================================================
+   VYAPAROS LIGHT REFERENCE UI — matched to supplied light PNGs
+   ========================================================= */
+:root:not(.dark) .vy-ref-shell {
+  background: #f7fbff !important;
+  color: #112b52;
+}
+:root:not(.dark) .vy-ref-shell .vy-ref-home-header {
+  background: rgba(255,255,255,.96) !important;
+  border-bottom: 1px solid #d8e8f7 !important;
+  box-shadow: 0 5px 20px rgba(43,105,160,.06);
+}
+:root:not(.dark) .vy-ref-shell .vy-ref-mobile-user-name { color:#102b55; }
+:root:not(.dark) .vy-ref-shell .vy-ref-mobile-user-role { color:#6d89a8; }
+:root:not(.dark) .vy-ref-shell .vy-ref-user-avatar { border-color:#c8def2; background:linear-gradient(135deg,#20bfff,#536cff 55%,#a64cff); box-shadow:0 5px 18px rgba(57,128,219,.16); }
+:root:not(.dark) .vy-ref-shell .vy-ref-bell,
+:root:not(.dark) .vy-ref-shell .vy-ref-header-icon,
+:root:not(.dark) .vy-ref-shell .vy-ref-header-language {
+  background:#fff !important;
+  color:#173c6b !important;
+  border-color:#cfe2f5 !important;
+  box-shadow:0 3px 12px rgba(44,103,160,.07);
+}
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] {
+  height:calc(78px + env(safe-area-inset-bottom));
+  border-top:1px solid #d8e8f7;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 -8px 28px rgba(42,100,158,.10);
+  backdrop-filter:blur(18px);
+}
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] > div { height:78px; }
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] a { color:#55739a; text-shadow:none; }
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] a.text-primary { color:#087dff; }
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] button {
+  width:62px;height:62px;margin-top:-22px;border:3px solid #fff;
+  background:radial-gradient(circle at 35% 30%,#1bc7ff,#316cff 48%,#a13cff 82%);
+  box-shadow:0 7px 24px rgba(31,116,245,.28),0 0 20px rgba(130,55,255,.20);
+}
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] button span { border-color:rgba(255,255,255,.65); }
+
+/* Dashboard */
+:root:not(.dark) .vy-ref-dashboard { color:#112b52; }
+:root:not(.dark) .vy-ref-greeting-copy h1 { color:#102b55; }
+:root:not(.dark) .vy-ref-greeting-copy p { color:#5e7da4; }
+:root:not(.dark) .vy-ref-ai-card {
+  border-color:#c9e6fb;
+  background:linear-gradient(105deg,#ffffff,#f1f8ff);
+  color:#173a67;
+  box-shadow:0 8px 24px rgba(37,115,181,.08);
+}
+:root:not(.dark) .vy-ref-ai-card small { color:#6281a6; }
+:root:not(.dark) .vy-ref-ai-card > svg { color:#4d78a8; }
+:root:not(.dark) .vy-ref-dashboard-actions .vy-ref-dashboard-action {
+  color:#143563;
+  background:#fff;
+  box-shadow:0 5px 18px rgba(48,111,169,.08);
+}
+:root:not(.dark) .vy-ref-dashboard-action small { color:#6a88a9; }
+:root:not(.dark) .vy-ref-dashboard-action svg:last-child { color:#3975b2; }
+:root:not(.dark) .vy-ref-dashboard-action.sale { border-color:#a9eadb; }
+:root:not(.dark) .vy-ref-dashboard-action.transaction { border-color:#b9d8ff; }
+:root:not(.dark) .vy-ref-overview-card,
+:root:not(.dark) .vy-ref-quick-card,
+:root:not(.dark) .vy-ref-sales-card {
+  border-color:#cce3f6 !important;
+  background:linear-gradient(145deg,#ffffff,#f5faff) !important;
+  box-shadow:0 8px 28px rgba(44,105,162,.08), inset 0 1px 0 #fff !important;
+}
+:root:not(.dark) .vy-ref-section-heading h2,
+:root:not(.dark) .vy-ref-section-title h2 { color:#12335f; }
+:root:not(.dark) .vy-ref-section-heading p { color:#718baa; }
+:root:not(.dark) .vy-ref-section-heading > span,
+:root:not(.dark) .vy-ref-overview-filter {
+  color:#315a86;
+  background:#fff;
+  border:1px solid #c9def1;
+  box-shadow:0 3px 10px rgba(38,103,160,.05);
+}
+:root:not(.dark) .vy-ref-overview-filter { display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:12px;font-size:11px;font-weight:700; }
+:root:not(.dark) .vy-ref-overview-stat { color:#17345d; background:#fff; border-color:#cfe4f7; box-shadow:0 4px 15px rgba(43,111,170,.05); }
+:root:not(.dark) .vy-ref-overview-stat span { color:#5b7798; }
+:root:not(.dark) .vy-ref-overview-stat b { color:#16345f; }
+:root:not(.dark) .vy-ref-overview-stat.cyan { background:linear-gradient(145deg,#f2fffd,#fff); border-color:#b9e9df; }
+:root:not(.dark) .vy-ref-overview-stat.pink { background:linear-gradient(145deg,#fff5f8,#fff); border-color:#ffd0dd; }
+:root:not(.dark) .vy-ref-overview-stat.blue { background:linear-gradient(145deg,#f2f8ff,#fff); border-color:#c8e0ff; }
+:root:not(.dark) .vy-ref-overview-stat.purple { background:linear-gradient(145deg,#f7f3ff,#fff); border-color:#dfcbff; }
+:root:not(.dark) .vy-ref-action-card.green,
+:root:not(.dark) .vy-ref-action-card.purple,
+:root:not(.dark) .vy-ref-action-card.amber,
+:root:not(.dark) .vy-ref-action-card.blue { color:#17345d; box-shadow:0 4px 14px rgba(47,105,160,.06); }
+:root:not(.dark) .vy-ref-action-card.green { background:linear-gradient(145deg,#f1fffb,#fff); border-color:#b7e9dc; }
+:root:not(.dark) .vy-ref-action-card.purple { background:linear-gradient(145deg,#f7f1ff,#fff); border-color:#d9c6ff; }
+:root:not(.dark) .vy-ref-action-card.amber { background:linear-gradient(145deg,#fff9ee,#fff); border-color:#ffd99c; }
+:root:not(.dark) .vy-ref-action-card.blue { background:linear-gradient(145deg,#f1f8ff,#fff); border-color:#c7e0ff; }
+:root:not(.dark) .vy-ref-action-card small { color:#6985a4; }
+:root:not(.dark) .vy-ref-insight-card { color:#17345d; background:linear-gradient(90deg,#f7fff9,#f4f8ff); border-color:#c7e6da; }
+:root:not(.dark) .vy-ref-insight-card small { color:#6885a5; }
+
+/* Invoice reference */
+:root:not(.dark) .vy-ref-invoice { background:linear-gradient(180deg,#f8fbff,#eef7ff 55%,#fbfdff) !important; color:#122b55 !important; }
+:root:not(.dark) .vy-ref-invoice-header { background:rgba(255,255,255,.97) !important; border-color:#d5e6f5 !important; box-shadow:0 5px 18px rgba(45,102,157,.06); }
+:root:not(.dark) .vy-ref-invoice .vy-ref-icon-btn { background:#fff; color:#173b69; border-color:#c9def1; }
+:root:not(.dark) .vy-ref-title-row h1 { color:#16345f; }
+:root:not(.dark) .vy-ref-title-row p { color:#6986a6; }
+:root:not(.dark) .vy-ref-title-icon { box-shadow:0 5px 16px rgba(41,120,222,.18); }
+:root:not(.dark) .vy-ref-search,
+:root:not(.dark) .vy-ref-filter-btn { background:#fff !important; color:#466b93 !important; border-color:#c9def1 !important; box-shadow:0 3px 12px rgba(46,107,163,.05); }
+:root:not(.dark) .vy-ref-search input { color:#17345d !important; }
+:root:not(.dark) .vy-ref-search input::placeholder { color:#7894b0; }
+:root:not(.dark) .vy-ref-stat-card { background:linear-gradient(145deg,#fff,#f3f9ff) !important; color:#16345f !important; border-color:#c9e0f3 !important; box-shadow:0 5px 18px rgba(47,106,161,.06); }
+:root:not(.dark) .vy-ref-stat-card > span:not(:first-child) { color:#5e7c9f; }
+:root:not(.dark) .vy-ref-stat-card.green { border-color:#b7e8d9 !important; background:linear-gradient(145deg,#f4fffb,#fff) !important; }
+:root:not(.dark) .vy-ref-stat-card.purple { border-color:#dcc9ff !important; background:linear-gradient(145deg,#faf7ff,#fff) !important; }
+:root:not(.dark) .vy-ref-tabs button { background:#fff !important; color:#345c87 !important; border-color:#cbdff1 !important; }
+:root:not(.dark) .vy-ref-tabs button.active { color:#fff !important; background:linear-gradient(100deg,#08aaf8,#7344ee) !important; border-color:#6aaaf1 !important; }
+:root:not(.dark) .vy-ref-invoice-row { background:#fff !important; color:#17345f !important; border-color:#cfe2f4 !important; box-shadow:0 4px 15px rgba(46,106,161,.05); }
+:root:not(.dark) .vy-ref-row-main small { color:#6e89a6 !important; }
+:root:not(.dark) .vy-ref-row-amount b { color:#16345f; }
+:root:not(.dark) .vy-ref-sale-btn { color:#087b70; background:linear-gradient(135deg,#effffc,#eaf9ff); border-color:#a8e5d6; }
+
+/* Reports */
+:root:not(.dark) .vy-page-reports { color:#16345f; }
+:root:not(.dark) .vy-page-reports .rounded-2xl.border.border-border\/60.bg-card,
+:root:not(.dark) .vy-page-reports .rounded-2xl.border.border-border\/60 { background:#fff !important; border-color:#cfe2f4 !important; box-shadow:0 6px 20px rgba(43,106,160,.06); }
+:root:not(.dark) .vy-page-reports h1 { color:#16345f; }
+:root:not(.dark) .vy-page-reports .text-muted-foreground { color:#6a87a5 !important; }
+:root:not(.dark) .vy-page-reports .bg-muted { background:#f3f8fd !important; }
+:root:not(.dark) .vy-page-reports .border-border { border-color:#d4e4f2 !important; }
+
+/* Bank / Transactions / Inventory use the same light geometry as the supplied reference collage. */
+:root:not(.dark) .vy-page-banking,
+:root:not(.dark) .vy-page-transactions,
+:root:not(.dark) .vy-page-inventory { color:#17345d; }
+:root:not(.dark) .vy-page-banking .bg-gradient-to-b,
+:root:not(.dark) .vy-page-transactions .bg-gradient-to-b { background:linear-gradient(180deg,#f8fbff,#edf6ff) !important; }
+:root:not(.dark) .vy-page-banking .bg-background,
+:root:not(.dark) .vy-page-transactions .bg-background,
+:root:not(.dark) .vy-page-inventory .bg-background { background:#fff !important; }
+:root:not(.dark) .vy-page-banking .border,
+:root:not(.dark) .vy-page-transactions .border,
+:root:not(.dark) .vy-page-inventory .border { border-color:#cfe2f4; }
+:root:not(.dark) .vy-page-banking .shadow-sm,
+:root:not(.dark) .vy-page-transactions .shadow-sm,
+:root:not(.dark) .vy-page-inventory .shadow-sm { box-shadow:0 5px 18px rgba(43,106,160,.06) !important; }
+
+/* Dashboard overview filter popup should remain readable in either theme. */
+.vy-ref-overview-filter { cursor:pointer; }
+.vy-ref-overview-filter svg { flex:none; }
+@media (max-width:767px) {
+  .vy-ref-section-heading { align-items:center; }
+  .vy-ref-overview-filter { max-width:142px; min-width:112px; justify-content:center; white-space:nowrap; }
+  .vy-ref-dashboard-actions { margin-top:-2px; }
+}
+
+/* =========================================================
+   VYAPAROS LIGHT MODE FINAL PASS
+   This is the last cascade layer for the supplied light-mode
+   reference screens. It removes legacy dark patches from every
+   business page without changing data/state/business logic.
+   ========================================================= */
+:root:not(.dark) .vy-ref-shell,
+:root:not(.dark) .vyaparos-app {
+  background:
+    radial-gradient(circle at 8% -5%, rgba(34, 167, 255, .07), transparent 30%),
+    radial-gradient(circle at 96% 0%, rgba(143, 69, 255, .06), transparent 28%),
+    linear-gradient(180deg, #f9fcff 0%, #eef6ff 55%, #f8fbff 100%) !important;
+  color: #102b55 !important;
+}
+
+:root:not(.dark) .vy-reference-page,
+:root:not(.dark) .vy-page-dashboard,
+:root:not(.dark) .vy-page-transactions,
+:root:not(.dark) .vy-page-invoice,
+:root:not(.dark) .vy-page-banking,
+:root:not(.dark) .vy-page-inventory,
+:root:not(.dark) .vy-page-reports,
+:root:not(.dark) .vy-page-ledger,
+:root:not(.dark) .vy-page-cash,
+:root:not(.dark) .vy-page-pos,
+:root:not(.dark) .vy-page-settings,
+:root:not(.dark) .vy-page-sales-history {
+  color: #102b55 !important;
+  background: transparent !important;
+}
+
+:root:not(.dark) .vy-reference-page::before,
+:root:not(.dark) .vy-page-dashboard::before,
+:root:not(.dark) .vy-page-transactions::before,
+:root:not(.dark) .vy-page-invoice::before {
+  background:
+    radial-gradient(circle at 8% -5%, rgba(0, 174, 255, .07), transparent 30%),
+    radial-gradient(circle at 96% 2%, rgba(155, 92, 255, .06), transparent 30%),
+    linear-gradient(180deg, #f9fcff 0%, #eef6ff 55%, #f8fbff 100%) !important;
+}
+
+/* Generic surface conversion: legacy dark cards/patches become white/ice-blue. */
+:root:not(.dark) .vy-reference-page .bg-background,
+:root:not(.dark) .vy-reference-page .bg-card,
+:root:not(.dark) .vy-reference-page .bg-muted,
+:root:not(.dark) .vy-reference-page .bg-muted\/30,
+:root:not(.dark) .vy-reference-page .bg-white,
+:root:not(.dark) .vy-reference-page .bg-slate-50,
+:root:not(.dark) .vy-reference-page .bg-slate-100,
+:root:not(.dark) .vy-reference-page .bg-gray-50,
+:root:not(.dark) .vy-reference-page .bg-gray-100,
+:root:not(.dark) .vyaparos-app .bg-background,
+:root:not(.dark) .vyaparos-app .bg-card {
+  background: #ffffff !important;
+  color: #102b55 !important;
+}
+
+:root:not(.dark) .vy-reference-page .bg-muted,
+:root:not(.dark) .vyaparos-app .bg-muted {
+  background: #f3f8fd !important;
+}
+
+:root:not(.dark) .vy-reference-page [class*="bg-gradient-to-b"],
+:root:not(.dark) .vy-reference-page [class*="from-slate-950"],
+:root:not(.dark) .vy-reference-page [class*="from-slate-900"],
+:root:not(.dark) .vy-reference-page [class*="from-gray-950"],
+:root:not(.dark) .vy-reference-page [class*="from-gray-900"] {
+  background-image: linear-gradient(180deg, #f9fcff 0%, #eef6ff 100%) !important;
+}
+
+:root:not(.dark) .vy-reference-page [class*="bg-slate-950"],
+:root:not(.dark) .vy-reference-page [class*="bg-slate-900"],
+:root:not(.dark) .vy-reference-page [class*="bg-gray-950"],
+:root:not(.dark) .vy-reference-page [class*="bg-gray-900"] {
+  background-color: #f7fbff !important;
+}
+
+:root:not(.dark) .vy-reference-page [class*="border-slate-700"],
+:root:not(.dark) .vy-reference-page [class*="border-slate-800"],
+:root:not(.dark) .vy-reference-page [class*="border-gray-700"],
+:root:not(.dark) .vy-reference-page [class*="border-gray-800"] {
+  border-color: #cfe2f4 !important;
+}
+
+:root:not(.dark) .vy-reference-page .text-white,
+:root:not(.dark) .vy-reference-page .text-slate-100,
+:root:not(.dark) .vy-reference-page .text-slate-200,
+:root:not(.dark) .vy-reference-page .text-gray-100,
+:root:not(.dark) .vy-reference-page .text-gray-200 {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-reference-page .text-slate-300,
+:root:not(.dark) .vy-reference-page .text-slate-400,
+:root:not(.dark) .vy-reference-page .text-gray-300,
+:root:not(.dark) .vy-reference-page .text-gray-400 {
+  color: #6683a3 !important;
+}
+
+:root:not(.dark) .vy-reference-page input,
+:root:not(.dark) .vy-reference-page textarea,
+:root:not(.dark) .vy-reference-page select,
+:root:not(.dark) .vy-reference-page [role="combobox"],
+:root:not(.dark) .vyaparos-app input,
+:root:not(.dark) .vyaparos-app textarea,
+:root:not(.dark) .vyaparos-app select,
+:root:not(.dark) .vyaparos-app [role="combobox"] {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #c9def1 !important;
+  box-shadow: inset 0 1px 2px rgba(44, 103, 160, .03) !important;
+}
+
+:root:not(.dark) .vy-reference-page input::placeholder,
+:root:not(.dark) .vy-reference-page textarea::placeholder,
+:root:not(.dark) .vyaparos-app input::placeholder,
+:root:not(.dark) .vyaparos-app textarea::placeholder {
+  color: #7a96b2 !important;
+}
+
+:root:not(.dark) .vy-reference-page [role="dialog"],
+:root:not(.dark) .vyaparos-app [role="dialog"],
+:root:not(.dark) .vyaparos-app [data-radix-popper-content-wrapper] > div,
+:root:not(.dark) .vyaparos-app [data-radix-popover-content] {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #c9def1 !important;
+  box-shadow: 0 24px 70px rgba(42, 100, 158, .16), 0 0 0 1px rgba(37, 124, 215, .04) !important;
+}
+
+/* Shared navigation and header surfaces. */
+:root:not(.dark) .vy-ref-shell .vy-ref-home-header,
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"],
+:root:not(.dark) .vyaparos-app aside {
+  background: rgba(255,255,255,.96) !important;
+  color: #17345d !important;
+  border-color: #d5e6f5 !important;
+  box-shadow: 0 5px 20px rgba(43,105,160,.07) !important;
+  backdrop-filter: blur(18px);
+}
+
+/* All reference cards/panels. */
+:root:not(.dark) .vy-reference-page [class*="rounded-xl"][class*="border"],
+:root:not(.dark) .vy-reference-page [class*="rounded-2xl"][class*="border"],
+:root:not(.dark) .vy-reference-page [class*="rounded-3xl"][class*="border"],
+:root:not(.dark) .vy-reference-page [class*="rounded-lg"][class*="border"] {
+  border-color: #cfe2f4 !important;
+  box-shadow: 0 7px 22px rgba(43, 106, 160, .06), inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+
+/* Dashboard custom cards. */
+:root:not(.dark) .vy-ref-overview-card,
+:root:not(.dark) .vy-ref-quick-card,
+:root:not(.dark) .vy-ref-sales-card {
+  background: linear-gradient(145deg, #ffffff, #f3f9ff) !important;
+  border-color: #c9e1f4 !important;
+  color: #17345d !important;
+  box-shadow: 0 8px 28px rgba(44,105,162,.08), inset 0 1px 0 #fff !important;
+}
+
+:root:not(.dark) .vy-ref-overview-stat,
+:root:not(.dark) .vy-ref-action-card,
+:root:not(.dark) .vy-ref-insight-card,
+:root:not(.dark) .vy-ref-dashboard-action {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ref-overview-stat { background: #fff !important; }
+:root:not(.dark) .vy-ref-overview-stat span { color: #5e7c9f !important; }
+:root:not(.dark) .vy-ref-overview-stat b { color: #16345f !important; }
+:root:not(.dark) .vy-ref-action-card small,
+:root:not(.dark) .vy-ref-insight-card small { color: #6a88a9 !important; }
+
+/* Dropdown: single clean vertical list, as requested. */
+:root:not(.dark) .vy-overview-filter-popover {
+  background: #ffffff !important;
+  border: 1px solid #c9def1 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 50px rgba(40, 96, 150, .16) !important;
+}
+
+:root:not(.dark) .vy-overview-filter-list {
+  display: grid;
+  gap: 4px;
+}
+
+:root:not(.dark) .vy-overview-filter-option {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #fff !important;
+  color: #294f79 !important;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+:root:not(.dark) .vy-overview-filter-option:hover {
+  background: #f2f8ff !important;
+  border-color: #cfe2f4 !important;
+}
+
+:root:not(.dark) .vy-overview-filter-option.active {
+  background: linear-gradient(100deg, #0aaef7, #7048ec) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 6px 16px rgba(54, 116, 229, .18) !important;
+}
+
+:root:not(.dark) .vy-overview-custom-range {
+  display: grid;
+  gap: 9px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid #e0ebf5;
+}
+
+:root:not(.dark) .vy-overview-custom-range label {
+  display: block;
+  margin-bottom: 4px;
+  color: #6c87a4;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+:root:not(.dark) .vy-overview-current-range {
+  margin-top: 9px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #f3f8fd !important;
+  color: #65809d !important;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Dashboard overview trigger. */
+:root:not(.dark) .vy-ref-overview-filter {
+  background: #fff !important;
+  color: #315a86 !important;
+  border-color: #c9def1 !important;
+  box-shadow: 0 3px 10px rgba(38,103,160,.05) !important;
+}
+
+/* Invoice / reports / inventory / banking / ledger / settings / POS custom surfaces. */
+:root:not(.dark) .vy-ref-invoice,
+:root:not(.dark) .vy-ref-inventory,
+:root:not(.dark) .vy-ref-ledger,
+:root:not(.dark) .vy-menu-page,
+:root:not(.dark) .vy-ai-page,
+:root:not(.dark) .vy-ai-shell,
+:root:not(.dark) .vy-page-reports,
+:root:not(.dark) .vy-page-banking,
+:root:not(.dark) .vy-page-inventory,
+:root:not(.dark) .vy-page-settings,
+:root:not(.dark) .vy-page-pos,
+:root:not(.dark) .vy-page-cash,
+:root:not(.dark) .vy-page-sales-history {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ref-invoice-header,
+:root:not(.dark) .vy-ref-invoice-row,
+:root:not(.dark) .vy-ref-stat-card,
+:root:not(.dark) .vy-ref-search,
+:root:not(.dark) .vy-ref-filter-btn,
+:root:not(.dark) .vy-ref-icon-btn {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #cfe2f4 !important;
+  box-shadow: 0 5px 18px rgba(47,106,161,.06) !important;
+}
+
+/* AI Commands page light conversion. */
+:root:not(.dark) .vy-ai-header,
+:root:not(.dark) .vy-ai-chat,
+:root:not(.dark) .vy-ai-composer-wrap,
+:root:not(.dark) .vy-ai-teach-modal {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #cfe2f4 !important;
+  box-shadow: 0 8px 28px rgba(43,106,160,.07) !important;
+}
+
+:root:not(.dark) .vy-ai-header h1,
+:root:not(.dark) .vy-ai-chat .text-gray-800,
+:root:not(.dark) .vy-ai-chat .text-gray-900,
+:root:not(.dark) .vy-ai-teach-modal .text-gray-900,
+:root:not(.dark) .vy-ai-teach-modal .text-gray-700 {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ai-header .bg-white,
+:root:not(.dark) .vy-ai-header .bg-gray-100,
+:root:not(.dark) .vy-ai-chat .bg-white,
+:root:not(.dark) .vy-ai-chat .bg-gray-50,
+:root:not(.dark) .vy-ai-composer .bg-white,
+:root:not(.dark) .vy-ai-teach-modal .bg-gray-50 {
+  background: #f5f9fd !important;
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ai-input,
+:root:not(.dark) .vy-ai-teach-modal input,
+:root:not(.dark) .vy-ai-teach-modal textarea {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #c9def1 !important;
+}
+
+/* Menu light surfaces. */
+:root:not(.dark) .vy-menu-page { color:#17345d !important; }
+:root:not(.dark) .vy-menu-back,
+:root:not(.dark) .vy-menu-profile,
+:root:not(.dark) .vy-menu-list,
+:root:not(.dark) .vy-menu-preferences {
+  background: linear-gradient(145deg,#ffffff,#f3f9ff) !important;
+  color:#17345d !important;
+  border-color:#cfe2f4 !important;
+  box-shadow:0 8px 24px rgba(43,106,160,.07) !important;
+}
+:root:not(.dark) .vy-menu-row,
+:root:not(.dark) .vy-menu-setting-row { color:#17345d !important; }
+:root:not(.dark) .vy-menu-row small,
+:root:not(.dark) .vy-menu-setting-row small,
+:root:not(.dark) .vy-menu-profile span { color:#6a88a9 !important; }
+:root:not(.dark) .vy-menu-setting-row + .vy-menu-setting-row { border-top-color:#dce9f4 !important; }
+:root:not(.dark) .vy-menu-value { background:#fff !important; color:#3d6b96 !important; border-color:#cfe2f4 !important; }
+:root:not(.dark) .vy-menu-setting-icon { background:#edf6ff !important; color:#2878c7 !important; border-color:#cfe2f4 !important; }
+:root:not(.dark) .vy-menu-footer-note { color:#7691ad !important; }
+
+/* Keep printable invoice paper untouched. */
+:root:not(.dark) .vy-reference-page .invoice-paper,
+:root:not(.dark) .vy-reference-page [class*="bg-white"][class*="text-slate-900"] {
+  background:#fff !important;
+  color:#0f172a !important;
+}
+
+/* Light-mode bottom navigation and mobile entry bars. */
+:root:not(.dark) .vyaparos-app nav[aria-hidden="false"],
+:root:not(.dark) .vyaparos-app .mobile-entry-footer,
+:root:not(.dark) .vyaparos-app .mobile-entry-inline-footer {
+  background: rgba(255,255,255,.97) !important;
+  color:#315a86 !important;
+  border-color:#d5e6f5 !important;
+  box-shadow:0 -8px 28px rgba(42,100,158,.10) !important;
+}
+
+:root:not(.dark) .vyaparos-app nav[aria-hidden="false"] a { color:#55739a !important; }
+:root:not(.dark) .vyaparos-app nav[aria-hidden="false"] a.text-primary { color:#087dff !important; }
+
+/* Mobile: the overview trigger remains a single compact dropdown control. */
+@media (max-width: 767px) {
+  :root:not(.dark) .vy-ref-overview-filter {
+    min-width: 118px;
+    max-width: 145px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  :root:not(.dark) .vy-overview-filter-popover {
+    width: min(250px, calc(100vw - 24px)) !important;
+  }
+}
+
+
+/* =========================================================
+   VYAPAROS LIGHT MODE POLISH — FINAL UI CONSISTENCY PASS
+   ========================================================= */
+:root:not(.dark) body {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%) !important;
+  color: #17345d;
+}
+
+:root:not(.dark) .vyaparos-app,
+:root:not(.dark) .vy-ref-shell {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%) !important;
+}
+
+/* Dashboard greeting must sit directly on the page surface — no white patch/card. */
+:root:not(.dark) .vy-ref-dashboard-hero,
+:root:not(.dark) .vy-ref-greeting-copy {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Keep the dashboard greeting area visually continuous with the light page background. */
+:root:not(.dark) .vy-ref-dashboard {
+  background: transparent !important;
+}
+
+/* Convert legacy dark utility surfaces to the same light-mode language. */
+:root:not(.dark) .vyaparos-app [class*="bg-gray-950"],
+:root:not(.dark) .vyaparos-app [class*="bg-gray-900"],
+:root:not(.dark) .vyaparos-app [class*="bg-slate-950"],
+:root:not(.dark) .vyaparos-app [class*="bg-slate-900"],
+:root:not(.dark) .vyaparos-app [class*="bg-slate-800"],
+:root:not(.dark) .vyaparos-app [class*="bg-slate-700"],
+:root:not(.dark) .vyaparos-app [class*="bg-black"] {
+  background: #ffffff !important;
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vyaparos-app [class*="text-white"],
+:root:not(.dark) .vyaparos-app [class*="text-slate-100"],
+:root:not(.dark) .vyaparos-app [class*="text-slate-200"],
+:root:not(.dark) .vyaparos-app [class*="text-gray-100"],
+:root:not(.dark) .vyaparos-app [class*="text-gray-200"] {
+  color: #17345d !important;
+}
+
+/* Pop-up destructive actions use the same VyaparOS primary gradient instead of red. */
+:root:not(.dark) .vyaparos-app [role="dialog"] .bg-destructive,
+:root:not(.dark) .vyaparos-app [role="alertdialog"] .bg-destructive,
+:root:not(.dark) .vyaparos-app [data-radix-alert-dialog-content] .bg-destructive,
+:root:not(.dark) .vyaparos-app .alert-dialog-action.bg-destructive {
+  background: linear-gradient(100deg, #08aaf8, #7344ee) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 7px 18px rgba(63, 105, 225, .22) !important;
+}
+
+:root:not(.dark) .vyaparos-app [role="dialog"] .bg-destructive:hover,
+:root:not(.dark) .vyaparos-app [role="alertdialog"] .bg-destructive:hover,
+:root:not(.dark) .vyaparos-app [data-radix-alert-dialog-content] .bg-destructive:hover {
+  filter: brightness(1.04);
+}
+
+/* Invoice list follows the same white/ice-blue geometry as Bank, Transactions and Ledger. */
+:root:not(.dark) .vy-ref-invoice {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%) !important;
+}
+
+:root:not(.dark) .vy-ref-invoice-header {
+  background: rgba(248, 251, 255, .96) !important;
+  border-bottom-color: #d5e6f5 !important;
+}
+
+:root:not(.dark) .vy-ref-invoice-list {
+  background: transparent !important;
+}
+
+/* Invoice actions use the same primary app gradient. */
+.vy-ref-invoice .vy-ref-sale-btn,
+.vy-ref-invoice .vy-ref-gradient-btn {
+  background: linear-gradient(100deg, #08aaf8, #7344ee 58%, #d029ff) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 7px 18px rgba(63, 105, 225, .20) !important;
+}
+
+:root:not(.dark) .vy-ref-invoice .vy-ref-title-row,
+:root:not(.dark) .vy-ref-invoice .vy-ref-search-row,
+:root:not(.dark) .vy-ref-invoice .vy-ref-tabs,
+:root:not(.dark) .vy-ref-invoice .vy-ref-invoice-items {
+  background: transparent !important;
+}
+
+/* Consistent light surface for invoice rows and controls. */
+:root:not(.dark) .vy-ref-invoice .vy-ref-invoice-row,
+:root:not(.dark) .vy-ref-invoice .vy-ref-search,
+:root:not(.dark) .vy-ref-invoice .vy-ref-filter-btn,
+:root:not(.dark) .vy-ref-invoice .vy-ref-stat-card,
+:root:not(.dark) .vy-ref-invoice .vy-ref-tabs button {
+  background: #ffffff !important;
+}
+
+/* Any hard-coded red primary button in invoice entry screens becomes the app primary color. */
+.vy-page-invoice button.bg-\[\#ef1738\],
+.vy-page-invoice .bg-\[\#ef1738\] {
+  background: linear-gradient(100deg, #08aaf8, #7344ee) !important;
+  color: #fff !important;
+}
+.vy-page-invoice button.bg-\[\#ef1738\]:hover,
+.vy-page-invoice .bg-\[\#ef1738\]:hover {
+  background: linear-gradient(100deg, #079ee8, #673bdc) !important;
+}
+
+/* Light-mode dialogs/popovers should never inherit a dark patch from legacy utility classes. */
+:root:not(.dark) .vyaparos-app [data-radix-popper-content-wrapper] > div,
+:root:not(.dark) .vyaparos-app [data-radix-popover-content],
+:root:not(.dark) .vyaparos-app [role="dialog"],
+:root:not(.dark) .vyaparos-app [role="alertdialog"] {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #cfe2f4 !important;
+}
+
+/* Latest mobile UI polish: customer picker stays above the Add Items card. */
+@media (max-width: 1023px) {
+  .vy-page-invoice.add-items-sale-screen { position: relative; min-height: 100dvh; }
+  .vy-page-invoice.add-items-sale-screen > main { padding-bottom: 5.5rem !important; }
+  .vy-page-invoice.add-items-sale-screen > main > section:first-child { position: relative; z-index: 20; }
+  .vy-page-invoice.add-items-sale-screen > main > section:first-child [class*="absolute"] { z-index: 200 !important; }
+  .vy-page-invoice.add-items-sale-screen > main > section:nth-child(2),
+  .vy-page-invoice.add-items-sale-screen > main > section:nth-child(3) { position: relative; z-index: 1; }
+  .vy-page-invoice.add-items-sale-screen > div.fixed.inset-x-0.bottom-0 { bottom: 0 !important; }
+}
+
+
+/* Global UI polish: remove decorative shadows everywhere except Floating Popup/FAB controls. */
+.vyaparos-app *,
+.vyaparos-app *::before,
+.vyaparos-app *::after {
+  box-shadow: none !important;
+}
+
+/* Non-FAB buttons that previously used shadows now use the app's light blue → violet treatment. */
+.vyaparos-app button.shadow-sm:not(.vy-mobile-fab),
+.vyaparos-app button.shadow-md:not(.vy-mobile-fab),
+.vyaparos-app button.shadow-lg:not(.vy-mobile-fab),
+.vyaparos-app button.shadow-xl:not(.vy-mobile-fab),
+.vyaparos-app button.shadow-2xl:not(.vy-mobile-fab),
+.vyaparos-app button.shadow-inner:not(.vy-mobile-fab) {
+  background: linear-gradient(100deg, #7dd3fc 0%, #60a5fa 48%, #a78bfa 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* Add Items (Optional) — light blue → violet, no shadow. */
+.vy-page-invoice.add-items-sale-screen button.border-dashed {
+  background: linear-gradient(100deg, #7dd3fc 0%, #60a5fa 48%, #a78bfa 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* Restore the only intentionally elevated controls: Floating Popup/FAB buttons. */
+.vyaparos-app .vy-mobile-fab {
+  box-shadow: 0 14px 32px rgba(59, 130, 246, .28) !important;
+}
+
+
+/* Final Add Items screen cleanup: absolutely no shadows on this screen, including
+   cards, search dropdown, header, fixed actions and pseudo-elements. */
+.vy-page-invoice.add-items-sale-screen,
+.vy-page-invoice.add-items-sale-screen *,
+.vy-page-invoice.add-items-sale-screen *::before,
+.vy-page-invoice.add-items-sale-screen *::after {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* The edit-item variant belongs to the same Add Items flow. */
+.vy-page-invoice.add-items-sale-screen ~ *,
+.vy-page-invoice.add-items-sale-screen + * {
+  box-shadow: none !important;
+}
+
+/* Transaction Details / Party Details segmented controls: no shadow in either state. */
+.vyaparos-app .vy-transaction-section-toggle,
+.vyaparos-app button[aria-label="Transaction Details"],
+.vyaparos-app button[aria-label="Party Details"] {
+  box-shadow: none !important;
+}
+
+/* Floating Popup/FAB buttons: subtle animated light border, while retaining the
+   intentional FAB elevation. */
+@keyframes vy-fab-border-light {
+  0%, 100% {
+    border-color: rgba(186, 230, 253, .72) !important;
+  }
+  50% {
+    border-color: rgba(196, 181, 253, 1) !important;
+  }
+}
+
+.vyaparos-app .vy-mobile-fab {
+  border-width: 1.5px !important;
+  border-style: solid !important;
+  animation: vy-fab-border-light 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vyaparos-app .vy-mobile-fab {
+    animation: none !important;
+  }
+}
+
+
+/* Mobile-only shadow cleanup for Add New Party and Cash screens. */
+@media (max-width: 1023px) {
+  .vyaparos-app .vy-page-cash,
+  .vyaparos-app .vy-page-cash *,
+  .vyaparos-app .vy-page-cash *::before,
+  .vyaparos-app .vy-page-cash *::after,
+  .vyaparos-app .vy-page-add-party,
+  .vyaparos-app .vy-page-add-party *,
+  .vyaparos-app .vy-page-add-party *::before,
+  .vyaparos-app .vy-page-add-party *::after {
+    box-shadow: none !important;
+  }
+
+  /* Keep only the intentional Floating Popup/FAB elevation. */
+  .vyaparos-app .vy-page-cash .vy-mobile-fab,
+  .vyaparos-app .vy-page-add-party .vy-mobile-fab {
+    box-shadow: 0 14px 32px rgba(59, 130, 246, .28) !important;
+  }
+}
+
+/* Mobile Add Sale: keep cards flat with no decorative shadows. */
+@media (max-width: 1023px) {
+  .vyaparos-app .vy-page-invoice section,
+  .vyaparos-app .vy-page-invoice section *,
+  .vyaparos-app .vy-page-invoice section *::before,
+  .vyaparos-app .vy-page-invoice section *::after {
+    box-shadow: none !important;
+  }
+}
+
+/* Mobile Add Item / Add Item Unit: app-consistent color treatment only; layout and logic remain unchanged. */
+@media (max-width: 1023px) {
+  .vyaparos-app .vy-page-inventory input:focus {
+    border-color: rgb(96 165 250 / .9) !important;
+    --tw-ring-color: rgb(139 92 246 / .18) !important;
+  }
+}
+
+/* Final mobile button polish: Add Item / Add Item Unit actions match the app gradient; requested buttons stay shadow-free. */
+@media (max-width: 1023px) {
+  .vyaparos-app .mobile-entry-footer > .mobile-entry-action,
+  .vyaparos-app .mobile-entry-inline-footer > button {
+    box-shadow: none !important;
+  }
+
+  .vyaparos-app .mobile-entry-footer > .mobile-entry-action:first-child,
+  .vyaparos-app .mobile-entry-inline-footer > button:first-child {
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-right: 1px solid rgba(96, 165, 250, .20) !important;
+  }
+
+  .vyaparos-app .mobile-entry-footer > .mobile-entry-action:last-child,
+  .vyaparos-app .mobile-entry-inline-footer > button:last-child {
+    background-image: linear-gradient(100deg, #7dd3fc 0%, #60a5fa 48%, #a78bfa 100%) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+  }
+
+  .vyaparos-app button[aria-label] {
+    box-shadow: none !important;
+  }
+}
+
+/* Add Sale: Add Items (Optional) must remain completely shadow-free. */
+.vyaparos-app button.shadow-none,
+.vyaparos-app .shadow-none {
+  box-shadow: none !important;
+}
+
+
+/* Bank forms: app-consistent Sky Blue → Blue → Violet entry UI. Logic/layout stay unchanged. */
+.vyaparos-app .bank-entry-dialog {
+  border-color: rgba(96, 165, 250, .28) !important;
+  background: hsl(var(--background)) !important;
+}
+
+.vyaparos-app .bank-entry-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 52%, #8b5cf6 100%);
+  border: 1px solid rgba(186, 230, 253, .7);
+}
+
+.vyaparos-app .bank-entry-form label {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  font-size: .78rem;
+}
+
+.vyaparos-app .bank-entry-form input,
+.vyaparos-app .bank-entry-form [role="combobox"] {
+  border-color: rgba(96, 165, 250, .34) !important;
+  background: color-mix(in srgb, hsl(var(--background)) 94%, #e0f2fe) !important;
+  border-radius: .75rem !important;
+}
+
+.vyaparos-app .bank-entry-form input:focus,
+.vyaparos-app .bank-entry-form [role="combobox"]:focus-visible {
+  border-color: rgba(59, 130, 246, .78) !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, .12) !important;
+}
+
+.vyaparos-app .bank-entry-form .grid > div {
+  min-width: 0;
+}
+
+.vyaparos-app .bank-entry-cancel {
+  border-color: rgba(96, 165, 250, .28) !important;
+  background: hsl(var(--background)) !important;
+}
+
+.vyaparos-app .bank-entry-save {
+  background-image: linear-gradient(100deg, #7dd3fc 0%, #60a5fa 48%, #a78bfa 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+@media (max-width: 1023px) {
+  .vyaparos-app .bank-entry-dialog {
+    padding: 16px 16px 88px !important;
+  }
+
+  .vyaparos-app .bank-entry-header {
+    padding: 2px 0 8px;
+    border-bottom: 1px solid rgba(96, 165, 250, .16);
+  }
+
+  .vyaparos-app .bank-entry-footer > button.bank-entry-cancel {
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-right: 1px solid rgba(96, 165, 250, .20) !important;
+  }
+
+  .vyaparos-app .bank-entry-footer > button.bank-entry-save {
+    background-image: linear-gradient(100deg, #7dd3fc 0%, #60a5fa 48%, #a78bfa 100%) !important;
+    color: #fff !important;
+  }
+}
+
+/* Bank Add Account / Add Sub-Savings — final VyaparOS mobile entry styling. */
+.vyaparos-app .bank-entry-dialog {
+  border: 1px solid rgba(96, 165, 250, .24) !important;
+  background: linear-gradient(180deg, rgba(239, 246, 255, .98) 0%, hsl(var(--background)) 28%) !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app .bank-entry-header {
+  position: relative;
+  margin: -16px -16px 18px !important;
+  padding: 18px 18px 16px !important;
+  background: linear-gradient(100deg, rgba(224, 242, 254, .82), rgba(239, 246, 255, .62), rgba(237, 233, 254, .72)) !important;
+  border-bottom: 1px solid rgba(96, 165, 250, .20) !important;
+}
+
+.vyaparos-app .bank-entry-header .text-muted-foreground {
+  color: rgba(30, 64, 175, .70) !important;
+}
+
+.vyaparos-app .bank-entry-form {
+  padding-bottom: 8px;
+}
+
+.vyaparos-app .bank-entry-form input,
+.vyaparos-app .bank-entry-form [role="combobox"] {
+  min-height: 46px !important;
+  border: 1px solid rgba(96, 165, 250, .34) !important;
+  background: hsl(var(--background)) !important;
+  border-radius: 13px !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app .bank-entry-form input:focus,
+.vyaparos-app .bank-entry-form [role="combobox"]:focus-visible {
+  border-color: rgba(59, 130, 246, .80) !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, .10) !important;
+}
+
+.vyaparos-app .bank-entry-form label {
+  color: #172554 !important;
+  font-size: .78rem !important;
+  font-weight: 700 !important;
+}
+
+.vyaparos-app .bank-entry-footer {
+  box-shadow: none !important;
+  background: hsl(var(--background)) !important;
+  border-top: 1px solid rgba(96, 165, 250, .18) !important;
+}
+
+.vyaparos-app .bank-entry-footer > button.bank-entry-cancel {
+  background: hsl(var(--background)) !important;
+  color: #1e3a8a !important;
+  border-right: 1px solid rgba(96, 165, 250, .18) !important;
+}
+
+.vyaparos-app .bank-entry-footer > button.bank-entry-save {
+  background: linear-gradient(100deg, #7dd3fc 0%, #60a5fa 48%, #a78bfa 100%) !important;
+  color: #fff !important;
+  border-left: 0 !important;
+}
+
+.vyaparos-app .bank-entry-footer > button:hover {
+  filter: brightness(1.02);
+}
+
+.vyaparos-app .bank-entry-dialog [data-radix-select-content] {
+  border-color: rgba(96, 165, 250, .28) !important;
+  box-shadow: 0 12px 30px rgba(30, 64, 175, .10) !important;
+}
+
+.vyaparos-app .bank-entry-dialog [data-radix-select-item][data-highlighted] {
+  background: rgba(224, 242, 254, .90) !important;
+  color: #1d4ed8 !important;
+}
+
+.vyaparos-app .bank-entry-dialog [data-radix-select-item][data-value="__add_more__"] {
+  margin-top: 4px;
+  border-top: 1px solid rgba(96, 165, 250, .18);
+  color: #2563eb !important;
+}
+
+@media (max-width: 1023px) {
+  .vyaparos-app .bank-entry-dialog {
+    padding: 0 16px 76px !important;
+    overflow-y: auto !important;
+    background: linear-gradient(180deg, #f5f9ff 0%, hsl(var(--background)) 34%) !important;
+  }
+
+  .vyaparos-app .bank-entry-header {
+    margin: 0 -16px 18px !important;
+    padding: 16px 18px 15px !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .vyaparos-app .bank-entry-form {
+    gap: 0;
+  }
+
+  .vyaparos-app .bank-entry-form > div {
+    border: 1px solid rgba(96, 165, 250, .12);
+    border-radius: 16px;
+    padding: 11px;
+    background: rgba(255, 255, 255, .70);
+  }
+
+  .vyaparos-app .bank-entry-form > .grid {
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+
+  .vyaparos-app .bank-entry-footer {
+    position: fixed !important;
+    z-index: 90 !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .vyaparos-app .bank-entry-dialog {
+    background: linear-gradient(180deg, rgba(8, 29, 53, .98) 0%, hsl(var(--background)) 30%) !important;
+  }
+  .vyaparos-app .bank-entry-header {
+    background: linear-gradient(100deg, rgba(14, 48, 79, .90), rgba(17, 45, 78, .74), rgba(55, 36, 91, .72)) !important;
+  }
+  .vyaparos-app .bank-entry-form label { color: #dbeafe !important; }
+  .vyaparos-app .bank-entry-form > div { background: rgba(8, 29, 53, .56) !important; }
+}
+
+/* Global no-shadow pass: remove every decorative/elevation shadow across the app. */
+.vyaparos-app,
+.vyaparos-app *,
+.vyaparos-app *::before,
+.vyaparos-app *::after {
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Portaled dropdowns/dialogs rendered outside the app root also stay shadow-free. */
+[data-radix-popper-content-wrapper] [data-radix-select-content],
+[data-radix-popper-content-wrapper] [data-radix-menu-content],
+[data-radix-popper-content-wrapper] [data-radix-dropdown-menu-content],
+[data-radix-popper-content-wrapper] [data-radix-popover-content],
+[data-radix-popper-content-wrapper] [data-radix-tooltip-content],
+[role="dialog"],
+[role="menu"] {
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Shadowed action buttons: replace the old elevated look with the app's light-blue treatment. */
+.vyaparos-app button[class*="shadow-"]:not(.vy-mobile-fab),
+.vyaparos-app a[class*="shadow-"] {
+  background: #e0f2fe !important;
+  color: #1d4ed8 !important;
+  border-color: #bae6fd !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.vyaparos-app button[class*="shadow-"]:not(.vy-mobile-fab):hover,
+.vyaparos-app a[class*="shadow-"]:hover {
+  background: #bae6fd !important;
+  color: #1e40af !important;
+}
+
+/* Settings image-upload actions use the same light-blue app button treatment. */
+.vyaparos-app .settings-upload-action {
+  background: #e0f2fe !important;
+  color: #1d4ed8 !important;
+  border-color: #bae6fd !important;
+  box-shadow: none !important;
+}
+.vyaparos-app .settings-upload-action:hover {
+  background: #bae6fd !important;
+  color: #1e40af !important;
+}
+
+/* Invoice list controls: functional filters + full-size mobile search field. */
+.vy-ref-invoice .vy-invoice-search-input {
+  min-height: 46px !important;
+  height: 46px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: .01em;
+}
+.vy-ref-invoice .vy-ref-search {
+  min-height: 54px !important;
+  height: 54px !important;
+  width: 100% !important;
+}
+.vy-ref-invoice .vy-ref-tabs button {
+  cursor: pointer !important;
+}
+
+/* Preview actions stay attached to the mobile bottom edge and use the app light-blue style. */
+.vy-invoice-preview-actions .vy-preview-action {
+  min-height: 48px !important;
+  height: 48px !important;
+  background: #e0f2fe !important;
+  color: #1d4ed8 !important;
+  border-color: #bae6fd !important;
+  box-shadow: none !important;
+  font-weight: 700 !important;
+}
+.vy-invoice-preview-actions .vy-preview-action:hover {
+  background: #bae6fd !important;
+  color: #1e40af !important;
+}
+
+/* Settings image/security actions that still used the component's elevated styling. */
+.vyaparos-app .settings-security-action,
+.vyaparos-app .settings-upload-action {
+  background: #e0f2fe !important;
+  color: #1d4ed8 !important;
+  border-color: #bae6fd !important;
+  box-shadow: none !important;
+}
+.vyaparos-app .settings-security-action:hover,
+.vyaparos-app .settings-upload-action:hover {
+  background: #bae6fd !important;
+  color: #1e40af !important;
+}
+
+/* Add Sale payment mode: restore the dark-blue → violet active state. */
+.vyaparos-app .vy-payment-mode-btn.is-active {
+  background: linear-gradient(100deg, #0b5bd3 0%, #2458d9 48%, #6d3fe8 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 767px) {
+  .vy-ref-invoice .vy-ref-search-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: stretch !important;
+    gap: 7px !important;
+  }
+  .vy-ref-invoice .vy-ref-filter-btn {
+    min-height: 54px !important;
+    height: 54px !important;
+  }
+  .vy-ref-invoice .vy-ref-filter-btn select {
+    max-width: 92px !important;
+    font-size: 12px !important;
+  }
+  .vy-invoice-preview-actions {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  .vy-invoice-preview-actions > div {
+    gap: 6px !important;
+  }
+  .vy-invoice-preview-actions .vy-preview-action {
+    min-height: 50px !important;
+    height: 50px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Invoice Preview: keep the five action buttons flush with the mobile viewport bottom. */
+@media (max-width: 767px) {
+  .vyaparos-app .vy-invoice-preview-actions {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    z-index: 9999 !important;
+    padding-top: 6px !important;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .vyaparos-app .vy-invoice-preview-actions > div {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  /* Leave enough scroll room so the fixed bar never covers the invoice content. */
+  .vyaparos-app .vy-page-invoice:has(.vy-invoice-preview-actions) main {
+    padding-bottom: 92px !important;
+  }
+}
+
+/* Invoice Preview: compact 3 x 2 mobile action grid. */
+@media (max-width: 767px) {
+  .vyaparos-app .vy-invoice-preview-actions {
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom)) !important;
+  }
+  .vyaparos-app .vy-invoice-preview-actions > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+  .vyaparos-app .vy-invoice-preview-actions .vy-preview-action {
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 4px 3px !important;
+    gap: 3px !important;
+    border-radius: 8px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+  }
+  .vyaparos-app .vy-invoice-preview-actions .vy-preview-action svg {
+    width: 13px !important;
+    height: 13px !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+/* Invoice Preview actions: portal to body so mobile bottom positioning is always viewport-relative. */
+.vy-invoice-preview-actions {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 99999 !important;
+  box-sizing: border-box !important;
+}
+.vy-invoice-preview-actions > div {
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+@media (max-width: 767px) {
+  .vy-invoice-preview-actions {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    padding-top: 6px !important;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important;
+  }
+  .vy-invoice-preview-actions > div {
+    max-width: none !important;
+    gap: 6px !important;
+  }
+  .vy-invoice-preview-actions .vy-preview-action {
+    min-height: 50px !important;
+    height: 50px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: 12px !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Dashboard Sale + Transaction FABs: match the shared MobileFab exactly and keep them close together. */
+@media (max-width: 1023px) {
+  .vyaparos-app .vy-dashboard-fab-actions {
+    gap: 0.625rem !important;
+    width: max-content !important;
+  }
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab {
+    min-height: 3.5rem !important;
+    height: 3.5rem !important;
+    border-radius: 9999px !important;
+    padding: 0.75rem 1.5rem !important;
+    gap: 0.625rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+  }
+}
+
+/* Dashboard FABs: exact saturated blue → violet gradient from the provided reference images. */
+@media (max-width: 1023px) {
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab {
+    background: linear-gradient(100deg, #0ea4e8 0%, #2563eb 55%, #7c3aed 100%) !important;
+    color: #fff !important;
+    border-color: rgba(186, 230, 253, .72) !important;
+  }
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab:hover {
+    background: linear-gradient(100deg, #0ea4e8 0%, #2563eb 55%, #7c3aed 100%) !important;
+  }
+}
+
+/* Dashboard FAB + bottom voice control: enforce reference white text/icons and true centered pair. */
+@media (max-width: 1023px) {
+  .vyaparos-app .vy-dashboard-fab-actions {
+    left: 50% !important;
+    right: auto !important;
+    width: max-content !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transform: translateX(-50%) !important;
+  }
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    text-align: center !important;
+  }
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab,
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab span,
+  .vyaparos-app .vy-dashboard-fab-actions .vy-mobile-fab svg {
+    color: #fff !important;
+    fill: none !important;
+    stroke: #fff !important;
+  }
+
+  .vyaparos-app nav button[aria-label="AI Voice Assistant"] {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+  .vyaparos-app nav button[aria-label="AI Voice Assistant"] svg {
+    color: #fff !important;
+    stroke: #fff !important;
+  }
+}
+
+
+/* POS saved-bill actions: no shadow, use a visible app border instead. */
+.vyaparos-app .pos-edit-action,
+.vyaparos-app .pos-delete-action {
+  box-shadow: none !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+.vyaparos-app .pos-edit-action {
+  border-color: #7dd3fc !important;
+  background: #f0f9ff !important;
+  color: #1d4ed8 !important;
+}
+.vyaparos-app .pos-edit-action:hover {
+  border-color: #38bdf8 !important;
+  background: #e0f2fe !important;
+}
+.vyaparos-app .pos-delete-action {
+  border-color: #f9a8d4 !important;
+  background: #fff1f2 !important;
+  color: #be123c !important;
+}
+.vyaparos-app .pos-delete-action:hover {
+  border-color: #fb7185 !important;
+  background: #ffe4e6 !important;
+}
+
+/* Bank mobile: the requested total bank balance card only. */
+.vyaparos-app .vy-total-bank-balance-card {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* =========================================================
+   AI ASSISTANT — NEW LIGHT MODE UI
+   Clean white + soft sky/indigo gradients, no dark patches.
+   Logic/layout unchanged.
+   ========================================================= */
+:root:not(.dark) .vy-ai-page {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(56,189,248,.16), transparent 26%),
+    radial-gradient(circle at 92% 8%, rgba(139,92,246,.13), transparent 28%),
+    linear-gradient(180deg, #f8fcff 0%, #eef6ff 52%, #f8fbff 100%) !important;
+  color: #102a56 !important;
+}
+
+:root:not(.dark) .vy-ai-shell {
+  background: transparent !important;
+}
+
+:root:not(.dark) .vy-ai-header {
+  background: rgba(255,255,255,.94) !important;
+  border-bottom: 1px solid #d7e8f8 !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  box-shadow: none !important;
+}
+
+:root:not(.dark) .vy-ai-header h1 {
+  color: #102a56 !important;
+  letter-spacing: -.02em;
+}
+
+:root:not(.dark) .vy-ai-header .text-gray-500 {
+  color: #5d789a !important;
+}
+
+:root:not(.dark) .vy-ai-header .bg-white,
+:root:not(.dark) .vy-ai-header .bg-gray-100,
+:root:not(.dark) .vy-ai-header .bg-indigo-50 {
+  background: #f1f8ff !important;
+  border-color: #cfe4f7 !important;
+}
+
+:root:not(.dark) .vy-ai-header .text-gray-600 {
+  color: #244b79 !important;
+}
+
+:root:not(.dark) .vy-ai-header .text-indigo-700 {
+  color: #4f46e5 !important;
+}
+
+:root:not(.dark) .vy-ai-header .border-gray-200,
+:root:not(.dark) .vy-ai-header .border-indigo-200 {
+  border-color: #cfe2f4 !important;
+}
+
+/* Chat canvas */
+:root:not(.dark) .vy-ai-chat {
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(247,251,255,.98)) !important;
+  border: 1px solid #d6e8f7 !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+}
+
+/* Assistant identity row */
+:root:not(.dark) .vy-ai-chat > .mb-5 {
+  margin: -1px -1px 22px !important;
+  padding: 14px 15px !important;
+  border: 1px solid #d9eafb !important;
+  border-radius: 18px !important;
+  background: linear-gradient(100deg, #f0f9ff 0%, #f7f5ff 100%) !important;
+}
+
+:root:not(.dark) .vy-ai-chat > .mb-5 > div:first-child {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb, #8b5cf6) !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+}
+
+:root:not(.dark) .vy-ai-chat > .mb-5 p:first-child {
+  color: #102a56 !important;
+  font-weight: 800 !important;
+}
+
+:root:not(.dark) .vy-ai-chat > .mb-5 .text-gray-500 {
+  color: #6380a2 !important;
+}
+
+/* Bot/user messages */
+:root:not(.dark) .vy-ai-chat .bg-white {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #d6e7f5 !important;
+  box-shadow: none !important;
+}
+
+:root:not(.dark) .vy-ai-chat .bg-blue-600 {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 52%, #7c3aed 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+:root:not(.dark) .vy-ai-chat .text-blue-600 {
+  color: #2563eb !important;
+}
+
+:root:not(.dark) .vy-ai-chat .text-blue-100 {
+  color: #dbeafe !important;
+}
+
+:root:not(.dark) .vy-ai-chat .text-gray-800,
+:root:not(.dark) .vy-ai-chat .text-gray-900 {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ai-chat .text-gray-500 {
+  color: #6883a2 !important;
+}
+
+:root:not(.dark) .vy-ai-chat .text-gray-700 {
+  color: #355b84 !important;
+}
+
+:root:not(.dark) .vy-ai-chat .border-gray-200 {
+  border-color: #d7e8f7 !important;
+}
+
+:root:not(.dark) .vy-ai-chat .bg-gray-50 {
+  background: #f5f9fd !important;
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ai-chat .bg-emerald-600 {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #fff !important;
+}
+
+/* Draft / understood card */
+:root:not(.dark) .vy-ai-chat .border-emerald-200 {
+  border-color: #b9eadb !important;
+  background: linear-gradient(145deg, #ffffff, #f2fffb) !important;
+}
+
+/* Composer */
+:root:not(.dark) .vy-ai-composer-wrap {
+  background: rgba(255,255,255,.94) !important;
+  border-top: 1px solid #d7e8f7 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+
+:root:not(.dark) .vy-ai-composer {
+  background: #ffffff !important;
+  border: 1px solid #bfdcf3 !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+  padding: 5px !important;
+}
+
+:root:not(.dark) .vy-ai-composer .bg-white {
+  background: linear-gradient(135deg, #eef8ff, #f4f0ff) !important;
+  color: #2563eb !important;
+  border: 1px solid #d4e8f8 !important;
+}
+
+:root:not(.dark) .vy-ai-composer .text-gray-600 {
+  color: #2563eb !important;
+}
+
+:root:not(.dark) .vy-ai-composer .bg-blue-600 {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb, #7c3aed) !important;
+  color: #fff !important;
+}
+
+:root:not(.dark) .vy-ai-composer .disabled\:bg-gray-200:disabled {
+  background: #e7eef5 !important;
+  color: #9aaabd !important;
+}
+
+:root:not(.dark) .vy-ai-input {
+  color: #17345d !important;
+  caret-color: #2563eb !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+:root:not(.dark) .vy-ai-input::placeholder {
+  color: #7a91aa !important;
+  opacity: 1 !important;
+}
+
+/* Teach AI modal */
+:root:not(.dark) .vy-ai-teach-modal {
+  background: linear-gradient(145deg, #ffffff 0%, #f5f9ff 100%) !important;
+  color: #17345d !important;
+  border: 1px solid #cfe3f5 !important;
+  box-shadow: none !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal .text-gray-900,
+:root:not(.dark) .vy-ai-teach-modal .text-gray-700 {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal .text-gray-500 {
+  color: #6b85a2 !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal .bg-gray-50 {
+  background: #f4f9fe !important;
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal .bg-blue-50 {
+  background: #eff8ff !important;
+  color: #2563eb !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal .text-blue-700 {
+  color: #2563eb !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal .border-gray-200 {
+  border-color: #cfe2f4 !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal input,
+:root:not(.dark) .vy-ai-teach-modal textarea {
+  background: #ffffff !important;
+  color: #17345d !important;
+  border-color: #c9def1 !important;
+}
+
+:root:not(.dark) .vy-ai-teach-modal input::placeholder,
+:root:not(.dark) .vy-ai-teach-modal textarea::placeholder {
+  color: #8095ad !important;
+}
+
+@media (max-width: 767px) {
+  :root:not(.dark) .vy-ai-chat {
+    border-radius: 20px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  :root:not(.dark) .vy-ai-chat > .mb-5 {
+    border-radius: 16px !important;
+  }
+  :root:not(.dark) .vy-ai-composer-wrap {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+/* Add Transaction — refreshed visual design only. Layout and transaction logic remain unchanged. */
+.transaction-mobile-screen {
+  --txn-blue: #2563eb;
+  --txn-sky: #0ea5e9;
+  --txn-violet: #7c3aed;
+}
+
+@media (max-width: 1023px) {
+  .vyaparos-app .transaction-mobile-screen {
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 22%, #f7faff 100%) !important;
+    color: #0f2557 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex > .sticky {
+    background: rgba(255,255,255,.94) !important;
+    border-bottom: 1px solid rgba(96,165,250,.22) !important;
+    backdrop-filter: blur(16px);
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex > .sticky h2 {
+    color: #102a63 !important;
+    font-weight: 800 !important;
+    letter-spacing: -.01em;
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex > .sticky button {
+    color: #2563eb !important;
+    border: 1px solid rgba(96,165,250,.28) !important;
+    background: #eff6ff !important;
+  }
+
+  /* Transaction type switch — compact, modern segmented control. */
+  .vyaparos-app .transaction-mobile-screen .grid.grid-cols-4.rounded-lg {
+    background: #eef5ff !important;
+    border: 1px solid #dbeafe !important;
+    border-radius: 14px !important;
+    padding: 4px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .grid.grid-cols-4.rounded-lg > button {
+    border-radius: 10px !important;
+    color: #64748b !important;
+    font-weight: 700 !important;
+    transition: .18s ease;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .grid.grid-cols-4.rounded-lg > button.bg-background {
+    background: linear-gradient(100deg, #38bdf8 0%, #2563eb 52%, #7c3aed 100%) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+
+  /* Amount/date inputs. */
+  .vyaparos-app .transaction-mobile-screen input {
+    background: rgba(255,255,255,.96) !important;
+    border-color: #bfdbfe !important;
+    color: #0f2557 !important;
+    font-weight: 600;
+  }
+
+  .vyaparos-app .transaction-mobile-screen input:focus {
+    border-color: #60a5fa !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(96,165,250,.14) !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen #txn-mobile-amount {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 58%, #f5f3ff 100%) !important;
+    border: 1.5px solid #7dd3fc !important;
+    font-size: 21px !important;
+    font-weight: 800 !important;
+    color: #0f2d68 !important;
+  }
+
+  /* Floating labels. */
+  .vyaparos-app .transaction-mobile-screen label.absolute {
+    color: #2563eb !important;
+    font-weight: 700 !important;
+  }
+
+  /* Section separators: clean blue-violet accents instead of heavy bars. */
+  .vyaparos-app .transaction-mobile-screen section {
+    border-top-width: 1px !important;
+    border-bottom-width: 1px !important;
+    border-top-color: rgba(96,165,250,.20) !important;
+    border-bottom-color: rgba(96,165,250,.20) !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen section h3 {
+    color: #122b64 !important;
+    font-weight: 800 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen section .text-primary,
+  .vyaparos-app .transaction-mobile-screen section button.text-primary {
+    color: #2563eb !important;
+    font-weight: 700 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen [role="combobox"] {
+    background: #fff !important;
+    border: 1px solid #bfdbfe !important;
+    color: #17336f !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen [role="combobox"]:focus,
+  .vyaparos-app .transaction-mobile-screen [role="combobox"][data-state="open"] {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 3px rgba(96,165,250,.12) !important;
+  }
+
+  /* Personal / Business buttons. */
+  .vyaparos-app .transaction-mobile-screen button.h-11.rounded-lg.border {
+    border-color: #bfdbfe !important;
+    background: #f8fbff !important;
+    color: #35507f !important;
+    box-shadow: none !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen button.h-11.rounded-lg.border.border-primary {
+    background: linear-gradient(100deg, #e0f2fe 0%, #dbeafe 55%, #ede9fe 100%) !important;
+    border-color: #60a5fa !important;
+    color: #1d4ed8 !important;
+  }
+
+  /* Bottom actions — polished app gradient, same two-button layout. */
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer {
+    background: rgba(255,255,255,.96) !important;
+    border-top: 1px solid rgba(96,165,250,.25) !important;
+    backdrop-filter: blur(18px);
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer > button:first-child {
+    background: #eff6ff !important;
+    color: #2563eb !important;
+    border-right: 1px solid rgba(96,165,250,.22) !important;
+    font-weight: 800 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer > button:last-child {
+    background: linear-gradient(100deg, #38bdf8 0%, #2563eb 50%, #7c3aed 100%) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer > button:active {
+    transform: scale(.985);
+  }
+}
+
+@media (min-width: 1024px) {
+  .vyaparos-app .transaction-mobile-screen {
+    border: 1px solid rgba(96,165,250,.25) !important;
+    background: linear-gradient(145deg, #ffffff 0%, #f7fbff 58%, #faf7ff 100%) !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen [data-slot="dialog-title"],
+  .vyaparos-app .transaction-mobile-screen h2 {
+    color: #102a63 !important;
+    font-weight: 800 !important;
+  }
+}
+
+/* Add Transaction — final visual refresh (UI only; layout and logic preserved). */
+@media (max-width: 1023px) {
+  .vyaparos-app .transaction-mobile-screen {
+    background: #f7fbff !important;
+    color: #102a56 !important;
+    border: 0 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex > .sticky {
+    height: 64px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%) !important;
+    border-bottom: 1px solid #cfe3f7 !important;
+    box-shadow: none !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex > .sticky button {
+    width: 38px !important;
+    height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 12px !important;
+    background: #eff7ff !important;
+    color: #2563eb !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex > .sticky h2 {
+    font-size: 19px !important;
+    font-weight: 800 !important;
+    color: #102a56 !important;
+    letter-spacing: -.02em !important;
+  }
+
+  /* Type switch: stronger, cleaner segmented control. */
+  .vyaparos-app .transaction-mobile-screen form > div:first-child {
+    background: #ffffff !important;
+    border-bottom: 1px solid #d7e8f8 !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > div:first-child > div {
+    background: #edf5ff !important;
+    border: 1px solid #cfe2f7 !important;
+    border-radius: 15px !important;
+    padding: 4px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > div:first-child > div > button {
+    height: 40px !important;
+    border-radius: 11px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: #66809e !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > div:first-child > div > button[class*="bg-background"] {
+    color: #ffffff !important;
+    background: linear-gradient(100deg, #0ea5e9 0%, #2563eb 52%, #7c3aed 100%) !important;
+    border: 1px solid transparent !important;
+  }
+
+  /* Main amount/date row. */
+  .vyaparos-app .transaction-mobile-screen form > div:nth-child(2) {
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+    background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%) !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen #txn-mobile-amount {
+    height: 62px !important;
+    border: 1.5px solid #7dd3fc !important;
+    border-radius: 15px !important;
+    background: linear-gradient(135deg, #effaff 0%, #ffffff 62%, #f5f1ff 100%) !important;
+    color: #102a56 !important;
+    font-size: 23px !important;
+    font-weight: 850 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen #txn-mobile-amount:focus {
+    border-color: #2563eb !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.10) !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > div:nth-child(2) input[type="date"] {
+    height: 62px !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 15px !important;
+    background: #ffffff !important;
+    color: #24466f !important;
+    font-weight: 700 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form label.absolute {
+    background: #ffffff !important;
+    color: #2563eb !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+  }
+
+  /* All form sections: white cards without changing their existing layout. */
+  .vyaparos-app .transaction-mobile-screen form section {
+    margin: 0 !important;
+    border-top: 1px solid #d8e9f8 !important;
+    border-bottom: 1px solid #d8e9f8 !important;
+    background: #ffffff !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form section h3,
+  .vyaparos-app .transaction-mobile-screen form section label,
+  .vyaparos-app .transaction-mobile-screen form > section label {
+    color: #183b6b !important;
+    font-weight: 800 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form section [role="combobox"],
+  .vyaparos-app .transaction-mobile-screen form input:not(#txn-mobile-amount) {
+    border: 1px solid #bfdbfe !important;
+    border-radius: 13px !important;
+    background: #fbfdff !important;
+    color: #183b6b !important;
+    font-weight: 600 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form section [role="combobox"] {
+    height: 50px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form section [role="combobox"]:focus,
+  .vyaparos-app .transaction-mobile-screen form section [role="combobox"][data-state="open"] {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 3px rgba(96,165,250,.10) !important;
+  }
+
+  /* Manage category action. */
+  .vyaparos-app .transaction-mobile-screen form section button.text-primary {
+    padding: 7px 10px !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 10px !important;
+    background: #eff7ff !important;
+    color: #2563eb !important;
+    font-weight: 800 !important;
+  }
+
+  /* Personal / Business segmented choices. */
+  .vyaparos-app .transaction-mobile-screen form button.h-11.rounded-lg.border {
+    border: 1px solid #c7dcf1 !important;
+    border-radius: 13px !important;
+    background: #f8fbff !important;
+    color: #486786 !important;
+    font-weight: 800 !important;
+    box-shadow: none !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form button.h-11.rounded-lg.border.border-primary {
+    border-color: #60a5fa !important;
+    background: linear-gradient(100deg, #e0f2fe 0%, #dbeafe 55%, #ede9fe 100%) !important;
+    color: #1d4ed8 !important;
+  }
+
+  /* Bottom actions remain in the exact same two-button layout, but visually refreshed. */
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer {
+    min-height: 68px !important;
+    background: rgba(255,255,255,.98) !important;
+    border-top: 1px solid #cfe3f7 !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(16px);
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer > button {
+    height: 68px !important;
+    min-height: 68px !important;
+    border-radius: 0 !important;
+    font-size: 14px !important;
+    font-weight: 850 !important;
+    box-shadow: none !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer > button:first-child {
+    background: #eff7ff !important;
+    color: #2563eb !important;
+    border-right: 1px solid #cfe3f7 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer > button:last-child {
+    background: linear-gradient(100deg, #0ea5e9 0%, #2563eb 52%, #7c3aed 100%) !important;
+    color: #ffffff !important;
+    border: 0 !important;
+  }
+}
+
+/* Add Transaction — refreshed mobile UI (visual-only; form structure and logic stay unchanged). */
+@media (max-width: 1023px) {
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-screen,
+  .vyaparos-app .transaction-mobile-screen {
+    background: #f6faff !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen > .flex.min-h-\[100dvh\] {
+    background: linear-gradient(180deg, #f8fbff 0%, #eef7ff 100%) !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .sticky.top-0 {
+    height: 62px !important;
+    background: linear-gradient(100deg, #eff8ff 0%, #f5f3ff 100%) !important;
+    border-bottom: 1px solid #bfdbfe !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .sticky.top-0 h2 {
+    color: #172554 !important;
+    font-weight: 800 !important;
+    letter-spacing: -.02em;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .sticky.top-0 button {
+    color: #2563eb !important;
+    background: #e0f2fe !important;
+    border: 1px solid #bae6fd !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .sticky.top-0 button svg {
+    color: #2563eb !important;
+  }
+
+  /* Transaction type switch */
+  .vyaparos-app .transaction-mobile-screen .border-b-\[6px\].border-sky-100 {
+    background: transparent !important;
+    border-bottom: 1px solid #dbeafe !important;
+    padding: 14px 14px 12px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .border-b-\[6px\].border-sky-100 > div {
+    background: #eaf4ff !important;
+    border: 1px solid #c7e3ff !important;
+    border-radius: 14px !important;
+    padding: 4px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .border-b-\[6px\].border-sky-100 > div button {
+    height: 40px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .border-b-\[6px\].border-sky-100 > div button[class*="bg-background"] {
+    background: linear-gradient(100deg, #38bdf8 0%, #3b82f6 52%, #7c3aed 100%) !important;
+    color: #fff !important;
+    border: 0 !important;
+  }
+
+  /* Amount/date row */
+  .vyaparos-app .transaction-mobile-screen #txn-mobile-amount {
+    height: 64px !important;
+    background: linear-gradient(135deg, #effaff 0%, #eef2ff 100%) !important;
+    border: 2px solid #60a5fa !important;
+    color: #172554 !important;
+    font-size: 23px !important;
+    font-weight: 800 !important;
+    border-radius: 14px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen #txn-mobile-amount + * { min-height: 0; }
+
+  .vyaparos-app .transaction-mobile-screen #txn-mobile-amount ~ * { }
+
+  .vyaparos-app .transaction-mobile-screen input[type="date"] {
+    height: 64px !important;
+    border: 1.5px solid #93c5fd !important;
+    background: #fff !important;
+    border-radius: 14px !important;
+    color: #1e3a8a !important;
+    font-weight: 650 !important;
+  }
+
+  /* Section cards — same layout, new visual treatment */
+  .vyaparos-app .transaction-mobile-screen form > section {
+    margin: 10px 12px !important;
+    border: 1px solid #cfe4ff !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,.96) !important;
+    overflow: hidden !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > section h3 {
+    color: #1e3a8a !important;
+    font-weight: 800 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > section button[type="button"] {
+    color: #2563eb !important;
+    font-weight: 700 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > section .relative input,
+  .vyaparos-app .transaction-mobile-screen form > section input {
+    background: #fff !important;
+    border: 1.5px solid #bfdbfe !important;
+    border-radius: 12px !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen form > section [role="combobox"] {
+    min-height: 50px !important;
+    border: 1.5px solid #93c5fd !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f5faff 100%) !important;
+    border-radius: 12px !important;
+    color: #1e3a8a !important;
+    font-weight: 650 !important;
+  }
+
+  /* Personal / Business selected states */
+  .vyaparos-app .transaction-mobile-screen form > section button[class*="border-primary"] {
+    background: linear-gradient(100deg, #dff6ff 0%, #e8eaff 100%) !important;
+    border: 1.5px solid #60a5fa !important;
+    color: #1d4ed8 !important;
+    font-weight: 800 !important;
+  }
+
+  /* Bottom actions */
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer {
+    gap: 10px !important;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom)) !important;
+    background: rgba(255,255,255,.97) !important;
+    border-top: 1px solid #bfdbfe !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer button {
+    height: 48px !important;
+    border-radius: 13px !important;
+    font-weight: 800 !important;
+    border: 1.5px solid #93c5fd !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer button:first-child {
+    background: #e0f2fe !important;
+    color: #1d4ed8 !important;
+  }
+
+  .vyaparos-app .transaction-mobile-screen .mobile-entry-footer .mobile-entry-save {
+    background: linear-gradient(100deg, #38bdf8 0%, #3b82f6 52%, #7c3aed 100%) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+  }
+}
+
+
+/* Center Home button — reference-style blue/violet orb with a luminous round ring. */
+.vyaparos-app .vy-home-center-button {
+  background: linear-gradient(135deg, #08bdf8 0%, #1688f5 42%, #4f46e5 72%, #8b21f3 100%) !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.14) inset,
+    0 8px 24px rgba(37,99,235,.38) !important;
+  isolation: isolate;
+}
+
+/* Bright cyan → blue → violet illuminated ring, matching the supplied reference. */
+.vyaparos-app .vy-home-center-button::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  padding: 3px;
+  background: conic-gradient(
+    from 210deg,
+    #00d9ff 0deg,
+    #008cff 92deg,
+    #3047ff 170deg,
+    #a52cff 245deg,
+    #ff45d8 305deg,
+    #00d9ff 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 5px rgba(0,210,255,.78)) drop-shadow(0 0 12px rgba(142,45,255,.58));
+  pointer-events: none;
+  animation: vy-home-ring-pulse 2.1s ease-in-out infinite;
+  z-index: -1;
+}
+
+.vyaparos-app .vy-home-center-button::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 9999px;
+  border: 1px solid rgba(196,181,253,.30);
+  box-shadow: 0 0 16px rgba(59,130,246,.20);
+  pointer-events: none;
+  animation: vy-home-ring-breathe 2.1s ease-in-out infinite;
+  z-index: -2;
+}
+
+/* Light mode keeps the same blue/violet center while using the pale outer ring seen in the reference. */
+:root:not(.dark) .vyaparos-app .vy-home-center-button {
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.34) inset,
+    0 8px 20px rgba(59,130,246,.18) !important;
+}
+
+:root:not(.dark) .vyaparos-app .vy-home-center-button::before {
+  inset: -5px;
+  padding: 2px;
+  background: conic-gradient(
+    from 210deg,
+    #dbeafe 0deg,
+    #bfdbfe 110deg,
+    #c4b5fd 230deg,
+    #e0e7ff 315deg,
+    #dbeafe 360deg
+  );
+  filter: drop-shadow(0 0 3px rgba(148,163,184,.28));
+}
+
+:root:not(.dark) .vyaparos-app .vy-home-center-button::after {
+  border-color: rgba(148,163,184,.24);
+  box-shadow: 0 0 14px rgba(148,163,184,.16);
+}
+
+.vyaparos-app .vy-home-center-button > svg {
+  position: relative;
+  z-index: 2;
+  color: #fff !important;
+  filter: drop-shadow(0 1px 2px rgba(15,23,42,.20));
+}
+
+@keyframes vy-home-ring-pulse {
+  0%, 100% { opacity: .78; transform: scale(.99); }
+  50% { opacity: 1; transform: scale(1.025); }
+}
+
+@keyframes vy-home-ring-breathe {
+  0%, 100% { opacity: .30; transform: scale(.99); }
+  50% { opacity: .68; transform: scale(1.035); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vyaparos-app .vy-home-center-button::before,
+  .vyaparos-app .vy-home-center-button::after {
+    animation: none !important;
+  }
+}
+
+/* Invoice requested refinements */
+.vy-ref-tabs button.active { background:linear-gradient(100deg,#7dd3fc 0%,#60a5fa 48%,#a78bfa 100%) !important; color:#fff !important; border-color:#93c5fd !important; box-shadow:none !important; }
+.vyaparos-app .vy-page-invoice .fixed.bottom-0,
+.vyaparos-app .vy-page-invoice .fixed.bottom-0 * { box-shadow:none !important; }
+@media (max-width:1023px){ .vyaparos-app .vy-page-invoice .fixed.bottom-0 { padding-bottom:calc(.5rem + env(safe-area-inset-bottom)) !important; } }
+
+/* Invoice status filters: selected option is always dark, with no shadow. */
+.vy-ref-invoice .vy-ref-tabs button.active,
+:root:not(.dark) .vy-ref-invoice .vy-ref-tabs button.active,
+.vyaparos-app .vy-ref-invoice .vy-ref-tabs button.active {
+  background: linear-gradient(100deg,#7dd3fc 0%,#60a5fa 48%,#a78bfa 100%) !important;
+  color: #ffffff !important;
+  border-color: #93c5fd !important;
+  box-shadow: none !important;
+}
+.vyaparos-app .vy-ref-invoice .vy-ref-tabs button:not(.active) {
+  box-shadow: none !important;
+}
+
+/* Preview Edit/Delete actions must sit flush at the viewport bottom, not above the app nav. */
+.vyaparos-app .vy-page-invoice > div.fixed.inset-x-0.bottom-0 {
+  bottom: 0 !important;
+  padding-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Invoice list compact controls + compact summary cards. */
+.vy-ref-invoice .vy-ref-search {
+  cursor: text !important;
+}
+.vy-ref-invoice .vy-ref-search:focus-within {
+  border-color: #18b8ff !important;
+  box-shadow: 0 0 0 2px rgba(24,184,255,.12);
+}
+.vy-ref-invoice .vy-ref-filter-wrap {
+  position: relative;
+  min-width: 150px;
+}
+.vy-ref-invoice .vy-ref-filter-btn {
+  width: 100%;
+  height: 54px;
+  min-height: 54px;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.vy-ref-invoice .vy-ref-filter-btn.open {
+  border-color: #18b8ff !important;
+  box-shadow: 0 0 0 2px rgba(24,184,255,.12);
+}
+.vy-ref-invoice .vy-ref-filter-menu {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 7px);
+  right: 0;
+  width: 100%;
+  min-width: 150px;
+  padding: 5px;
+  border: 1px solid rgba(0,149,255,.5);
+  border-radius: 13px;
+  background: rgba(3,27,57,.98);
+  box-shadow: 0 14px 30px rgba(0,0,0,.28);
+  backdrop-filter: blur(14px);
+}
+.vy-ref-invoice .vy-ref-filter-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  color: #b9dcf5;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.vy-ref-invoice .vy-ref-filter-menu button:hover,
+.vy-ref-invoice .vy-ref-filter-menu button.active {
+  color: #fff;
+  background: linear-gradient(100deg, rgba(0,191,255,.25), rgba(89,57,255,.28));
+}
+.vy-ref-invoice .vy-ref-filter-check { color: #25d8bb; font-weight: 900; }
+
+.vy-ref-invoice .vy-ref-stat-card {
+  min-height: 92px;
+  padding: 9px 10px;
+  border-radius: 14px;
+}
+.vy-ref-invoice .vy-ref-stat-card > svg,
+.vy-ref-invoice .vy-ref-stat-card > span:first-child {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+.vy-ref-invoice .vy-ref-stat-card > span:not(:first-child) {
+  margin-top: 5px;
+  font-size: 10px;
+}
+.vy-ref-invoice .vy-ref-stat-card b {
+  margin-top: 1px;
+  font-size: 17px;
+}
+.vy-ref-invoice .vy-ref-stat-card em {
+  margin-top: 1px;
+  font-size: 9px;
+}
+.vy-ref-invoice .vy-ref-progress {
+  height: 5px;
+  margin-top: 5px;
+}
+
+:root:not(.dark) .vy-ref-invoice .vy-ref-filter-menu {
+  background: rgba(255,255,255,.99);
+  border-color: #c9def1;
+  box-shadow: 0 14px 30px rgba(46,107,163,.16);
+}
+:root:not(.dark) .vy-ref-invoice .vy-ref-filter-menu button { color: #31597b; }
+:root:not(.dark) .vy-ref-invoice .vy-ref-filter-menu button:hover,
+:root:not(.dark) .vy-ref-invoice .vy-ref-filter-menu button.active { color: #174d7c; background: #eaf6ff; }
+
+@media (max-width: 767px) {
+  .vy-ref-invoice .vy-ref-filter-wrap { min-width: 132px; }
+  .vy-ref-invoice .vy-ref-filter-btn { min-height: 54px !important; height: 54px !important; padding: 0 10px; font-size: 11px; }
+  .vy-ref-invoice .vy-ref-filter-menu { min-width: 132px; }
+  .vy-ref-invoice .vy-ref-stat-card { min-height: 82px; padding: 7px 8px; border-radius: 12px; }
+  .vy-ref-invoice .vy-ref-stat-card > svg,
+  .vy-ref-invoice .vy-ref-stat-card > span:first-child { width: 25px; height: 25px; font-size: 11px; }
+  .vy-ref-invoice .vy-ref-stat-card > span:not(:first-child) { margin-top: 3px; font-size: 9px; }
+  .vy-ref-invoice .vy-ref-stat-card b { font-size: 15px; }
+  .vy-ref-invoice .vy-ref-stat-card em { font-size: 8px; }
+  .vy-ref-invoice .vy-ref-progress { height: 4px; margin-top: 4px; }
+}
+
+
+/* Final invoice filter + preview delete refinements. */
+.vy-ref-invoice .vy-ref-filter-menu {
+  pointer-events: auto;
+}
+.vy-ref-invoice .vy-invoice-preview-actions button[aria-label="Delete invoice"] {
+  background: #dc2626 !important;
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+.vy-ref-invoice .vy-invoice-preview-actions button[aria-label="Delete invoice"] svg {
+  color: #ffffff !important;
+}
+.vy-ref-invoice .vy-invoice-preview-actions button[aria-label="Delete invoice"]:hover {
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+.vy-ref-invoice .vy-invoice-preview-actions button[aria-label="Delete invoice"]:active {
+  background: #991b1b !important;
+  background-color: #991b1b !important;
+}
+
+
+/* Customer / Supplier ledger detail — compact mobile profile */
+.vy-customer-ledger-profile {
+  position: relative;
+}
+.vy-customer-ledger-photo-wrap {
+  overflow: hidden;
+  border: 1px solid rgba(148,163,184,.22);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #e0f2fe, #ede9fe);
+}
+.vy-customer-ledger-photo {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+.vy-customer-ledger-photo-placeholder {
+  min-height: 240px;
+}
+.vy-customer-ledger-identity {
+  padding: 12px 4px 8px;
+  text-align: center;
+}
+.vy-customer-ledger-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.vy-customer-ledger-actions button {
+  box-shadow: none !important;
+}
+.vy-customer-ledger-profile ~ .mb-5.grid.grid-cols-3 > div {
+  box-shadow: none !important;
+}
+.vy-compact-summary-cards > * {
+  min-height: 0 !important;
+  box-shadow: none !important;
+}
+.vy-compact-summary-cards .p-5 {
+  padding: .75rem !important;
+}
+@media (max-width: 767px) {
+  .vy-customer-ledger-photo-wrap {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 20px 20px;
+    border-left: 0;
+    border-right: 0;
+  }
+  .vy-customer-ledger-photo,
+  .vy-customer-ledger-photo-placeholder {
+    height: 25vh;
+    min-height: 155px;
+    max-height: 250px;
+  }
+  .vy-customer-ledger-identity {
+    padding-top: 12px;
+  }
+  .vy-customer-ledger-actions {
+    margin-bottom: 4px;
+  }
+  .vy-customer-ledger-actions button {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+  }
+  .vy-compact-summary-cards {
+    gap: 8px !important;
+  }
+  .vy-compact-summary-cards .p-3 {
+    padding: .625rem !important;
+  }
+}
+@media (min-width: 768px) {
+  .vy-customer-ledger-profile {
+    padding: 18px;
+    border: 1px solid hsl(var(--border) / .6);
+    border-radius: 18px;
+    background: hsl(var(--card));
+  }
+  .vy-customer-ledger-photo-wrap {
+    width: 100%;
+  }
+  .vy-customer-ledger-photo,
+  .vy-customer-ledger-photo-placeholder {
+    height: 260px;
+  }
+  .vy-customer-ledger-identity {
+    text-align: left;
+  }
+  .vy-customer-ledger-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Customer ledger entry actions */
+.vyaparos-app .vy-customer-ledger-profile ~ .vy-ledger-history-entry-actions button { box-shadow: none !important; }

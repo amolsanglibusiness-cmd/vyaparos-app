@@ -1,0 +1,18 @@
+VyaparOS Vihaan integration
+
+Added:
+- components/vihaan-splash.tsx
+- public/vihaan-splash.gif
+- public/vihaan-splash-static.png
+- public/icons/icon-192.png
+- public/icons/icon-512.png
+- public/icons/icon-1024.png
+- android-assets/res/...
+- VIHAAN_ANDROID_SPLASH_SETUP.md
+
+Modified:
+- app/layout.tsx
+- app/globals.css
+- app/manifest.ts
+- capacitor.config.ts
+- package.json
