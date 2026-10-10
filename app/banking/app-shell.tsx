@@ -93,7 +93,7 @@ function MobileNavLink({ href, pathname, t }: { href: string; pathname: string; 
 export function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [hideSaleMobileBottomBar, setHideSaleMobileBottomBar] = useState(false);
-    const hideMobileBottomBar = pathname === '/assistant' || pathname.startsWith('/assistant/') || hideSaleMobileBottomBar;
+    const hideMobileBottomBar = pathname === '/assistant' || pathname.startsWith('/assistant/') || pathname === '/expense-management' || hideSaleMobileBottomBar;
     const hideGlobalHeader = ['/banking', '/transactions', '/pos', '/sales-history', '/ledger', '/cash', '/inventory', '/invoice'].includes(pathname);
     const router = useRouter();
     const { t, isDarkMode, toggleDarkMode, toggleLanguage, language, businessProfile } = useSettings();
@@ -447,10 +447,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         </button>
                     </div>
                     <MobileNavLink href={businessProfile.bottomButton4} pathname={pathname} t={t} />
-                    <Link href="/menu" className={cn('flex h-full flex-col items-center justify-center gap-1 text-[10px] font-medium', pathname === '/menu' ? 'text-primary' : 'text-muted-foreground')}>
+                    <button
+                        type="button"
+                        onClick={() => pathname === '/menu' ? router.back() : router.push('/menu')}
+                        aria-label={pathname === '/menu' ? 'Close menu' : 'Open menu'}
+                        aria-expanded={pathname === '/menu'}
+                        className="vy-mobile-menu-button flex h-full flex-col items-center justify-center gap-1 text-[10px] font-medium"
+                    >
                         <Menu className="h-5 w-5" />
                         {t.navMenu}
-                    </Link>
+                    </button>
                 </div>
             </nav>
             )}

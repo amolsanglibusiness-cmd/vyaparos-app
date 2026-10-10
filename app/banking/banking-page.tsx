@@ -93,7 +93,7 @@ export function BankingPage() {
     ];
 
     return (
-        <div className="min-h-dvh bg-gradient-to-b from-slate-50 to-slate-100/50 dark:from-slate-950 dark:to-slate-900">
+        <div className="min-h-dvh text-foreground bg-gradient-to-b from-slate-50 to-slate-100/50 dark:from-slate-950 dark:to-slate-900">
             <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8">
                 <div className="lg:hidden">
                     <header className="sticky top-0 z-50 -mx-4 border-b bg-background/95 px-3 py-2.5 shadow-sm backdrop-blur">
@@ -198,19 +198,19 @@ export function BankingPage() {
                         return (
                             <Card
                                 key={card.title}
-                                className={`relative overflow-hidden border-0 text-white shadow-none transition-transform duration-300 hover:scale-[1.01] ${card.gradient}`}
+                                className={`relative overflow-hidden border-0 text-foreground dark:text-white shadow-none transition-transform duration-300 hover:scale-[1.01] ${card.gradient}`}
                             >
                                 <CardContent className="relative z-10 flex items-center justify-between p-3 sm:p-3.5">
                                     <div>
-                                        <p className="text-xs font-medium uppercase tracking-wide text-white/80">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-900/80 dark:text-white/80">
                                             {card.title}
                                         </p>
                                         <p className="mt-1.5 text-xl font-bold tracking-tight sm:text-2xl">
                                             {card.value}
                                         </p>
                                     </div>
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                                        <Icon className="h-5 w-5 text-white" />
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/10 dark:bg-white/20 backdrop-blur-sm">
+                                        <Icon className="h-5 w-5 text-slate-900 dark:text-white" />
                                     </div>
                                 </CardContent>
                             </Card>

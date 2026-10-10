@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Settings,
     User,
@@ -61,6 +62,8 @@ type ImageField =
 const fileToDataUrl = readImageFile;
 
 export function SettingsPage() {
+    const router = useRouter(); // 2. router जोडले
+
     const {
         t,
         businessProfile,
@@ -76,7 +79,7 @@ export function SettingsPage() {
     } = useSettings();
 
     const { bankAccounts } = useAppData();
-    const { businesses, currentBusiness, cashMode, gallaMode, setCashMode, setGallaMode, currentRole, businessId, switchBusiness } = useMultiUser();
+    const { businesses, currentBusiness, cashMode, gallaMode, setCashMode, setGallaMode, currentRole, businessId, switchBusiness, deleteBusiness } = useMultiUser();
 
     const sigInputRef = useRef<HTMLInputElement>(null);
     const stampInputRef = useRef<HTMLInputElement>(null);
@@ -85,6 +88,9 @@ export function SettingsPage() {
     const [showSaved, setShowSaved] = useState(false);
     const [activeScreen, setActiveScreen] = useState<'business' | 'personal' | 'bottom' | 'security' | null>(null);
     const [resetOpen, setResetOpen] = useState(false);
+    const [deleteBusinessOpen, setDeleteBusinessOpen] = useState(false);
+    const [deleteBusinessBusy, setDeleteBusinessBusy] = useState(false);
+    const [deleteBusinessError, setDeleteBusinessError] = useState<string | null>(null);
 
     const [imageError, setImageError] =
         useState<string | null>(null);
@@ -361,6 +367,21 @@ export function SettingsPage() {
         setResetOpen(false);
     };
 
+    const handleDeleteBusiness = async () => {
+        if (!businessId || !currentBusiness) return;
+        setDeleteBusinessBusy(true);
+        setDeleteBusinessError(null);
+        const result = await deleteBusiness(businessId);
+        setDeleteBusinessBusy(false);
+        if (result.error) {
+            setDeleteBusinessError(result.error);
+            return;
+        }
+        setDeleteBusinessOpen(false);
+        setDeleteBusinessError(null);
+        setActiveScreen(null);
+    };
+
     // ---------------------------------------------------------
     // REMOVE IMAGE
     // ---------------------------------------------------------
@@ -378,9 +399,7 @@ export function SettingsPage() {
     return (
         <div data-settings-root className="mx-auto max-w-4xl pb-32 text-foreground [&_*]:shadow-none [&_button]:shadow-none [&_div]:shadow-none bg-transparent">
 
-            {/* =====================================================
-          TRANSPARENT STICKY HEADER WITH BACK ARROW & TITLE
-      ====================================================== */}
+            {/* STICKY HEADER */}
             <div className="sticky top-0 z-30 mb-4 flex items-center justify-between border-b border-border/40 bg-transparent px-2 py-3 backdrop-blur-none">
                 <div className="flex items-center gap-2">
                     <Button
@@ -390,6 +409,8 @@ export function SettingsPage() {
                         onClick={() => {
                             if (activeScreen !== null) {
                                 setActiveScreen(null);
+                            } else {
+                                router.push('/'); // 3. मुख्य स्क्रीनवर असताना होमवर जाणे
                             }
                         }}
                         className="h-9 w-9 rounded-xl hover:bg-muted text-black dark:text-white bg-transparent"
@@ -433,15 +454,29 @@ export function SettingsPage() {
                             <h2 className="truncate text-base font-bold text-black dark:text-white">{currentBusiness?.name || businessProfile.businessName || 'My Business'}</h2>
                         </div>
                     </div>
-                    <select
-                        value={businessId || ''}
-                        onChange={e => void switchBusiness(e.target.value)}
-                        className="h-10 w-full rounded-xl border border-border bg-transparent px-3 text-sm font-semibold text-black dark:text-white outline-none focus:border-primary sm:w-56"
-                    >
-                        {businesses.map(b => (
-                            <option key={b.id} value={b.id} className="bg-background text-foreground">{b.name}</option>
-                        ))}
-                    </select>
+                    <div className="flex w-full items-center gap-2 sm:w-auto">
+                        <select
+                            value={businessId || ''}
+                            onChange={e => void switchBusiness(e.target.value)}
+                            className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-transparent px-3 text-sm font-semibold text-black dark:text-white outline-none focus:border-primary sm:w-56 sm:flex-none"
+                        >
+                            {businesses.map(b => (
+                                <option key={b.id} value={b.id} className="bg-background text-foreground">{b.name}</option>
+                            ))}
+                        </select>
+                        {currentBusiness?.ownerUserId && currentRole === 'owner' && businesses.length > 1 && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setDeleteBusinessError(null); setDeleteBusinessOpen(true); }}
+                                className="h-8 shrink-0 px-2 text-[11px] font-semibold text-destructive hover:bg-destructive/10"
+                                title="Delete Business"
+                            >
+                                <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </section>
 
@@ -870,6 +905,29 @@ export function SettingsPage() {
             {/* =====================================================
           RESET CONFIRMATION DIALOG
       ====================================================== */}
+            <AlertDialog open={deleteBusinessOpen} onOpenChange={(open) => { if (!deleteBusinessBusy) setDeleteBusinessOpen(open); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Business?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            <span className="block">“{currentBusiness?.name || 'This business'}” कायमचा delete केला जाईल.</span>
+                            <span className="mt-2 block font-medium text-destructive">या business मधील invoices, customers, transactions, inventory आणि इतर business data देखील delete होईल. ही कृती undo करता येणार नाही.</span>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    {deleteBusinessError && <p className="px-1 text-sm font-medium text-destructive">{deleteBusinessError}</p>}
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteBusinessBusy}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => { e.preventDefault(); void handleDeleteBusiness(); }}
+                            disabled={deleteBusinessBusy}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleteBusinessBusy ? 'Deleting…' : 'Delete Business'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

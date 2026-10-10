@@ -7,16 +7,26 @@ interface SyncResult {
   errors: number;
 }
 
+const ACTIVE_BUSINESS_KEY = 'vyaparos:active-business-id';
+
 const COLUMN_MAP: Record<TableName, { localToRemote: Record<string, string> }> = {
   bank_accounts: {
     localToRemote: {
       bank_name: 'bank_name',
-      account_holder_name: 'account_holder_name',
+      account_holder_name: 'account_holder',
       account_number: 'account_number',
-      ifsc_code: 'ifsc_code',
+      ifsc_code: 'ifsc',
+      upi_id: 'upi_id',
       account_type: 'account_type',
       balance: 'balance',
-      upi_id: 'upi_id',
+      branch: 'branch',
+      nickname: 'nickname',
+      opening_balance: 'opening_balance',
+      opening_date: 'opening_date',
+      is_default: 'is_default',
+      status: 'status',
+      show_on_invoice: 'show_on_invoice',
+      notes: 'notes',
       created_at: 'created_at',
     },
   },
@@ -117,6 +127,7 @@ const COLUMN_MAP: Record<TableName, { localToRemote: Record<string, string> }> =
       address: 'address',
       photo_url: 'photo_url',
       upi_id: 'upi_id',
+      gstin: 'gstin', // येथे फक्त स्ट्रिंग ठेवा
       opening_balance: 'opening_balance',
       notes: 'notes',
       created_at: 'created_at',
@@ -130,6 +141,7 @@ const COLUMN_MAP: Record<TableName, { localToRemote: Record<string, string> }> =
       description: 'description',
       date: 'date',
       created_at: 'created_at',
+      transaction_id: 'transaction_id',
     },
   },
   business_profiles: {
@@ -142,9 +154,21 @@ const COLUMN_MAP: Record<TableName, { localToRemote: Record<string, string> }> =
       gstin: 'gstin',
       signature_url: 'signature_url',
       stamp_url: 'stamp_url',
+      business_contact_number: 'business_contact_number',
+      business_logo_url: 'business_logo_url',
+      bottom_button_1: 'bottom_button_1',
+      bottom_button_2: 'bottom_button_2',
+      bottom_button_4: 'bottom_button_4',
+      main_bank_account_id: 'main_bank_account_id',
+      transaction_categories: 'transaction_categories',
     },
   },
 };
+
+function normalizeJsonValue(value: unknown, fallback: unknown): unknown {
+  if (typeof value !== 'string') return value ?? fallback;
+  try { return JSON.parse(value); } catch { return fallback; }
+}
 
 function toRemotePayload(
   table: TableName,
@@ -160,13 +184,35 @@ function toRemotePayload(
     }
   }
 
-  // All application tables are RLS-protected by auth.uid() = user_id.
-  // Explicitly sending the authenticated user's id makes inserts deterministic
-  // and prevents a missing/incorrect default from silently failing RLS.
-  if (userId && table !== 'business_profiles') {
-    remote.user_id = userId;
-  } else if (userId && table === 'business_profiles') {
-    remote.user_id = userId;
+  // Bank rows created by older builds used account_holder/ifsc as the local
+  // keys, while the Dexie schema uses account_holder_name/ifsc_code. Accept
+  // both forms so already-queued APK records are also uploaded successfully.
+  if (table === 'bank_accounts') {
+    if (!('account_holder' in remote) && 'account_holder' in localRow) {
+      remote.account_holder = localRow.account_holder;
+    }
+    if (!('ifsc' in remote) && 'ifsc' in localRow) {
+      remote.ifsc = localRow.ifsc;
+    }
+  }
+
+  // Dexie stores JSONB fields as strings for offline compatibility. Send the
+  // actual JSON value to Supabase so JSONB columns remain arrays/objects.
+  if (table === 'invoices' && 'items' in remote) {
+    remote.items = normalizeJsonValue(remote.items, []);
+  }
+  if (table === 'transactions' && 'expense_items' in remote) {
+    remote.expense_items = normalizeJsonValue(remote.expense_items, []);
+  }
+
+  // Business selection is a client-side workspace choice. Supabase's
+  // `my_business_id()` intentionally resolves only the first membership, so
+  // multi-business writes must carry the currently selected business id.
+  // The id is read from the same workspace key used by MultiUserProvider.
+  void userId;
+  if (typeof window !== 'undefined') {
+    const businessId = window.localStorage.getItem(ACTIVE_BUSINESS_KEY);
+    if (businessId) remote.business_id = businessId;
   }
 
   return remote;
@@ -181,6 +227,31 @@ function toLocalRow(table: TableName, remoteRow: Record<string, unknown>): Recor
     }
   }
   return local;
+}
+
+
+export async function applyRemoteChange(
+  table: TableName,
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE',
+  remoteRow: Record<string, unknown>,
+): Promise<void> {
+  const tableRef = (db as unknown as Record<string, {
+    put: (row: Record<string, unknown>) => Promise<unknown>;
+    delete: (id: string) => Promise<unknown>;
+    get: (id: string) => Promise<Record<string, unknown> | undefined>;
+  }>)[table];
+  const id = String(remoteRow.id ?? '');
+  if (!tableRef || !id) return;
+
+  if (eventType === 'DELETE') {
+    const localRow = await tableRef.get(id);
+    if (!localRow || localRow.is_synced === 'synced') await tableRef.delete(id);
+    return;
+  }
+
+  const localRow = await tableRef.get(id);
+  if (localRow && (localRow.is_synced === 'pending' || localRow.is_synced === 'error')) return;
+  await tableRef.put(toLocalRow(table, remoteRow));
 }
 
 async function pushPending(): Promise<{ pushed: number; errors: number }> {
@@ -204,10 +275,15 @@ async function pushPending(): Promise<{ pushed: number; errors: number }> {
       const table = entry.table_name as TableName;
 
       if (entry.operation === 'delete') {
+        const businessId = typeof window !== 'undefined'
+          ? window.localStorage.getItem(ACTIVE_BUSINESS_KEY)
+          : null;
+        if (!businessId) throw new Error('Active business is not selected.');
         const { error } = await supabase
           .from(table)
           .delete()
-          .eq('id', entry.record_id);
+          .eq('id', entry.record_id)
+          .eq('business_id', businessId);
 
         if (error) throw error;
       } else {
@@ -244,7 +320,11 @@ async function pushPending(): Promise<{ pushed: number; errors: number }> {
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : String(error);
+        error instanceof Error
+          ? error.message
+          : (error && typeof error === 'object'
+              ? JSON.stringify(error)
+              : String(error));
 
       await db.sync_queue.update(entry.id!, {
         retries: entry.retries + 1,
@@ -298,8 +378,29 @@ async function pullRemote(): Promise<{ pulled: number }> {
 
   for (const table of tables) {
     try {
-      const { data, error } = await supabase.from(table).select('*');
+      // RLS is the membership boundary; the active business filter is the
+      // workspace boundary. Without this filter a user with A+B businesses
+      // would pull both businesses into the same Dexie cache.
+      const businessId = typeof window !== 'undefined'
+        ? window.localStorage.getItem(ACTIVE_BUSINESS_KEY)
+        : null;
+      if (!businessId) continue;
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .eq('business_id', businessId);
       if (error || !data) continue;
+      let workspaceRows = data as Record<string, unknown>[];
+      // A shared account remains owned by the source business; expose its bank
+      // row to the target workspace without cloning the account in PostgreSQL.
+      if (table === 'bank_accounts') {
+        const shared = await supabase.rpc('get_accessible_shared_bank_accounts', { p_business_id: businessId });
+        if (!shared.error && Array.isArray(shared.data)) {
+          const byId = new Map<string, Record<string, unknown>>();
+          for (const row of [...workspaceRows, ...(shared.data as Record<string, unknown>[])]) byId.set(String(row.id), row);
+          workspaceRows = Array.from(byId.values());
+        }
+      }
 
       const tableRef = (db as unknown as Record<string, {
         bulkPut: (rows: Record<string, unknown>[]) => Promise<unknown>;
@@ -308,7 +409,7 @@ async function pullRemote(): Promise<{ pulled: number }> {
         delete: (id: string) => Promise<unknown>;
       }>)[table];
 
-      const remoteRows = data as Record<string, unknown>[];
+      const remoteRows = workspaceRows;
       const remoteIds = new Set(remoteRows.map((row) => String(row.id)));
       const localRows = await tableRef.toArray();
 

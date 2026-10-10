@@ -78,6 +78,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const base = { ...DEFAULT_PROFILE, ...(displayName ? { ownerName: displayName } : {}), ...(user.email ? { email: user.email } : {}) };
       if (data) {
         setBusinessProfile({ ...base, ownerName: data.owner_name || base.ownerName, businessName: data.business_name || base.businessName, businessAddress: data.business_address || '', phone: data.phone || '', businessContactNumber: data.business_contact_number || data.phone || '', email: data.email || base.email, gstin: data.gstin || '', signatureUrl: data.signature_url || null, stampUrl: data.stamp_url || null, businessLogoUrl: data.business_logo_url || null, bottomButton1: data.bottom_button_1 || base.bottomButton1, bottomButton2: data.bottom_button_2 || base.bottomButton2, bottomButton4: data.bottom_button_4 || base.bottomButton4, mainBankAccountId: data.main_bank_account_id || null });
+        const remoteCategories = Array.isArray(data.transaction_categories) ? data.transaction_categories.filter((v: unknown): v is string => typeof v === 'string' && v.trim().length > 0) : null;
+        if (remoteCategories?.length) {
+          setTransactionCategories(remoteCategories);
+          localStorage.setItem(categoryStorageKey, JSON.stringify(remoteCategories));
+        } else {
+          const localCategories = localStorage.getItem(categoryStorageKey);
+          if (localCategories) { try { const parsed = JSON.parse(localCategories); if (Array.isArray(parsed) && parsed.length) setTransactionCategories(parsed); } catch {} }
+        }
       } else if (local) {
         try { setBusinessProfile({ ...base, ...JSON.parse(local) }); } catch { setBusinessProfile(base); }
       } else setBusinessProfile(base);
@@ -85,6 +93,33 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     void loadProfile();
     return () => { cancelled = true; };
   }, [user?.id, businessId, profileStorageKey]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user?.id || !businessId || !profileStorageKey) return;
+    const syncLocalProfile = () => {
+      try {
+        const raw = localStorage.getItem(profileStorageKey);
+        if (!raw) return;
+        const localProfile = JSON.parse(raw);
+        void supabase.from('business_profiles').upsert({
+          user_id: user.id, business_id: businessId, owner_name: localProfile.ownerName || '',
+          business_name: localProfile.businessName || '', business_address: localProfile.businessAddress || '',
+          phone: localProfile.phone || '', business_contact_number: localProfile.businessContactNumber || '',
+          email: localProfile.email || user.email || '', gstin: localProfile.gstin || '',
+          signature_url: localProfile.signatureUrl || null, stamp_url: localProfile.stampUrl || null,
+          business_logo_url: localProfile.businessLogoUrl || null, bottom_button_1: localProfile.bottomButton1 || '/invoice',
+          bottom_button_2: localProfile.bottomButton2 || '/transactions', bottom_button_4: localProfile.bottomButton4 || '/pos',
+          main_bank_account_id: localProfile.mainBankAccountId || null,
+          transaction_categories: transactionCategories, updated_at: new Date().toISOString()
+        }, { onConflict: 'business_id,user_id' }).then(({ error }) => {
+          if (error) console.error('[VyaparOS] Profile/image sync failed:', error.message);
+        });
+      } catch (error) { console.error('[VyaparOS] Local profile sync failed:', error); }
+    };
+    window.addEventListener('online', syncLocalProfile);
+    if (navigator.onLine) syncLocalProfile();
+    return () => window.removeEventListener('online', syncLocalProfile);
+  }, [user?.id, user?.email, businessId, profileStorageKey, transactionCategories]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -120,16 +155,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const next = { ...prev, ...updates };
       if (profileStorageKey) localStorage.setItem(profileStorageKey, JSON.stringify(next));
       if (user?.id && businessId) {
-        void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, owner_name:next.ownerName, business_name:next.businessName, business_address:next.businessAddress, phone:next.phone, business_contact_number:next.businessContactNumber, email:next.email, gstin:next.gstin, signature_url:next.signatureUrl, stamp_url:next.stampUrl, business_logo_url:next.businessLogoUrl, bottom_button_1:next.bottomButton1, bottom_button_2:next.bottomButton2, bottom_button_4:next.bottomButton4, main_bank_account_id:next.mainBankAccountId, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
+        void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, owner_name:next.ownerName, business_name:next.businessName, business_address:next.businessAddress, phone:next.phone, business_contact_number:next.businessContactNumber, email:next.email, gstin:next.gstin, signature_url:next.signatureUrl, stamp_url:next.stampUrl, business_logo_url:next.businessLogoUrl, bottom_button_1:next.bottomButton1, bottom_button_2:next.bottomButton2, bottom_button_4:next.bottomButton4, main_bank_account_id:next.mainBankAccountId, transaction_categories:transactionCategories, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
       }
       return next;
     });
-  }, [profileStorageKey,user?.id,businessId]);
+  }, [profileStorageKey,user?.id,businessId,transactionCategories]);
 
   const resetBusinessProfile = useCallback(() => {
     setBusinessProfile(DEFAULT_PROFILE);
     if (profileStorageKey) localStorage.setItem(profileStorageKey, JSON.stringify(DEFAULT_PROFILE));
-    if (user?.id && businessId) void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, owner_name:DEFAULT_PROFILE.ownerName, business_name:DEFAULT_PROFILE.businessName, business_address:'', phone:'', business_contact_number:'', email:user.email || '', gstin:'', signature_url:null, stamp_url:null, business_logo_url:null, bottom_button_1:DEFAULT_PROFILE.bottomButton1, bottom_button_2:DEFAULT_PROFILE.bottomButton2, bottom_button_4:DEFAULT_PROFILE.bottomButton4, main_bank_account_id:null, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
+    if (user?.id && businessId) void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, owner_name:DEFAULT_PROFILE.ownerName, business_name:DEFAULT_PROFILE.businessName, business_address:'', phone:'', business_contact_number:'', email:user.email || '', gstin:'', signature_url:null, stamp_url:null, business_logo_url:null, bottom_button_1:DEFAULT_PROFILE.bottomButton1, bottom_button_2:DEFAULT_PROFILE.bottomButton2, bottom_button_4:DEFAULT_PROFILE.bottomButton4, main_bank_account_id:null, transaction_categories:DEFAULT_TRANSACTION_CATEGORIES, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
   }, [profileStorageKey,user?.id,user?.email,businessId]);
 
 
@@ -161,11 +196,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (prev.some((item) => item.toLowerCase() === value.toLowerCase())) return prev;
       const next = [...prev, value];
       localStorage.setItem(categoryStorageKey, JSON.stringify(next));
+      if (user?.id && businessId) void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, transaction_categories:next, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
       added = true;
       return next;
     });
     return added;
-  }, [categoryStorageKey]);
+  }, [categoryStorageKey, user?.id, businessId]);
 
   const updateTransactionCategory = useCallback((oldName: string, newName: string) => {
     const value = newName.trim();
@@ -175,20 +211,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (prev.some((item) => item !== oldName && item.toLowerCase() === value.toLowerCase())) return prev;
       const next = prev.map((item) => item === oldName ? value : item);
       localStorage.setItem(categoryStorageKey, JSON.stringify(next));
+      if (user?.id && businessId) void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, transaction_categories:next, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
       updated = true;
       return next;
     });
     return updated;
-  }, [categoryStorageKey]);
+  }, [categoryStorageKey, user?.id, businessId]);
 
   const deleteTransactionCategory = useCallback((name: string) => {
     setTransactionCategories((prev) => {
       if (prev.length <= 1) return prev;
       const next = prev.filter((item) => item !== name);
       localStorage.setItem(categoryStorageKey, JSON.stringify(next));
+      if (user?.id && businessId) void supabase.from('business_profiles').upsert({ user_id:user.id, business_id:businessId, transaction_categories:next, updated_at:new Date().toISOString() }, { onConflict:'business_id,user_id' });
       return next;
     });
-  }, [categoryStorageKey]);
+  }, [categoryStorageKey, user?.id, businessId]);
 
   const removeAppSecurity = useCallback(() => {
     removeAppPin();

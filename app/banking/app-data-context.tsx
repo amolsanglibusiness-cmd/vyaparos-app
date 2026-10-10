@@ -37,16 +37,16 @@ interface AppDataContextValue {
   cashInHandBalance: number;
   getBankBalance: (id: string) => number;
 
-  addBankAccount: (account: BankAccount) => void;
-  updateBankAccount: (account: BankAccount) => void;
+  addBankAccount: (account: BankAccount) => boolean | string | void;
+  updateBankAccount: (account: BankAccount) => boolean | string | void;
   deleteBankAccount: (id: string) => void;
 
   addSubSavings: (account: SubSavingsAccount) => void;
   updateSubSavings: (account: SubSavingsAccount) => void;
   deleteSubSavings: (id: string) => void;
 
-  addTransaction: (txn: Transaction) => boolean;
-  updateTransaction: (txn: Transaction) => boolean;
+  addTransaction: (txn: Transaction) => boolean | string;
+  updateTransaction: (txn: Transaction) => boolean | string;
   deleteTransaction: (id: string) => void;
 
   addFinancialGoal: (goal: FinancialGoal) => void;
@@ -79,12 +79,18 @@ function mapBankAccount(row: Record<string, unknown>): BankAccount {
   return {
     id: row.id as string,
     bankName: row.bank_name as string,
-    accountHolderName: row.account_holder_name as string,
-    accountNumber: row.account_number as string,
-    ifscCode: row.ifsc_code as string,
+    accountHolderName: String(row.account_holder ?? ''),
+    accountNumber: String(row.account_number ?? ''),
+    ifscCode: String(row.ifsc ?? row.ifsc_code ?? ''),
     accountType: row.account_type as 'Savings' | 'Current',
-    balance: row.balance as number,
-    upiId: row.upi_id as string,
+    balance: Number(row.balance ?? row.opening_balance ?? 0),
+    upiId: String(row.upi_id ?? ''),
+    branch: String(row.branch ?? ''),
+    nickname: String(row.nickname ?? ''),
+    openingDate: (row.opening_date as string | null) ?? null,
+    status: String(row.status ?? 'Active'),
+    showOnInvoice: row.show_on_invoice !== false,
+    notes: String(row.notes ?? ''),
     createdAt: row.created_at as string,
   };
 }
@@ -116,7 +122,7 @@ function mapTransaction(row: Record<string, unknown>): Transaction {
     destAccountId: (row.dest_account_id as string | null) ?? null,
     isFromGalla: row.is_from_galla as boolean,
     shopName: String(row.shop_name ?? ''),
-    expenseItems: (() => { try { return JSON.parse(String(row.expense_items ?? '[]')); } catch { return []; } })(),
+    expenseItems: parseJsonField(row.expense_items, []),
     createdAt: row.created_at as string,
   };
 }
@@ -150,11 +156,17 @@ function mapInventoryItem(row: Record<string, unknown>): InventoryItem {
   };
 }
 
+function parseJsonField(value: unknown, fallback: unknown): any {
+  if (Array.isArray(value) || (value && typeof value === 'object')) return value;
+  if (typeof value === 'string') { try { return JSON.parse(value); } catch { return fallback; } }
+  return fallback;
+}
+
 function mapInvoice(row: Record<string, unknown>): Invoice {
   return {
     id: row.id as string,
     invoiceNumber: row.invoice_number as string,
-    items: JSON.parse(row.items as string),
+    items: parseJsonField(row.items, []),
     subtotal: row.subtotal as number,
     discount: row.discount as number,
     total: row.total as number,
@@ -236,10 +248,11 @@ function getLocalDateKey(value: string): string {
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [gallaOpeningBalance, setGallaOpeningBalanceState] = useState(0);
   const [gallaOpeningBalanceKey, setGallaOpeningBalanceKey] = useState(GALLA_OPENING_BALANCE_KEY);
-  const { cashMode, gallaMode, businessMembers } = useMultiUser();
+  const { cashMode, gallaMode, businessMembers, businessId, businesses } = useMultiUser();
   const [sharedBankBalances, setSharedBankBalances] = useState<Record<string, number>>({});
   const [sharedCashNet, setSharedCashNet] = useState(0);
   const [sharedGallaNet, setSharedGallaNet] = useState(0);
+  const [sharedTransactions, setSharedTransactions] = useState<Transaction[]>([]);
 
   const setGallaOpeningBalance = useCallback((amount: number) => {
     const safe = Number.isFinite(amount) && amount >= 0 ? amount : 0;
@@ -300,6 +313,19 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, []);
 
+  // A business switch must never keep the previous business's Dexie rows.
+  // Flush the selected workspace from cloud after isolating the local cache.
+  useEffect(() => {
+    if (!businessId || typeof window === 'undefined') return;
+    let cancelled = false;
+    const switchWorkspace = async () => {
+      await clearAllLocalAppData();
+      if (!cancelled) await syncAll();
+    };
+    void switchWorkspace().catch((error) => console.error('[VyaparOS] Business workspace sync failed:', error));
+    return () => { cancelled = true; };
+  }, [businessId]);
+
   // Live queries — automatically re-render when Dexie data changes
   const bankAccountRows = useLiveQuery(() => db.bank_accounts.toArray(), []) ?? [];
   const subSavingsRows = useLiveQuery(() => db.sub_savings.toArray(), []) ?? [];
@@ -312,7 +338,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const bankAccounts = bankAccountRows.map((r) => mapBankAccount(r as unknown as Record<string, unknown>));
   const subSavings = subSavingsRows.map((r) => mapSubSavings(r as unknown as Record<string, unknown>));
-  const actualTransactions = transactionRows.map((r) => mapTransaction(r as unknown as Record<string, unknown>));
+  const activeBusinessName = businesses.find((b) => b.id === businessId)?.name ?? '';
+  const actualTransactions = transactionRows.map((r) => ({ ...mapTransaction(r as unknown as Record<string, unknown>), businessName: activeBusinessName }));
 
   const ownBankBalance = useMemo(() => {
     const result: Record<string, number> = {};
@@ -334,22 +361,61 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   let cancelled = false;
 
   const loadShared = async () => {
-    const entries = await Promise.all(
+    const results = await Promise.all(
       bankAccounts.map(async (account) => {
-        const { data, error } = await supabase.rpc('get_shared_bank_balance', {
-          p_account_number: account.accountNumber,
-          p_ifsc_code: account.ifscCode,
-        });
-        if (error || data === null || data === undefined) {
-          return [account.id, ownBankBalance[account.id] ?? 0] as const;
-        }
-        return [account.id, Number(data) || 0] as const;
+        const [balanceResult, transactionResult] = await Promise.all([
+          supabase.rpc('get_shared_bank_balance', {
+            p_account_number: account.accountNumber,
+            p_ifsc_code: account.ifscCode,
+          }),
+          supabase.rpc('get_shared_bank_transactions', {
+            p_account_number: account.accountNumber,
+            p_ifsc_code: account.ifscCode,
+          }),
+        ]);
+        const balance = balanceResult.error || balanceResult.data === null || balanceResult.data === undefined
+          ? ownBankBalance[account.id] ?? 0
+          : Number(balanceResult.data) || 0;
+        return { account, balance, rows: (transactionResult.data ?? []) as Record<string, unknown>[] };
       })
     );
 
     if (cancelled) return;
 
-    const newSharedBalances = Object.fromEntries(entries);
+    const newSharedBalances = Object.fromEntries(results.map((r) => [r.account.id, r.balance]));
+    const ownIds = new Set(actualTransactions.map((txn) => txn.id));
+    const sharedById = new Map<string, Transaction>();
+    for (const result of results) {
+      for (const row of result.rows) {
+        const id = String(row.id ?? '');
+        if (!id || ownIds.has(id)) continue;
+        const source = String(row.source_account_id ?? '');
+        const dest = row.dest_account_id == null ? null : String(row.dest_account_id);
+        const sharedAccount = result.account.id;
+        // The RPC tells us which side belongs to the matching shared bank.
+        // Replace only that side with this business's local bank id.
+        const sourceLocal = Boolean(row.source_is_shared_bank) ? sharedAccount : source;
+        const destLocal = Boolean(row.dest_is_shared_bank) ? sharedAccount : dest;
+        sharedById.set(id, {
+          id,
+          type: String(row.type) as Transaction['type'],
+          amount: Number(row.amount) || 0,
+          category: String(row.category ?? 'Other'),
+          description: String(row.description ?? ''),
+          date: String(row.date ?? new Date().toISOString()),
+          tag: (row.tag as Transaction['tag']) ?? null,
+          sourceAccountId: sourceLocal,
+          destAccountId: destLocal,
+          isFromGalla: Boolean(row.is_from_galla),
+          shopName: String(row.shop_name ?? ''),
+          expenseItems: Array.isArray(row.expense_items) ? row.expense_items as Transaction['expenseItems'] : [],
+          createdAt: String(row.created_at ?? row.date ?? new Date().toISOString()),
+          isShared: true,
+          businessName: String(row.business_name ?? 'Other Business'),
+        });
+      }
+    }
+    setSharedTransactions(Array.from(sharedById.values()));
 
     // १. डेटा प्रत्यक्षात बदलला असेल तरच स्टेट अपडेट करा (Infinite Loop थांबवण्यासाठी)
     setSharedBankBalances((prev) =>
@@ -392,6 +458,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   gallaMode,
   businessMembers.length,
   JSON.stringify(ownBankBalance),
+  JSON.stringify(actualTransactions),
 ]);
 
   // AUTO-GALLA-INCOME is a real saved transaction created automatically when
@@ -401,7 +468,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const isAutoGallaIncome = (txn: Transaction) =>
     txn.category === 'Automatic Galla Income' || txn.description.startsWith('[AUTO-GALLA-INCOME]');
 
-  const transactions = actualTransactions;
+  const transactions = useMemo(() => [...actualTransactions, ...sharedTransactions], [actualTransactions, sharedTransactions]);
   const transactionsWithBackgroundGalla = transactions;
 
   const financialGoals = goalRows.map((r) => mapGoal(r as unknown as Record<string, unknown>));
@@ -440,7 +507,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [transactions, cashMode, sharedCashNet]);
 
   const getBankBalance = useCallback((id: string) => {
-    return sharedBankBalances[id] ?? ownBankBalance[id] ?? (bankAccounts.find((a) => a.id === id)?.balance || 0);
+    const local = ownBankBalance[id] ?? (bankAccounts.find((a) => a.id === id)?.balance || 0);
+    const shared = sharedBankBalances[id];
+    // A shared RPC returning 0 must not hide a valid local balance while the
+    // shared aggregation is still catching up. Bank balances cannot be negative.
+    return shared === undefined ? local : Math.max(local, Number(shared) || 0);
   }, [sharedBankBalances, ownBankBalance, bankAccounts]);
 
   // --- Helpers to write + enqueue sync ---
@@ -475,34 +546,72 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   // --- Bank Accounts ---
   const addBankAccount = useCallback((account: BankAccount) => {
-    writeAndSync('bank_accounts', {
+    const bankName = account.bankName.trim();
+    const accountNumber = account.accountNumber.trim();
+    const holder = account.accountHolderName.trim();
+    if (!bankName || !holder || !accountNumber) {
+      return 'बँक नेम, अकाऊंट होल्डर आणि अकाऊंट नंबर अनिवार्य आहेत.';
+    }
+    const duplicate = bankAccounts.some((existing) =>
+      existing.bankName.trim().toLowerCase() === bankName.toLowerCase() &&
+      existing.accountNumber.replace(/\\s+/g, '').toLowerCase() === accountNumber.replace(/\\s+/g, '').toLowerCase()
+    );
+    if (duplicate) {
+      return `हे बँक खाते आधीपासून सेव्ह आहे: ${bankName} ••••${accountNumber.slice(-4)}`;
+    }
+    void writeAndSync('bank_accounts', {
       id: account.id,
-      bank_name: account.bankName,
-      account_holder_name: account.accountHolderName,
-      account_number: account.accountNumber,
-      ifsc_code: account.ifscCode,
+      bank_name: bankName,
+      account_holder_name: holder,
+      account_number: accountNumber,
+      ifsc_code: account.ifscCode.trim().toUpperCase(),
       account_type: account.accountType,
-      balance: account.balance,
-      upi_id: account.upiId,
+      balance: Number(account.balance) || 0,
+      opening_balance: Number(account.balance) || 0,
+      upi_id: account.upiId?.trim() || '',
+      branch: account.branch?.trim() || '',
+      nickname: account.nickname?.trim() || '',
+      opening_date: account.openingDate || null,
+      status: account.status || 'Active',
+      show_on_invoice: account.showOnInvoice !== false,
+      notes: account.notes?.trim() || '',
       created_at: account.createdAt,
       is_synced: 'pending',
     } as Record<string, unknown>, 'insert');
     return true;
-  }, [writeAndSync, transactions]);
+  }, [writeAndSync, bankAccounts]);
 
   const updateBankAccount = useCallback((account: BankAccount) => {
-    writeAndSync('bank_accounts', {
+    const bankName = account.bankName.trim();
+    const accountNumber = account.accountNumber.trim();
+    const holder = account.accountHolderName.trim();
+    if (!bankName || !holder || !accountNumber) return 'बँक नेम, अकाऊंट होल्डर आणि अकाऊंट नंबर अनिवार्य आहेत.';
+    const duplicate = bankAccounts.some((existing) =>
+      existing.id !== account.id &&
+      existing.bankName.trim().toLowerCase() === bankName.toLowerCase() &&
+      existing.accountNumber.replace(/\\s+/g, '').toLowerCase() === accountNumber.replace(/\\s+/g, '').toLowerCase()
+    );
+    if (duplicate) return 'याच बँक नावाचा आणि अकाऊंट नंबरचा खाते आधीपासून आहे.';
+    void writeAndSync('bank_accounts', {
       id: account.id,
-      bank_name: account.bankName,
-      account_holder_name: account.accountHolderName,
-      account_number: account.accountNumber,
-      ifsc_code: account.ifscCode,
+      bank_name: bankName,
+      account_holder_name: holder,
+      account_number: accountNumber,
+      ifsc_code: account.ifscCode.trim().toUpperCase(),
       account_type: account.accountType,
-      balance: account.balance,
-      upi_id: account.upiId,
+      balance: Number(account.balance) || 0,
+      opening_balance: Number(account.balance) || 0,
+      upi_id: account.upiId?.trim() || '',
+      branch: account.branch?.trim() || '',
+      nickname: account.nickname?.trim() || '',
+      opening_date: account.openingDate || null,
+      status: account.status || 'Active',
+      show_on_invoice: account.showOnInvoice !== false,
+      notes: account.notes?.trim() || '',
       created_at: account.createdAt,
     } as Record<string, unknown>, 'update');
-  }, [writeAndSync]);
+    return true;
+  }, [writeAndSync, bankAccounts]);
 
   const deleteBankAccount = useCallback((id: string) => {
     writeAndSync('bank_accounts', { id } as Record<string, unknown>, 'delete');
@@ -579,7 +688,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const shouldCreateAutoGallaIncome = (txn: Transaction) =>
     !isAutoGallaIncome(txn) &&
     txn.sourceAccountId === MOCK_GALLA_ID &&
-    (txn.type === 'Expense' || txn.type === 'Transfer') &&
+    (txn.type === 'Expense' || txn.type === 'Transfer' || txn.type === 'Savings') &&
     txn.amount > 0;
 
   const buildAutoGallaIncome = (txn: Transaction): Transaction => ({
@@ -597,6 +706,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   });
 
   const addTransaction = useCallback((txn: Transaction) => {
+    const sourceBank = bankAccounts.find((account) => account.id === txn.sourceAccountId);
+    const bankOutflow = txn.type === 'Expense' || txn.type === 'Transfer' || txn.type === 'Savings';
+    if (sourceBank && bankOutflow && txn.amount > getBankBalance(sourceBank.id)) {
+      const available = getBankBalance(sourceBank.id);
+      return `बँक बॅलेन्स अपुरा आहे. उपलब्ध बॅलेन्स ₹${available.toLocaleString('en-IN')}, व्यवहारासाठी ₹${txn.amount.toLocaleString('en-IN')} आवश्यक आहेत.`;
+    }
     if (txn.type === 'Savings' && txn.destAccountId) {
       adjustSavingsBalance(txn.destAccountId, txn.amount);
     }
@@ -613,10 +728,21 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
 
     return true;
-  }, [adjustSavingsBalance, writeAndSync]);
+  }, [adjustSavingsBalance, writeAndSync, bankAccounts, getBankBalance]);
 
   const updateTransaction = useCallback((txn: Transaction) => {
     const previous = actualTransactions.find((item) => item.id === txn.id);
+    const sourceBank = bankAccounts.find((account) => account.id === txn.sourceAccountId);
+    const bankOutflow = txn.type === 'Expense' || txn.type === 'Transfer' || txn.type === 'Savings';
+    if (sourceBank && bankOutflow) {
+      const available = getBankBalance(sourceBank.id);
+      const oldSourceSame = previous?.sourceAccountId === txn.sourceAccountId &&
+        (previous.type === 'Expense' || previous.type === 'Transfer' || previous.type === 'Savings');
+      const effectiveAvailable = available + (oldSourceSame ? Number(previous.amount) || 0 : 0);
+      if (txn.amount > effectiveAvailable) {
+        return `बँक बॅलेन्स अपुरा आहे. उपलब्ध बॅलेन्स ₹${effectiveAvailable.toLocaleString('en-IN')}, व्यवहारासाठी ₹${txn.amount.toLocaleString('en-IN')} आवश्यक आहेत.`;
+      }
+    }
     if (previous?.type === 'Savings' && previous.destAccountId) {
       adjustSavingsBalance(previous.destAccountId, -previous.amount);
     }
@@ -641,7 +767,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
 
     return true;
-  }, [actualTransactions, adjustSavingsBalance, writeAndSync]);
+  }, [actualTransactions, adjustSavingsBalance, writeAndSync, bankAccounts, getBankBalance]);
 
   const deleteTransaction = useCallback((id: string) => {
     const previous = actualTransactions.find((item) => item.id === id);

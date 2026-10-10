@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">VyaparOS</string>
+    <string name="title_activity_main">VyaparOS</string>
+    <string name="package_name">com.vyaparos.app</string>
+    <string name="custom_url_scheme">com.vyaparos.app</string>
+</resources>

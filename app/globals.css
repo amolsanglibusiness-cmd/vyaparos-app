@@ -953,9 +953,13 @@
   .dark .vy-ref-shell nav[aria-hidden="false"] a.text-primary { color:#11bfff; }
   .dark .vy-ref-shell nav[aria-hidden="false"] svg { filter:drop-shadow(0 0 5px rgba(0,181,255,.22)); }
   .dark .vy-ref-shell nav[aria-hidden="false"] button {
-    width:68px; height:68px; margin-top:-25px; border:2px solid #5edaff;
-    background:radial-gradient(circle at 35% 30%,#19bfff,#1649ff 47%,#7d20ff 78%);
-    box-shadow:0 0 18px #008dff,0 0 34px rgba(134,33,255,.7), inset 0 0 12px rgba(255,255,255,.32);
+    width: 68px; 
+    height: 68px; 
+    margin-top: -25px; 
+    border: 2px solid #5edaff;
+    border-radius: 50% !important;
+    background: radial-gradient(circle at 35% 30%, #19bfff, #1649ff 47%, #7d20ff 78%);
+    box-shadow: 0 0 18px #008dff, 0 0 34px rgba(134,33,255,.7), inset 0 0 12px rgba(255,255,255,.32);
   }
   .dark .vy-ref-shell nav[aria-hidden="false"] button span { border:2px solid rgba(73,228,255,.55); }
 
@@ -3804,9 +3808,34 @@
 
 /* Light mode keeps the same blue/violet center while using the pale outer ring seen in the reference. */
 :root:not(.dark) .vyaparos-app .vy-home-center-button {
-  box-shadow:
-    0 0 0 2px rgba(255,255,255,.34) inset,
-    0 8px 20px rgba(59,130,246,.18) !important;
+  width: 68px !important;
+  height: 68px !important;
+
+  min-width: 68px !important;
+  min-height: 68px !important;
+  max-width: 68px !important;
+  max-height: 68px !important;
+
+  margin-top: -25px !important;
+
+  border: 2px solid #5edaff !important;
+  border-radius: 50% !important;
+  -webkit-border-radius: 50% !important;
+
+  background: radial-gradient(
+    circle at 35% 30%,
+    #19bfff,
+    #1649ff 47%,
+    #7d20ff 78%
+  ) !important;
+
+
+
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 68px !important;
+
+  overflow: visible !important;
+  box-sizing: border-box !important;
 }
 
 :root:not(.dark) .vyaparos-app .vy-home-center-button::before {
@@ -4117,3 +4146,916 @@
 
 /* Customer ledger entry actions */
 .vyaparos-app .vy-customer-ledger-profile ~ .vy-ledger-history-entry-actions button { box-shadow: none !important; }
+
+/* ==========================================================================
+   VyaparOS — FINAL LIGHT / DARK TEXT VISIBILITY SAFETY LAYER
+   --------------------------------------------------------------------------
+   Visual-only overrides. No business logic, API, state, layout or data
+   behavior is changed.
+
+   IMPORTANT:
+   - Light mode: normal text is dark and readable.
+   - Dark mode: normal text is bright and readable.
+   - Gradient/primary/destructive buttons keep white text.
+   - Bank forms and shared forms get explicit readable labels/inputs.
+   - These rules intentionally appear at the END so they win the CSS cascade.
+   ========================================================================== */
+
+/* -----------------------------
+   1. Theme-level readable text
+   ----------------------------- */
+:root:not(.dark) .vyaparos-app {
+  color: #10233b !important;
+}
+
+.dark .vyaparos-app {
+  color: #eef7ff !important;
+}
+
+/* Normal text utilities in LIGHT mode.
+   Do not globally recolor gradient buttons; those are handled below. */
+:root:not(.dark) .vyaparos-app
+  :is(.text-foreground, .text-card-foreground, .text-popover-foreground) {
+  color: #10233b !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is(.text-muted-foreground, .text-gray-500, .text-gray-600, .text-slate-500, .text-slate-600) {
+  color: #526b85 !important;
+}
+
+.dark .vyaparos-app
+  :is(.text-foreground, .text-card-foreground, .text-popover-foreground) {
+  color: #eef7ff !important;
+}
+
+.dark .vyaparos-app
+  :is(.text-muted-foreground, .text-gray-400, .text-gray-500, .text-slate-400, .text-slate-500) {
+  color: #a9c4df !important;
+}
+
+/* Legacy dark text classes: readable in light mode. */
+:root:not(.dark) .vyaparos-app
+  :is(.text-white, .text-slate-100, .text-slate-200, .text-gray-100, .text-gray-200) {
+  color: #17345d !important;
+}
+
+/* Keep white text where the element itself is a colored action/control. */
+:root:not(.dark) .vyaparos-app
+  :is(
+    .bg-primary,
+    .bg-destructive,
+    .bg-emerald-600,
+    .bg-emerald-700,
+    .bg-rose-600,
+    .bg-rose-700,
+    .bg-blue-600,
+    .bg-blue-700,
+    .bg-indigo-600,
+    .bg-indigo-700
+  )
+  :is(.text-white, .text-slate-100, .text-slate-200, .text-gray-100, .text-gray-200) {
+  color: #ffffff !important;
+}
+
+/* Gradient action buttons must always retain white foreground. */
+.vyaparos-app :is(
+  .vy-ref-gradient-btn,
+  .vy-ref-sale-btn,
+  .vy-home-center-button,
+  .mobile-entry-save,
+  .bank-entry-save,
+  .vy-mobile-fab,
+  [class*="bg-primary"]
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.vyaparos-app :is(
+  .vy-ref-gradient-btn,
+  .vy-ref-sale-btn,
+  .vy-home-center-button,
+  .mobile-entry-save,
+  .bank-entry-save,
+  .vy-mobile-fab,
+  [class*="bg-primary"]
+) svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* -----------------------------
+   2. BANK PAGE — Light mode
+   ----------------------------- */
+
+/* Bank page/container text. */
+:root:not(.dark) .vyaparos-app
+  :is(.vy-bank-page, .vy-bank, .bank-page, .bank-screen) {
+  color: #10233b !important;
+}
+
+/* Bank add-account/sub-savings dialog. */
+:root:not(.dark) .vyaparos-app .bank-entry-dialog {
+  color: #10233b !important;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%) !important;
+  border-color: #cfe2f8 !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-dialog
+  :is(h1, h2, h3, h4, p, span, div, label) {
+  color: #10233b;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-dialog .text-muted-foreground {
+  color: #526b85 !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-form label,
+:root:not(.dark) .vyaparos-app .bank-entry-form [data-slot="form-label"] {
+  color: #172554 !important;
+  -webkit-text-fill-color: #172554 !important;
+  font-weight: 700 !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-form
+  :is(input, textarea, select, [role="combobox"]) {
+  color: #10233b !important;
+  -webkit-text-fill-color: #10233b !important;
+  background: #ffffff !important;
+  border-color: #a9c9e8 !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-form
+  :is(input, textarea, select, [role="combobox"])::placeholder {
+  color: #7892ad !important;
+  -webkit-text-fill-color: #7892ad !important;
+  opacity: 1 !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-form
+  :is(input, textarea, select, [role="combobox"]):focus {
+  color: #10233b !important;
+  border-color: #3b82f6 !important;
+  outline: none !important;
+}
+
+/* Native select/options must remain readable. */
+:root:not(.dark) .vyaparos-app .bank-entry-form select,
+:root:not(.dark) .vyaparos-app .bank-entry-form option {
+  color: #10233b !important;
+  background: #ffffff !important;
+}
+
+/* Bank footer. */
+:root:not(.dark) .vyaparos-app .bank-entry-footer {
+  background: rgba(255,255,255,.98) !important;
+  border-top-color: #cfe2f8 !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-footer
+  .bank-entry-cancel {
+  color: #1e3a8a !important;
+  -webkit-text-fill-color: #1e3a8a !important;
+  background: #ffffff !important;
+}
+
+:root:not(.dark) .vyaparos-app .bank-entry-footer
+  .bank-entry-save {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Bank cards/rows: force dark text on light surfaces. */
+:root:not(.dark) .vyaparos-app
+  :is(.vy-total-bank-balance-card, .bank-account-card, .bank-card) {
+  color: #10233b !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is(.vy-total-bank-balance-card, .bank-account-card, .bank-card)
+  :is(.text-white, .text-slate-100, .text-slate-200, .text-gray-100, .text-gray-200) {
+  color: #17345d !important;
+}
+
+/* -----------------------------
+   3. ALL FORMS / INPUTS
+   ----------------------------- */
+
+:root:not(.dark) .vyaparos-app
+  :is(input, textarea, select, [role="combobox"]) {
+  color: #10233b !important;
+  -webkit-text-fill-color: #10233b !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is(input, textarea, select, [role="combobox"])::placeholder {
+  color: #7892ad !important;
+  -webkit-text-fill-color: #7892ad !important;
+  opacity: 1 !important;
+}
+
+.dark .vyaparos-app
+  :is(input, textarea, select, [role="combobox"]) {
+  color: #f3f8ff !important;
+  -webkit-text-fill-color: #f3f8ff !important;
+}
+
+.dark .vyaparos-app
+  :is(input, textarea, select, [role="combobox"])::placeholder {
+  color: #8eabc7 !important;
+  -webkit-text-fill-color: #8eabc7 !important;
+  opacity: 1 !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is(label, [data-slot="form-label"]) {
+  color: #17345d !important;
+}
+
+.dark .vyaparos-app
+  :is(label, [data-slot="form-label"]) {
+  color: #dbeafe !important;
+}
+
+/* -----------------------------
+   4. LIGHT MODE — legacy dark
+      surfaces/text across ALL pages
+   ----------------------------- */
+
+:root:not(.dark) .vyaparos-app
+  :is(
+    [class*="bg-gray-950"],
+    [class*="bg-gray-900"],
+    [class*="bg-gray-800"],
+    [class*="bg-slate-950"],
+    [class*="bg-slate-900"],
+    [class*="bg-slate-800"],
+    [class*="bg-slate-700"],
+    [class*="bg-black"]
+  ) {
+  background: #ffffff !important;
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is(
+    [class*="bg-gray-950"],
+    [class*="bg-gray-900"],
+    [class*="bg-gray-800"],
+    [class*="bg-slate-950"],
+    [class*="bg-slate-900"],
+    [class*="bg-slate-800"],
+    [class*="bg-slate-700"],
+    [class*="bg-black"]
+  )
+  :is(.text-white, .text-slate-100, .text-slate-200, .text-gray-100, .text-gray-200) {
+  color: #17345d !important;
+}
+
+/* Light cards with accidentally white text. */
+:root:not(.dark) .vyaparos-app
+  :is(.bg-white, .bg-card, [class*="bg-background"], [class*="bg-slate-50"], [class*="bg-gray-50"])
+  :is(.text-white, .text-slate-100, .text-slate-200, .text-gray-100, .text-gray-200) {
+  color: #17345d !important;
+}
+
+/* But keep explicitly colored action controls white. */
+:root:not(.dark) .vyaparos-app 
+  :is(
+    button.bg-primary,
+    a.bg-primary,
+    button[class*="bg-primary"],
+    a[class*="bg-primary"],
+    .vy-ref-gradient-btn,
+    .vy-ref-sale-btn,
+    .mobile-entry-save,
+    .bank-entry-save
+  ) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* -----------------------------
+   5. TABLES / LISTS / DIALOGS
+   ----------------------------- */
+
+:root:not(.dark) .vyaparos-app
+  :is(table, tbody, tr, td, th) {
+  color: #17345d;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is([role="dialog"], [role="alertdialog"], [data-radix-dialog-content]) {
+  color: #17345d !important;
+  background-color: #ffffff !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is([role="dialog"], [role="alertdialog"], [data-radix-dialog-content])
+  :is(h1, h2, h3, h4, p, label) {
+  color: #17345d !important;
+}
+
+.dark .vyaparos-app
+  :is([role="dialog"], [role="alertdialog"], [data-radix-dialog-content]) {
+  color: #eef7ff !important;
+  background-color: #081d35 !important;
+}
+
+/* Dropdown menu / select content. */
+:root:not(.dark) .vyaparos-app
+  :is([role="menu"], [role="listbox"], [data-radix-select-content], [data-radix-popper-content-wrapper]) {
+  color: #17345d !important;
+  background: #ffffff !important;
+  border-color: #cfe2f8 !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is([role="menuitem"], [role="option"], [data-radix-select-item]) {
+  color: #17345d !important;
+}
+
+:root:not(.dark) .vyaparos-app
+  :is([role="menuitem"]:hover, [role="option"][data-highlighted], [data-radix-select-item][data-highlighted]) {
+  color: #1d4ed8 !important;
+  background: #eaf5ff !important;
+}
+
+/* -----------------------------
+   6. DARK MODE explicit readability
+   ----------------------------- */
+
+.dark .vyaparos-app
+  :is(h1, h2, h3, h4, h5, h6, p, span, label, td, th, li) {
+  color: inherit;
+}
+
+.dark .vyaparos-app
+  :is(.text-muted-foreground, .text-gray-400, .text-gray-500, .text-slate-400, .text-slate-500) {
+  color: #a9c4df !important;
+}
+
+.dark .vyaparos-app
+  :is(input, textarea, select, [role="combobox"]) {
+  background-color: #071b31 !important;
+  border-color: #28577e !important;
+}
+
+.dark .vyaparos-app
+  :is(select, option) {
+  color: #f3f8ff !important;
+  background-color: #071b31 !important;
+}
+
+/* Dark buttons/gradients retain white text. */
+.dark .vyaparos-app
+  :is(
+    .bg-primary,
+    .bg-destructive,
+    .vy-ref-gradient-btn,
+    .vy-ref-sale-btn,
+    .mobile-entry-save,
+    .bank-entry-save,
+    .vy-home-center-button
+  ) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* -----------------------------
+   7. Links / navigation
+   ----------------------------- */
+
+:root:not(.dark) .vyaparos-app a:not([class*="bg-"]) {
+  color: #2563eb;
+}
+
+:root:not(.dark) .vyaparos-app nav a:not([class*="bg-"]) {
+  color: #31597b;
+}
+
+:root:not(.dark) .vyaparos-app nav a.text-primary,
+:root:not(.dark) .vyaparos-app nav a[aria-current="page"] {
+  color: #2563eb !important;
+}
+
+.dark .vyaparos-app nav a:not([class*="bg-"]) {
+  color: #a9c9e9;
+}
+
+.dark .vyaparos-app nav a.text-primary,
+.dark .vyaparos-app nav a[aria-current="page"] {
+  color: #22c7ff !important;
+}
+
+/* -----------------------------
+   8. Accessibility / focus
+   ----------------------------- */
+
+.vyaparos-app :is(input, textarea, select, button, [role="button"], [role="combobox"]):focus-visible {
+  outline: 2px solid rgba(59,130,246,.55) !important;
+  outline-offset: 2px;
+}
+
+/* Do not allow disabled controls to become invisible. */
+:root:not(.dark) .vyaparos-app :disabled {
+  color: #8299b0 !important;
+  -webkit-text-fill-color: #8299b0 !important;
+  opacity: .72;
+}
+
+.dark .vyaparos-app :disabled {
+  color: #7894ae !important;
+  -webkit-text-fill-color: #7894ae !important;
+  opacity: .72;
+}
+
+/* -----------------------------
+   9. Mobile entry screens
+   ----------------------------- */
+
+@media (max-width: 1023px) {
+  :root:not(.dark) .vyaparos-app .mobile-entry-screen,
+  :root:not(.dark) .vyaparos-app .mobile-entry-screen [role="dialog"] {
+    color: #17345d !important;
+    background: #f7fbff !important;
+  }
+
+  :root:not(.dark) .vyaparos-app .mobile-entry-screen
+    :is(h1, h2, h3, h4, p, label, span) {
+    color: inherit;
+  }
+
+  :root:not(.dark) .vyaparos-app .mobile-entry-footer {
+    background: rgba(255,255,255,.98) !important;
+    border-top-color: #cfe2f8 !important;
+  }
+
+  :root:not(.dark) .vyaparos-app .mobile-entry-footer
+    > button:first-child {
+    color: #17345d !important;
+    -webkit-text-fill-color: #17345d !important;
+    background: #ffffff !important;
+  }
+
+  :root:not(.dark) .vyaparos-app .mobile-entry-footer
+    > button:last-child {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+}
+
+/* ==========================================================================
+   END — FINAL LIGHT / DARK TEXT VISIBILITY SAFETY LAYER
+   ========================================================================== */
+
+/* ============================================================================
+   VyaparOS — Reference Button / Icon UI System
+   Based on the supplied button reference image.
+   IMPORTANT: .vy-mobile-fab and .vy-home-center-button are intentionally
+   excluded so their existing design/behavior remains unchanged.
+   ============================================================================ */
+
+.vyaparos-app button:not(.vy-mobile-fab):not(.vy-home-center-button),
+.vyaparos-app [role="button"]:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  -webkit-tap-highlight-color: transparent;
+  transition: background .18s ease, border-color .18s ease, color .18s ease,
+    transform .18s ease, opacity .18s ease;
+}
+
+.vyaparos-app button:not(.vy-mobile-fab):not(.vy-home-center-button) svg,
+.vyaparos-app [role="button"]:not(.vy-mobile-fab):not(.vy-home-center-button) svg {
+  flex-shrink: 0;
+  stroke-width: 2.15;
+}
+
+/* Main blue action — the reference's rounded/gradient blue button. */
+.vyaparos-app button.bg-primary:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-primary"]:not(.vy-mobile-fab),
+.vyaparos-app .mobile-entry-save:not(.vy-mobile-fab),
+.vyaparos-app .bank-entry-save:not(.vy-mobile-fab),
+.vyaparos-app .vy-ref-gradient-btn:not(.vy-mobile-fab),
+.vyaparos-app .vy-ref-sale-btn:not(.vy-mobile-fab) {
+  background: linear-gradient(100deg, #16b8f3 0%, #1677ea 52%, #6847e8 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border: 1px solid rgba(96, 165, 250, .48) !important;
+  border-radius: 13px !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+.vyaparos-app button.bg-primary:not(.vy-mobile-fab):hover,
+.vyaparos-app button[class*="bg-primary"]:not(.vy-mobile-fab):hover,
+.vyaparos-app .mobile-entry-save:not(.vy-mobile-fab):hover,
+.vyaparos-app .bank-entry-save:not(.vy-mobile-fab):hover {
+  background: linear-gradient(100deg, #0ea9e7 0%, #126de0 52%, #5e3edb 100%) !important;
+}
+
+/* Destructive actions — reference red button. */
+.vyaparos-app button.bg-destructive:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-red-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-rose-"]:not(.vy-mobile-fab),
+.vyaparos-app .invoice-preview-delete-btn:not(.vy-mobile-fab) {
+  background: linear-gradient(100deg, #ff3b30 0%, #ff2d55 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+/* Outline buttons — cyan/blue border and clean white/dark surface. */
+.vyaparos-app button.border:not(.vy-mobile-fab):not(.vy-home-center-button),
+.vyaparos-app button[class*="border-sky-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="border-blue-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="border-indigo-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="border-input"]:not(.vy-mobile-fab) {
+  border-color: #8bd6f8 !important;
+  background: #ffffff !important;
+  color: #1677d8 !important;
+  -webkit-text-fill-color: #1677d8 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app button.border:not(.vy-mobile-fab):not(.vy-home-center-button):hover,
+.vyaparos-app button[class*="border-sky-"]:not(.vy-mobile-fab):hover,
+.vyaparos-app button[class*="border-blue-"]:not(.vy-mobile-fab):hover,
+.vyaparos-app button[class*="border-indigo-"]:not(.vy-mobile-fab):hover,
+.vyaparos-app button[class*="border-input"]:not(.vy-mobile-fab):hover {
+  background: #eefaff !important;
+  border-color: #38bdf8 !important;
+  color: #0759bd !important;
+}
+
+/* Neutral/secondary controls — pale blue like the reference's soft buttons. */
+.vyaparos-app button.bg-secondary:not(.vy-mobile-fab),
+.vyaparos-app button.bg-muted:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-slate-50"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-gray-50"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-sky-50"]:not(.vy-mobile-fab) {
+  background: #e8f5ff !important;
+  color: #1467bd !important;
+  -webkit-text-fill-color: #1467bd !important;
+  border-color: #c7e7fb !important;
+  box-shadow: none !important;
+}
+
+/* Icon-only circular controls — compact blue reference style. */
+.vyaparos-app button.rounded-full:not(.vy-mobile-fab):not(.vy-home-center-button),
+.vyaparos-app [role="button"].rounded-full:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  border: 1px solid #b7ddf7 !important;
+  background: #ffffff !important;
+  color: #0877d8 !important;
+  -webkit-text-fill-color: #0877d8 !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app button.rounded-full:not(.vy-mobile-fab):not(.vy-home-center-button):hover,
+.vyaparos-app [role="button"].rounded-full:not(.vy-mobile-fab):not(.vy-home-center-button):hover {
+  background: #eaf7ff !important;
+  border-color: #60baf0 !important;
+  color: #075db8 !important;
+}
+
+/* Back / close / settings style icon buttons in the reference. */
+.vyaparos-app button.rounded-full.p-2:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  min-width: 40px;
+  min-height: 40px;
+  padding: .5rem !important;
+}
+
+/* Dashed utility button — reference dashed blue outline. */
+.vyaparos-app button.border-dashed:not(.vy-mobile-fab) {
+  background: #fafdff !important;
+  border: 1.5px dashed #3aa7e8 !important;
+  color: #1478c9 !important;
+  -webkit-text-fill-color: #1478c9 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app button.border-dashed:not(.vy-mobile-fab):hover {
+  background: #edf9ff !important;
+  border-color: #158fd1 !important;
+}
+
+/* Text/icon buttons: blue by default, with no old gray/black appearance. */
+.vyaparos-app button.text-primary:not(.vy-mobile-fab),
+.vyaparos-app button[class*="text-blue-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="text-sky-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="text-indigo-"]:not(.vy-mobile-fab) {
+  color: #0877d8 !important;
+  -webkit-text-fill-color: #0877d8 !important;
+}
+
+.vyaparos-app button.text-destructive:not(.vy-mobile-fab),
+.vyaparos-app button[class*="text-red-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="text-rose-"]:not(.vy-mobile-fab) {
+  color: #ef3340 !important;
+  -webkit-text-fill-color: #ef3340 !important;
+}
+
+/* Reference-inspired semantic accent buttons. */
+.vyaparos-app button[class*="bg-pink-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-fuchsia-"]:not(.vy-mobile-fab) {
+  background: linear-gradient(100deg, #ef46c5 0%, #c83ce8 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+}
+
+.vyaparos-app button[class*="bg-emerald-"]:not(.vy-mobile-fab) {
+  background: linear-gradient(100deg, #27c59a 0%, #0fae84 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+}
+
+.vyaparos-app button[class*="bg-orange-"]:not(.vy-mobile-fab),
+.vyaparos-app button[class*="bg-amber-"]:not(.vy-mobile-fab) {
+  background: linear-gradient(100deg, #ffb21c 0%, #f58a19 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* All icons inside filled semantic action buttons remain white like the reference. */
+.vyaparos-app button.bg-primary:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-primary"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button.bg-destructive:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-red-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-rose-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-pink-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-fuchsia-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-emerald-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-orange-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app button[class*="bg-amber-"]:not(.vy-mobile-fab) svg,
+.vyaparos-app .mobile-entry-save:not(.vy-mobile-fab) svg,
+.vyaparos-app .bank-entry-save:not(.vy-mobile-fab) svg {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
+/* Avoid turning menus, tabs and compact list rows into large action buttons. */
+.vyaparos-app [role="menu"] button:not(.vy-mobile-fab),
+.vyaparos-app [role="listbox"] button:not(.vy-mobile-fab),
+.vyaparos-app .vy-ref-tabs button:not(.vy-mobile-fab),
+.vyaparos-app button.h-16:not(.vy-mobile-fab),
+.vyaparos-app button.h-14:not(.vy-mobile-fab) {
+  border-radius: 10px !important;
+}
+
+/* Dark mode equivalent: retain the same blue/violet language without white patches. */
+.dark .vyaparos-app button.border:not(.vy-mobile-fab):not(.vy-home-center-button),
+.dark .vyaparos-app button[class*="border-sky-"]:not(.vy-mobile-fab),
+.dark .vyaparos-app button[class*="border-blue-"]:not(.vy-mobile-fab),
+.dark .vyaparos-app button[class*="border-indigo-"]:not(.vy-mobile-fab),
+.dark .vyaparos-app button[class*="border-input"]:not(.vy-mobile-fab),
+.dark .vyaparos-app button.rounded-full:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  background: #0b243d !important;
+  border-color: #3479aa !important;
+  color: #70c9ff !important;
+  -webkit-text-fill-color: #70c9ff !important;
+}
+
+.dark .vyaparos-app button.bg-secondary:not(.vy-mobile-fab),
+.dark .vyaparos-app button.bg-muted:not(.vy-mobile-fab),
+.dark .vyaparos-app button[class*="bg-slate-50"]:not(.vy-mobile-fab),
+.dark .vyaparos-app button[class*="bg-gray-50"]:not(.vy-mobile-fab),
+.dark .vyaparos-app button[class*="bg-sky-50"]:not(.vy-mobile-fab) {
+  background: #0d2945 !important;
+  border-color: #285d84 !important;
+  color: #8bd7ff !important;
+  -webkit-text-fill-color: #8bd7ff !important;
+}
+
+.dark .vyaparos-app button.border-dashed:not(.vy-mobile-fab) {
+  background: rgba(14, 50, 78, .78) !important;
+  border-color: #45b9f2 !important;
+  color: #78d2ff !important;
+  -webkit-text-fill-color: #78d2ff !important;
+}
+
+/* Keyboard focus follows the reference's blue outline. */
+.vyaparos-app button:not(.vy-mobile-fab):not(.vy-home-center-button):focus-visible,
+.vyaparos-app [role="button"]:not(.vy-mobile-fab):not(.vy-home-center-button):focus-visible {
+  outline: 2px solid rgba(14, 165, 233, .45) !important;
+  outline-offset: 2px;
+}
+
+/* Disabled buttons stay readable and do not become black/gray patches. */
+.vyaparos-app button:disabled:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  background: #e6eef5 !important;
+  color: #7892aa !important;
+  -webkit-text-fill-color: #7892aa !important;
+  border-color: #d0e0ec !important;
+  opacity: .72;
+}
+
+.dark .vyaparos-app button:disabled:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  background: #122a40 !important;
+  color: #7190aa !important;
+  -webkit-text-fill-color: #7190aa !important;
+  border-color: #29445c !important;
+}
+
+/* Explicitly preserve the existing Floating Popup/FAB and mobile Home button. */
+.vyaparos-app .vy-mobile-fab,
+.vyaparos-app .vy-home-center-button,
+.vyaparos-app .vy-home-center-button svg {
+  /* Intentionally no visual overrides here. */
+}
+
+/* Final semantic-priority pass: filled action meaning wins over generic border classes. */
+.vyaparos-app button.bg-primary:not(.vy-mobile-fab):not(.vy-home-center-button):not(:disabled),
+.vyaparos-app button[class*="bg-primary"]:not(.vy-mobile-fab):not(.vy-home-center-button):not(:disabled),
+.vyaparos-app .mobile-entry-save:not(.vy-mobile-fab):not(:disabled),
+.vyaparos-app .bank-entry-save:not(.vy-mobile-fab):not(:disabled),
+.vyaparos-app .vy-ref-gradient-btn:not(.vy-mobile-fab):not(:disabled),
+.vyaparos-app .vy-ref-sale-btn:not(.vy-mobile-fab):not(:disabled) {
+  background: linear-gradient(100deg, #16b8f3 0%, #1677ea 52%, #6847e8 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+}
+
+.vyaparos-app button.bg-destructive:not(.vy-mobile-fab):not(.vy-home-center-button):not(:disabled),
+.vyaparos-app button[class*="bg-red-"]:not(.vy-mobile-fab):not(.vy-home-center-button):not(:disabled),
+.vyaparos-app button[class*="bg-rose-"]:not(.vy-mobile-fab):not(.vy-home-center-button):not(:disabled),
+.vyaparos-app .invoice-preview-delete-btn:not(.vy-mobile-fab):not(:disabled) {
+  background: linear-gradient(100deg, #ff3b30 0%, #ff2d55 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+}
+
+
+/* ============================================================================
+   VyaparOS — Unified rounded tab/button treatment
+   Any Radix Tabs trigger now follows the same pill style as
+   .vy-transaction-section-toggle. FAB and mobile Home remain excluded.
+   ============================================================================ */
+.vyaparos-app [role="tab"]:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  height: 40px !important;
+  min-height: 40px !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(148, 163, 184, .55) !important;
+  background: var(--background) !important;
+  color: var(--muted-foreground) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+  padding: .5rem 1rem !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.vyaparos-app [role="tab"][data-state="active"]:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  border-color: hsl(var(--primary) / .50) !important;
+  background: hsl(var(--primary) / .10) !important;
+  color: hsl(var(--primary)) !important;
+  -webkit-text-fill-color: hsl(var(--primary)) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .08) !important;
+}
+
+.vyaparos-app [role="tab"]:not([data-state="active"]):hover {
+  border-color: hsl(var(--primary) / .35) !important;
+  background: hsl(var(--primary) / .06) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .vyaparos-app [role="tab"]:not([data-state="active"]) {
+  border-color: rgba(96, 165, 250, .32) !important;
+  background: rgba(15, 23, 42, .45) !important;
+  color: #9fb3c8 !important;
+}
+
+.dark .vyaparos-app [role="tab"][data-state="active"] {
+  border-color: rgba(96, 165, 250, .52) !important;
+  background: rgba(59, 130, 246, .12) !important;
+  color: #60a5fa !important;
+}
+
+/* The transaction section toggle is the reference shape for segmented controls. */
+.vyaparos-app .vy-transaction-section-toggle {
+  height: 40px !important;
+  min-height: 40px !important;
+  border-radius: 9999px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Restore a genuinely circular mobile Home button. Do not alter .vy-mobile-fab. */
+.vyaparos-app .vy-home-center-button,
+.vyaparos-app .vy-home-center-button::before,
+.vyaparos-app .vy-home-center-button::after,
+.vyaparos-app .vy-home-center-button > span {
+  border-radius: 50% !important;
+}
+
+.vyaparos-app .vy-home-center-button {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 60px !important;
+  padding: 0 !important;
+}
+
+/* ============================================================================
+   VyaparOS — Final button state treatment
+   - Inactive pills: white with a visible border.
+   - Active/open pills: solid primary/dark, white foreground.
+   - Small primary badges are intentionally darker than primary/10.
+   ============================================================================ */
+.vyaparos-app [role="tab"]:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  background: #ffffff !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app [role="tab"][data-state="active"]:not(.vy-mobile-fab):not(.vy-home-center-button) {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  -webkit-text-fill-color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app .vy-transaction-section-toggle {
+  background: #ffffff !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+}
+
+.vyaparos-app .vy-transaction-section-toggle[aria-pressed="true"],
+.vyaparos-app .vy-transaction-section-toggle.is-active,
+.vyaparos-app .vy-transaction-section-toggle[data-state="active"] {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  -webkit-text-fill-color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+/* Small primary badges: darker than the old primary/10 treatment. */
+.vyaparos-app .bg-primary\/10 {
+  background-color: hsl(var(--primary) / .20) !important;
+}
+
+/* Ledger customer detail page header. */
+.vyaparos-app .vy-ref-ledger-detail-header {
+  box-shadow: none !important;
+}
+
+.vyaparos-app .vy-ref-ledger-detail-header h1 {
+  line-height: 1.25 !important;
+}
+
+.dark .vyaparos-app [role="tab"]:not([data-state="active"]):not(.vy-mobile-fab):not(.vy-home-center-button),
+.dark .vyaparos-app .vy-transaction-section-toggle {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .vyaparos-app [role="tab"][data-state="active"]:not(.vy-mobile-fab):not(.vy-home-center-button),
+.dark .vyaparos-app .vy-transaction-section-toggle[aria-pressed="true"],
+.dark .vyaparos-app .vy-transaction-section-toggle.is-active,
+.dark .vyaparos-app .vy-transaction-section-toggle[data-state="active"] {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+
+/* Expense page primary action animation */
+@keyframes expenseButtonPulse { 0%,100% { box-shadow: 0 8px 22px rgba(14,165,233,.18); transform: translateY(0); } 50% { box-shadow: 0 10px 28px rgba(14,165,233,.30); transform: translateY(-2px); } }
+.expense-add-animated { animation: expenseButtonPulse 2.2s ease-in-out infinite; transition: filter .2s ease, transform .2s ease; }
+.expense-add-animated:active { animation-play-state: paused; filter: brightness(.96); }
+@media (prefers-reduced-motion: reduce) { .expense-add-animated { animation: none; } }
+
+
+/* Mobile bottom-bar Menu action stays a plain icon + label, never the primary gradient button. */
+.vyaparos-app .vy-ref-shell nav[aria-hidden="false"] button.vy-mobile-menu-button,
+:root:not(.dark) .vy-ref-shell nav[aria-hidden="false"] button.vy-mobile-menu-button,
+.dark .vy-ref-shell nav[aria-hidden="false"] button.vy-mobile-menu-button {
+  width: auto !important; height: 100% !important; min-width: 0 !important; margin: 0 !important;
+  padding: 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; background-image: none !important; box-shadow: none !important;
+  color: inherit !important; -webkit-text-fill-color: currentColor !important;
+  font-weight: 500 !important; transform: none !important;
+}
+.vyaparos-app .vy-ref-shell nav[aria-hidden="false"] button.vy-mobile-menu-button svg {
+  width: 20px !important; height: 20px !important; color: currentColor !important;
+  stroke: currentColor !important; filter: none !important;
+}
+.vyaparos-app .vy-ref-shell nav[aria-hidden="false"] button.vy-mobile-menu-button:hover,
+.vyaparos-app .vy-ref-shell nav[aria-hidden="false"] button.vy-mobile-menu-button:active {
+  background: transparent !important; box-shadow: none !important; opacity: .78;
+}

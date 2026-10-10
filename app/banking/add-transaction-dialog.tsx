@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Transaction, TransactionType, TxnCategory, ExpenseTag, BankAccount, ExpenseItem, ExpenseUnit } from './types';
 import { generateId, GALLA_ID, CASH_IN_HAND_ID } from './mock-data';
 
-interface Props { bankAccounts: BankAccount[]; onAdd: (txn: Transaction) => boolean | void; trigger?: React.ReactNode; }
+interface Props { bankAccounts: BankAccount[]; onAdd: (txn: Transaction) => boolean | string | void; trigger?: React.ReactNode; }
 
 const builtInExpense = ['Rent','Utilities','Groceries','Supplies','Maintenance','Transport','Food','Personal','Other'];
 const builtInIncome = ['Salary','Business Revenue','Other'];
@@ -85,6 +85,7 @@ export function AddTransactionDialog({ bankAccounts, onAdd, trigger }: Props) {
     if(txnType === 'Expense' && expenseEntryMode === 'items' && expenseItems.length===0) { setError(language === 'mr' ? 'किमान एक Item Add करा.' : 'Add at least one item.'); return; }
     const txn:Transaction={id:generateId('txn'),type:txnType,amount:finalAmount,category,description:description.trim(),date,tag:(txnType==='Transfer'||txnType==='Savings')?null:tag,sourceAccountId:sourceAccount,destAccountId:(txnType==='Transfer'||txnType==='Savings')?(destAccount||null):null,isFromGalla:sourceAccount===GALLA_ID,shopName:txnType==='Expense'?shopName.trim():'',expenseItems:txnType==='Expense' && expenseEntryMode==='items'?expenseItems:[],createdAt:new Date().toISOString()};
     const ok=onAdd(txn);
+    if(typeof ok==='string'){setError(ok);return;}
     if(ok===false){setError(language==='mr'?'व्यवहार जतन करता आला नाही.':'The transaction could not be saved.');return;}
     reset();
     if(!saveAndNew) setOpen(false);

@@ -432,7 +432,23 @@ export function AIAssistantPage() {
         return true;
       }
       if (bankAccounts.some(a => a.accountNumber === accountNo)) { setAnswer(language === 'mr' ? 'हा account number आधीच सेव्ह आहे.' : 'This account number is already saved.'); return true; }
-      const account = { id: generateId('bank'), bankName: bankName.toUpperCase(), accountHolderName: businessProfile.ownerName || 'User', accountNumber: accountNo, ifscCode: ifsc, accountType: has('current') ? 'Current' as const : 'Savings' as const, balance: 0, upiId: upi, createdAt: new Date().toISOString() };
+      const account = { 
+  id: generateId('bank'), 
+  bankName: bankName.toUpperCase(), 
+  accountHolderName: businessProfile.ownerName || 'User', 
+  accountNumber: accountNo, 
+  ifscCode: ifsc, 
+  accountType: has('current') ? 'Current' as const : 'Savings' as const, 
+  balance: 0, 
+  upiId: upi, 
+  createdAt: new Date().toISOString(),
+  branch: '',          
+  nickname: '',        
+  openingDate: new Date().toISOString().split('T')[0], 
+  status: 'Active',
+  showOnInvoice: true,   // नवीन जोडले (इनव्हॉइसवर दाखवण्यासाठी boolean व्हॅल्यू)
+  notes: ''              // नवीन जोडले (पर्यायी नोट्ससाठी स्ट्रिंग)
+};
       addBankAccount(account);
       setAnswer(language === 'mr' ? `${account.bankName} ${account.accountType} account सेव्ह केला. Account ending ${account.accountNumber.slice(-4)}${upi ? `, UPI ${upi}` : ''}.` : `${account.bankName} ${account.accountType} account saved. Account ending ${account.accountNumber.slice(-4)}.`);
       return true;

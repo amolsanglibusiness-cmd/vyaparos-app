@@ -37,6 +37,7 @@ export function AddPartyFullPage({ onBack, onSaved, onSaveAndNew }: { onBack: ()
   const [pType, setPType] = useState<LedgerPartyType>('Customer');
   const [search, setSearch] = useState('');
   const [contacts, setContacts] = useState<ContactRow[]>([]);
+  const CONTACTS_STORAGE_KEY = 'vyaparos:device-contacts:v1';
   const [showContacts, setShowContacts] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [contactError, setContactError] = useState('');
@@ -47,6 +48,18 @@ export function AddPartyFullPage({ onBack, onSaved, onSaveAndNew }: { onBack: ()
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(CONTACTS_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as ContactRow[];
+        if (Array.isArray(saved) && saved.length > 0) {
+          setContacts(saved);
+          setShowContacts(true);
+        }
+      }
+    } catch {
+      // Ignore an unreadable contact cache; the user can import again.
+    }
     const showTimer = window.setTimeout(() => {
       window.dispatchEvent(new CustomEvent('vyaparos:sale-screen', { detail: { open: true } }));
     }, 0);
@@ -102,6 +115,7 @@ export function AddPartyFullPage({ onBack, onSaved, onSaveAndNew }: { onBack: ()
           return { id: c.contactId, name, phone, email, address };
         }).filter((c) => c.name || c.phone);
         setContacts(rows);
+        if (typeof window !== 'undefined') window.localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify(rows));
         setShowContacts(true);
         return;
       }
@@ -111,6 +125,7 @@ export function AddPartyFullPage({ onBack, onSaved, onSaveAndNew }: { onBack: ()
         const picked = await picker.select(['name', 'tel', 'email', 'address'], { multiple: false });
         const rows = (picked || []).map((c) => ({ name: c.name?.[0] || '', phone: c.tel?.[0] || '', email: c.email?.[0] || '', address: c.address?.[0] || '' }));
         setContacts(rows);
+        if (typeof window !== 'undefined') window.localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify(rows));
         if (rows[0]) selectContact(rows[0]);
         return;
       }
@@ -316,7 +331,7 @@ export function AddPartyFullPage({ onBack, onSaved, onSaveAndNew }: { onBack: ()
             notes: '', 
             createdAt: new Date(`${asOfDate}T00:00:00`).toISOString() 
           });
-          setPName(''); setGstin(''); setPPhone(''); setOpeningBalance(''); setPAddress(''); setPEmail(''); setPPhotoUrl(''); setPartyPhotoError(null); setContacts([]); setShowContacts(false); 
+          setPName(''); setGstin(''); setPPhone(''); setOpeningBalance(''); setPAddress(''); setPEmail(''); setPPhotoUrl(''); setPartyPhotoError(null); setSearch(''); setShowContacts(true); 
         }}>{t.saveAndNew}</Button>
         <Button className="mobile-entry-save h-16 rounded-none border-0" onClick={save}>{t.saveParty}</Button>
       </div>

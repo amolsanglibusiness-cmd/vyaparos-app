@@ -210,7 +210,7 @@ function DashboardContent() {
             <div className="vy-ref-quick-grid">
               <AddTransactionDialog bankAccounts={bankAccounts} onAdd={addTransaction} trigger={<button className="vy-ref-action-card green"><span><ShoppingCart /></span><b>Record Sale</b><small>Add a new sale</small></button>} />
               <Link href="/invoice" className="vy-ref-action-card purple"><span><ReceiptText /></span><b>Create Invoice</b><small>Generate invoice</small></Link>
-              <AddTransactionDialog bankAccounts={bankAccounts} onAdd={addTransaction} trigger={<button className="vy-ref-action-card amber"><span><TrendingDown /></span><b>Add Expense</b><small>Track expenses</small></button>} />
+              <Link href="/expense-management" className="vy-ref-action-card amber"><span><TrendingDown /></span><b>+ Expense</b><small>Track expenses</small></Link>
               <Link href="/reports" className="vy-ref-action-card blue"><span><BarChart3 /></span><b>View Reports</b><small>Check business performance</small></Link>
             </div>
           </section>

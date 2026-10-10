@@ -42,13 +42,14 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // output: 'export', <-- ही लाईन काढून टाका
+    // Capacitor Android APK साठी 'out' फोल्डर बनण्यासाठी ही लाईन आवश्यक आहे
+    output: 'export',
     trailingSlash: false,
     eslint: {
         ignoreDuringBuilds: true,
     },
     images: {
-        unoptimized: true,
+        unoptimized: true, // Static Export मुळे इमेज ऑप्टिमायझेशन unoptimized ठेवावे लागते
     },
     transpilePackages: ['lucide-react'],
     env: {

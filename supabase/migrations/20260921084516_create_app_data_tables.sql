@@ -40,13 +40,22 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   bank_name text NOT NULL,
-  account_holder_name text NOT NULL,
-  account_number text NOT NULL,
-  ifsc_code text NOT NULL,
-  account_type text NOT NULL DEFAULT 'Savings',
-  balance numeric NOT NULL DEFAULT 0,
-  upi_id text NOT NULL DEFAULT '',
-  created_at timestamptz NOT NULL DEFAULT now()
+  account_holder text,
+  account_number text,
+  ifsc text,
+  account_type text DEFAULT 'Savings',
+  balance numeric DEFAULT 0,
+  upi_id text DEFAULT '',
+  branch text,
+  nickname text,
+  opening_balance numeric DEFAULT 0,
+  opening_date date,
+  is_default boolean DEFAULT false,
+  status text DEFAULT 'Active',
+  show_on_invoice boolean DEFAULT true,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE bank_accounts ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_bank_accounts_user_id ON bank_accounts(user_id);

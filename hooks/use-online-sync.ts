@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { syncAll, getPendingCount } from '@/lib/sync-service';
+import { syncAll, getPendingCount, applyRemoteChange } from '@/lib/sync-service';
+import type { TableName } from '@/lib/offline-db';
 import { supabase } from '@/lib/supabase';
 import { markOfflineSync } from '@/lib/offline-first';
 import { App } from '@capacitor/app';
@@ -65,6 +66,24 @@ export function useOnlineSync(): OnlineSyncValue {
     return () => {
       listener.subscription.unsubscribe();
     };
+  }, [triggerSync]);
+
+
+  useEffect(() => {
+    const tables: TableName[] = [
+      'bank_accounts','sub_savings','transactions','financial_goals',
+      'inventory_items','invoices','ledger_parties','ledger_entries','business_profiles',
+    ];
+    const channel = supabase.channel('vyaparos-two-way-sync');
+    for (const table of tables) {
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+        const row = (payload.eventType === 'DELETE' ? payload.old : payload.new) as Record<string, unknown>;
+        void applyRemoteChange(table, payload.eventType as 'INSERT'|'UPDATE'|'DELETE', row)
+          .catch((error) => console.error('[Supabase Realtime] Apply failed:', error));
+      });
+    }
+    void channel.subscribe((status) => { if (status === 'SUBSCRIBED') void triggerSync(); });
+    return () => { void supabase.removeChannel(channel); };
   }, [triggerSync]);
 
   // Android/iOS resume is a first-class sync trigger. This matters when the

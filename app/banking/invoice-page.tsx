@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Check, ChevronRight, FilePlus2, ImageDown, MoreVertical, Plus, Printer, ReceiptText, Search, Share2, ShoppingCart, Trash2, UserPlus, Pencil, ChevronDown, CalendarDays, Settings, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -72,15 +73,14 @@ interface ItemDraft {
   discountValue: string;
 }
 
-
 function emptyItem(): ItemDraft {
   return { name: '', category: 'General', hsnCode: '', unit: 'pcs', salePrice: '', purchasePrice: '', openingStock: '0', minStock: '0', taxRate: '0', taxType: 'without', quantity: '1', discountValue: '0' };
 }
 
-function buildUpiLink(upiId: string, businessName: string, amount?: number) {
+function buildUpiLink(upiId: string, _businessName: string, amount?: number) {
   if (!upiId) return '';
-  const params = new URLSearchParams({ pa: upiId, pn: businessName || 'Business', cu: 'INR' });
-  if (amount && amount > 0) params.set('am', amount.toFixed(2));
+  const params = new URLSearchParams({ pa: upiId, cu: 'INR' });
+  if (amount && amount > 0) params.set('am', String(Number(amount.toFixed(2))));
   return `upi://pay?${params.toString()}`;
 }
 
@@ -115,7 +115,6 @@ export function InvoicePage() {
   const { bankAccounts, inventoryItems, ledgerParties, ledgerEntries, invoices, addInventoryItem, updateInventoryItem, addInvoice, updateInvoice, addLedgerParty, addLedgerEntry, deleteLedgerEntry, addTransaction, deleteTransaction, deleteInvoice } = useAppData();
 
   const [screen, setScreen] = useState<Screen>('list');
-  // Prevent the old ?view=... search param from reopening the preview after Back.
   const skipNextViewParamRef = useRef(false);
   const [invoiceListSearch, setInvoiceListSearch] = useState('');
   const [invoiceListFilter, setInvoiceListFilter] = useState<'this-month' | 'this-week' | 'all'>('all');
@@ -126,6 +125,9 @@ export function InvoicePage() {
   useClickOutside(invoiceFilterRef, closeInvoiceFilter, invoiceDateFilterOpen);
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<'all' | 'Paid' | 'Pending' | 'Overdue'>('all');
 
+  // नवीन: Tax Invoice टॉगल (डीफॉल्ट 'no' अर्थात false)
+  const [isTaxInvoice, setIsTaxInvoice] = useState(false);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     window.dispatchEvent(new CustomEvent('vyaparos:sale-screen', { detail: { open: screen !== 'list' } }));
@@ -133,6 +135,7 @@ export function InvoicePage() {
       window.dispatchEvent(new CustomEvent('vyaparos:sale-screen', { detail: { open: false } }));
     };
   }, [screen]);
+
   const [invoiceTheme, setInvoiceTheme] = useState<InvoiceTheme>('standard');
   const [invoiceNumber, setInvoiceNumber] = useState(() => nextInvoiceNumber(invoices));
   const [date, setDate] = useState(today());
@@ -174,6 +177,9 @@ export function InvoicePage() {
   const [partyNotes, setPartyNotes] = useState('');
   const [partyPhotoUrl, setPartyPhotoUrl] = useState('');
   const [busy, setBusy] = useState(false);
+  const saveLockRef = useRef(false);
+  const lastSavedPartyRef = useRef<LedgerParty | null>(null);
+  const lastSavedBalanceRef = useRef(0);
   const [itemQuery, setItemQuery] = useState('');
   const [itemSearchOpen, setItemSearchOpen] = useState(false);
   const customerSearchRef = useRef<HTMLDivElement>(null);
@@ -186,9 +192,6 @@ export function InvoicePage() {
   useClickOutside(itemSearchRef, closeItemSearch, itemSearchOpen && screen === 'items');
 
   const loadInvoiceForEdit = useCallback((invoice: Invoice) => {
-    // Enter a complete edit session from the saved invoice. Every persisted
-    // invoice field is copied into the form so editing is not limited to the
-    // customer/items only.
     setEditingInvoiceId(invoice.id);
     setInvoiceNumber(invoice.invoiceNumber);
     setDate(invoice.date);
@@ -260,6 +263,7 @@ export function InvoicePage() {
     const frame = requestAnimationFrame(resetPageScroll);
     return () => cancelAnimationFrame(frame);
   }, [screen]);
+
   const customerSuggestions = useMemo(() => {
     const rawQuery = customerQuery.trim();
     const q = rawQuery.toLowerCase();
@@ -274,6 +278,7 @@ export function InvoicePage() {
       })
       .slice(0, 8);
   }, [customerQuery, ledgerParties, selectedCustomer]);
+
   const itemSuggestions = useMemo(() => {
     const q = itemQuery.trim().toLowerCase();
     if (!q) return inventoryItems.slice(0, 8);
@@ -466,14 +471,13 @@ export function InvoicePage() {
       if (item) updateInventoryItem({ ...item, stock: item.stock + Math.max(0, Number(line.quantity) || 0) });
     }
     ledgerEntries.filter((entry) => entry.description.startsWith(`${invoice.invoiceNumber} —`)).forEach((entry) => {
-      // deleteLedgerEntry is supplied by AppDataContext in the latest build; guard for older contexts.
       try { (deleteLedgerEntry as (id: string) => void)(entry.id); } catch {}
     });
     if (invoice.transactionId) deleteTransaction(invoice.transactionId);
   };
 
   const commitInvoice = async (goPreview: boolean): Promise<Invoice | null> => {
-    if (busy) return null;
+    if (busy || saveLockRef.current) return null;
     if (isReceiptMode) {
       if (receiptTotal <= 0) { toast.error('जमा पावतीसाठी Total Amount ₹0 पेक्षा जास्त असणे आवश्यक आहे.'); return null; }
       if (receiptReceived <= 0) { toast.error('जमा पावतीसाठी Received Amount टाका.'); return null; }
@@ -483,16 +487,29 @@ export function InvoicePage() {
     if (!creditMode && paymentMethod !== 'Cash' && !paymentAccountId) { toast.error('Bank / UPI / Cheque साठी account निवडा.'); return null; }
     const duplicate = duplicatePhone(customerPhone, selectedCustomer?.id);
     if (duplicate) { setCustomerError(duplicate); toast.error('हा mobile number दुसऱ्या customer कडे आहे.'); return null; }
+    saveLockRef.current = true;
     setBusy(true);
     try {
       const party = ensureCustomer();
       if (customerError) throw new Error('Customer mobile validation failed.');
       const previousInvoice = editingInvoiceId ? invoices.find((entry) => entry.id === editingInvoiceId) || null : null;
+      if (!editingInvoiceId && invoices.some((entry) => entry.invoiceNumber.trim() === (invoiceNumber.trim() || nextInvoiceNumber(invoices)))) {
+        throw new Error(`Invoice number ${invoiceNumber.trim() || nextInvoiceNumber(invoices)} already exists. Please use the next invoice number.`);
+      }
       if (previousInvoice) reverseInvoiceEffects(previousInvoice, false);
       const invoice = buildInvoice(party);
       const invoiceTxnId = generateId('txn');
       invoice.transactionId = creditMode || received <= 0 ? null : invoiceTxnId;
       if (previousInvoice) updateInvoice(invoice); else addInvoice(invoice);
+
+      const currentPartyBalance = party
+        ? party.openingBalance + ledgerEntries.filter((entry) => entry.partyId === party.id).reduce((sum, entry) => sum + (entry.type === 'Given' ? Number(entry.amount) : -Number(entry.amount)), 0)
+        : 0;
+      const previousReceived = previousInvoice ? Math.max(0, Number(previousInvoice.total || 0) - Number(previousInvoice.balanceDue || 0)) : 0;
+      const previousNet = previousInvoice ? Number(previousInvoice.balanceDue || 0) - previousReceived : 0;
+      const newNet = Number(balanceDue || 0) - Number(received || 0);
+      lastSavedPartyRef.current = party;
+      lastSavedBalanceRef.current = currentPartyBalance - previousNet + newNet;
 
       const stockDelta = new Map<string, number>();
       if (previousInvoice) {
@@ -525,9 +542,6 @@ export function InvoicePage() {
         addTransaction(txn);
       }
       setSavedInvoice(invoice);
-      // Keep the URL synchronized with the invoice currently being displayed.
-      // This prevents a stale ?view=<old-id> from reopening the previous bill
-      // after a different invoice is selected or a new sale is saved.
       if (goPreview) {
         router.replace(`/invoice?view=${encodeURIComponent(invoice.id)}`);
         setScreen('preview');
@@ -539,7 +553,10 @@ export function InvoicePage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Invoice save failed.');
       return null;
-    } finally { setBusy(false); }
+    } finally {
+      saveLockRef.current = false;
+      setBusy(false);
+    }
   };
 
   const saveAndShare = async () => {
@@ -559,8 +576,11 @@ export function InvoicePage() {
   }, [searchParams]);
 
   const reset = () => {
+    lastSavedPartyRef.current = null;
+    lastSavedBalanceRef.current = 0;
     setEditingInvoiceId(null);
     setScreen('sale'); setInvoiceNumber(nextInvoiceNumber([...invoices, ...(savedInvoice ? [savedInvoice] : [])])); setDate(today()); setCreditMode(false); setCustomerQuery(''); setCustomerPhone(''); setCustomerAddress(''); setSelectedCustomer(null); setCustomerError(null); setLines([]); setBillDiscountValue('0'); setBillTaxValue('0'); setRoundOff(false); setPaymentMethod('Cash'); setPaymentAccountId(''); setReceivedAmount(''); setReceiptTotalAmount(''); setSupplyState(''); setDescription(''); setAttachmentName(''); setAttachmentDataUrl(''); setSavedInvoice(null);
+    setIsTaxInvoice(false);
   };
 
   const openItems = () => { setSavedInvoice(null); setScreen('items'); };
@@ -573,9 +593,6 @@ export function InvoicePage() {
       setScreen('list');
       return;
     }
-    // The invoice header Back button is a root-level navigation action.
-    // Always return to Dashboard instead of restoring an older /invoice?view=...
-    // history entry.
     router.push('/');
   };
   const openCreateInvoice = () => {
@@ -594,8 +611,8 @@ export function InvoicePage() {
     if (!ctx) throw new Error('Canvas unavailable');
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#111827';
     ctx.font = '700 30px Arial'; ctx.fillText(businessProfile.businessName || 'Business', 50, 60);
-    ctx.font = '18px Arial'; ctx.fillStyle = '#4b5563'; ctx.fillText((businessProfile.businessAddress || '').slice(0, 85), 50, 90); ctx.fillText(`${businessProfile.phone || ''}${businessProfile.gstin ? ` • GSTIN ${businessProfile.gstin}` : ''}`, 50, 118);
-    ctx.fillStyle = '#111827'; ctx.font = '700 28px Arial'; ctx.textAlign = 'right'; ctx.fillText(isReceipt ? 'PAYMENT RECEIPT' : 'TAX INVOICE', canvas.width - 50, 60); ctx.font = '18px Arial'; ctx.fillText(invoice.invoiceNumber, canvas.width - 50, 90); ctx.fillText(new Date(invoice.date).toLocaleDateString('en-IN'), canvas.width - 50, 118); ctx.textAlign = 'left';
+    ctx.font = '18px Arial'; ctx.fillStyle = '#4b5563'; ctx.fillText((businessProfile.businessAddress || '').slice(0, 85), 50, 90); ctx.fillText(`${businessProfile.phone || ''}${businessProfile.gstin && isTaxInvoice ? ` • GSTIN ${businessProfile.gstin}` : ''}`, 50, 118);
+    ctx.fillStyle = '#111827'; ctx.font = '700 28px Arial'; ctx.textAlign = 'right'; ctx.fillText(isReceipt ? 'PAYMENT RECEIPT' : (isTaxInvoice ? 'TAX INVOICE' : 'INVOICE'), canvas.width - 50, 60); ctx.font = '18px Arial'; ctx.fillText(invoice.invoiceNumber, canvas.width - 50, 90); ctx.fillText(new Date(invoice.date).toLocaleDateString('en-IN'), canvas.width - 50, 118); ctx.textAlign = 'left';
     let y = 165; ctx.strokeStyle = '#d1d5db'; ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(canvas.width - 50, y); ctx.stroke(); y += 45;
     ctx.font = '700 19px Arial'; ctx.fillStyle = '#111827'; ctx.fillText(`Customer: ${invoice.customerName}`, 50, y); ctx.font = '16px Arial'; ctx.fillStyle = '#4b5563';
     if (invoice.customerPhone) { ctx.fillText(`Mobile: ${invoice.customerPhone}`, 50, y + 28); }
@@ -613,8 +630,6 @@ export function InvoicePage() {
       y += 25; ctx.textAlign = 'right'; ctx.font = '17px Arial'; ctx.fillStyle = '#374151'; ctx.fillText(`Subtotal: ${money(invoice.subtotal)}`, canvas.width - 50, y); y += 28; ctx.fillText(`Tax: ${money(invoice.taxAmount || 0)}`, canvas.width - 50, y); y += 28; ctx.fillText(`Discount: -${money(invoice.discount)}`, canvas.width - 50, y); y += 35; ctx.font = '700 25px Arial'; ctx.fillStyle = '#111827'; ctx.fillText(`TOTAL: ${money(invoice.total)}`, canvas.width - 50, y); ctx.textAlign = 'left';
       y += 60; ctx.font = '700 16px Arial'; ctx.fillText(`Payment: ${invoice.paymentMethod} • ${invoice.paymentStatus || 'Paid'}`, 50, y); if (invoice.stateOfSupply) { y += 25; ctx.font = '15px Arial'; ctx.fillText(`State of Supply: ${invoice.stateOfSupply}`, 50, y); }
     }
-    // Render bank/payment details as a visible section in the PNG itself (not only in the Preview DOM).
-    // Resolve the saved invoice account first, then the configured main/first bank as a safe fallback.
     const bankY = Math.max(y + 70, isReceipt ? 430 : y + 70);
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(50, bankY - 35, canvas.width - 100, 210);
@@ -634,7 +649,6 @@ export function InvoicePage() {
       ctx.fillText('Bank details not configured', 75, bankY + 40);
     }
     if (invoice.terms && !isReceipt) { ctx.font = '12px Arial'; ctx.fillStyle = '#64748b'; ctx.fillText(invoice.terms.slice(0, 120), 75, bankY + 160); }
-    // Generate QR independently of the Preview DOM.
     if (imageBank?.upiId) {
       try {
         const qrMarkupForImage = renderToStaticMarkup(<QRCodeSVG value={buildUpiLink(imageBank.upiId, businessProfile.businessName, invoice.total)} size={130} includeMargin />);
@@ -653,27 +667,165 @@ export function InvoicePage() {
     return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Image generation failed')), 'image/png', 0.95));
   };
 
-  const shareInvoice = async (invoice: Invoice) => {
-    const shareBank = getInvoiceBank(invoice);
-    const upi = shareBank?.upiId || '';
-    const text = [businessProfile.businessName, `Invoice: ${invoice.invoiceNumber}`, `Customer: ${invoice.customerName}`, `Total: ${money(invoice.total)}`, `Payment: ${invoice.paymentMethod} (${invoice.paymentStatus || 'Paid'})`, upi ? `UPI: ${upi}` : ''].filter(Boolean).join('\n');
-    setBusy(true);
-    try {
-      const blob = await createInvoiceImage(invoice);
-      const file = new File([blob], `${invoice.invoiceNumber}.png`, { type: 'image/png' });
-      if (Capacitor.isNativePlatform()) {
-        await nativeShareFile(blob, `${invoice.invoiceNumber}.png`, 'image/png', text);
-        toast.success('Invoice image share करण्यासाठी उघडले.');
-      } else if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
-        await navigator.share({ title: invoice.invoiceNumber, text, files: [file] });
-      } else {
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
-        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${invoice.invoiceNumber}.png`; a.click(); URL.revokeObjectURL(url);
-        toast.success('WhatsApp text + invoice image तयार झाले.');
-      }
-    } catch (error) { if ((error as DOMException)?.name !== 'AbortError') toast.error(error instanceof Error ? error.message : 'Share failed.'); }
-    finally { setBusy(false); }
+  const createPublicLedgerShareLink = async (party: LedgerParty | null) => {
+    if (!party?.id) return '';
+    const existing = await supabase
+      .from('ledger_share_links')
+      .select('token, created_at')
+      .eq('party_id', party.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing.error) throw existing.error;
+    if (existing.data?.token) {
+      return `https://vyaparos-app.vercel.app/t/${encodeURIComponent(existing.data.token)}?s=pr`;
+    }
+
+    const paymentAccount =
+      bankAccounts.find((account) => account.id === businessProfile.mainBankAccountId) ||
+      bankAccounts.find((account) => Boolean(account.upiId)) ||
+      bankAccounts[0] ||
+      null;
+
+    const businessSnapshot = {
+      ownerName: businessProfile.ownerName || '',
+      businessName: businessProfile.businessName || '',
+      businessAddress: businessProfile.businessAddress || '',
+      phone: businessProfile.phone || '',
+      email: businessProfile.email || '',
+      gstin: businessProfile.gstin || '',
+      businessLogoUrl: businessProfile.businessLogoUrl || null,
+    };
+
+    const paymentSnapshot = paymentAccount
+      ? {
+          bankName: paymentAccount.bankName || '',
+          accountHolderName: paymentAccount.accountHolderName || '',
+          accountNumber: paymentAccount.accountNumber || '',
+          ifscCode: paymentAccount.ifscCode || '',
+          upiId: paymentAccount.upiId || '',
+        }
+      : null;
+
+    const { data, error } = await supabase
+      .from('ledger_share_links')
+      .insert({
+        party_id: party.id,
+        business_snapshot: businessSnapshot,
+        payment_snapshot: paymentSnapshot,
+      })
+      .select('token')
+      .single();
+
+    if (error) throw error;
+    if (!data?.token) throw new Error('Customer ledger token मिळाला नाही.');
+
+    return `https://vyaparos-app.vercel.app/t/${encodeURIComponent(data.token)}?s=pr`;
   };
+
+  const getShareParty = (invoice: Invoice) => {
+    if (invoice.customerId) {
+      return ledgerParties.find((party) => party.id === invoice.customerId) ||
+        (lastSavedPartyRef.current?.id === invoice.customerId ? lastSavedPartyRef.current : null);
+    }
+    return null;
+  };
+
+  const buildInvoiceWhatsAppText = async (invoice: Invoice) => {
+    const shareBank = getInvoiceBank(invoice);
+    const party = getShareParty(invoice);
+    const currentBalance = invoice.customerId === lastSavedPartyRef.current?.id
+      ? lastSavedBalanceRef.current
+      : party
+        ? party.openingBalance + ledgerEntries.filter((entry) => entry.partyId === party.id).reduce((sum, entry) => sum + (entry.type === 'Given' ? Number(entry.amount) : -Number(entry.amount)), 0)
+        : Number(invoice.balanceDue || 0);
+
+    let ledgerUrl = '';
+    if (party) {
+      try {
+        ledgerUrl = await createPublicLedgerShareLink(party);
+      } catch (error) {
+        console.error('Public ledger link creation failed:', error);
+      }
+    }
+
+    const invoiceDue = Math.max(0, Number(invoice.balanceDue || 0));
+    const totalOutstanding = Math.max(0, Number(currentBalance));
+    const upi = shareBank?.upiId || '';
+    const lines = [
+      `Dear ${invoice.customerName || 'Customer'},`,
+      '',
+      `Current balance: ${money(totalOutstanding)}`,
+      '',
+      'You can view all bills, receipts, payments, pending amounts and complete history without logging in.',
+      ledgerUrl,
+    ];
+
+    if (upi && invoiceDue > 0) {
+      lines.push('', `💳 Pay Current Bill: ${money(invoiceDue)}`, buildUpiLink(upi, '', invoiceDue));
+    }
+    if (upi && totalOutstanding > 0) {
+      lines.push('', `💳 Pay Total Outstanding: ${money(totalOutstanding)}`, buildUpiLink(upi, '', totalOutstanding));
+    }
+
+    return lines.filter((line, index, arr) => !(line === '' && arr[index - 1] === '')).join('\n');
+  };
+
+  const shareInvoice = async (invoice: Invoice) => {
+  setBusy(true);
+  try {
+    const text = await buildInvoiceWhatsAppText(invoice);
+    const element = document.getElementById('invoice-preview-export');
+    if (!element) throw new Error('Invoice preview तयार नाही.');
+
+    const canvas = await renderA4InvoiceCanvas(element);
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+    pdf.addImage(canvas.toDataURL('image/png', 1), 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+    const pdfBlob = pdf.output('blob') as Blob;
+    const filename = `${invoice.invoiceNumber}-A4.pdf`;
+    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+    // ग्राहकाचा मोबाईल नंबर मिळवणे आणि क्लीन करणे
+    const party = getShareParty(invoice);
+    let rawPhone = cleanPhone(party?.phone || invoice.customerPhone || '');
+    
+    // नंबर फॉरमॅट करणे (फक्त अंक मिळवण्यासाठी)
+    let formattedPhone = '';
+    if (rawPhone) {
+      let digits = rawPhone.replace(/\D/g, '');
+      if (digits.length === 10) {
+        formattedPhone = `91${digits}`;
+      } else if (digits.startsWith('91') && digits.length === 12) {
+        formattedPhone = digits;
+      } else {
+        formattedPhone = digits;
+      }
+    }
+
+    if (Capacitor.isNativePlatform()) {
+      // नेटिव्ह ॲपसाठी (जर नेटिव्ह प्लॅटफॉर्म असेल आणि विशिष्ट नंबरवर पाठवायचे असेल)
+      await nativeShareFile(pdfBlob, filename, 'application/pdf', text);
+      toast.success('Invoice PDF + WhatsApp message share करण्यासाठी उघडले.');
+    } else if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+      // मोबाईल किंवा सपोर्टेड ब्राउझर वेब शेअर API
+      await navigator.share({ title: invoice.invoiceNumber, text, files: [file] });
+    } else {
+      // तुम्ही सांगितलेल्या api.whatsapp.com फॉरमॅटनुसार लिंक तयार करणे
+      const waUrl = formattedPhone 
+        ? `https://api.whatsapp.com/send/?phone=${formattedPhone}&text=${encodeURIComponent(text)}&type=phone_number&app_absent=0`
+        : `https://api.whatsapp.com/send/?text=${encodeURIComponent(text)}&app_absent=0`;
+        
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+      downloadBlob(pdfBlob, filename);
+      toast.success('WhatsApp मेसेज ग्राहकाच्या नंबरवर तयार केला आहे; PDF डाउनलोड झाली आहे.');
+    }
+  } catch (error) {
+    if ((error as DOMException)?.name !== 'AbortError') toast.error(error instanceof Error ? error.message : 'Share failed.');
+  } finally {
+    setBusy(false);
+  }
+};
 
   const downloadImage = async (invoice: Invoice) => {
     try {
@@ -693,13 +845,10 @@ export function InvoicePage() {
   };
 
   const shareInvoiceWhatsApp = async (invoice: Invoice) => {
-    const text = [businessProfile.businessName || 'Business', `Invoice: ${invoice.invoiceNumber}`, `Customer: ${invoice.customerName}`, `Total: ${money(invoice.total)}`, `Payment: ${invoice.paymentMethod} (${invoice.paymentStatus || 'Paid'})`].join('\n');
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    await shareInvoice(invoice);
   };
 
   const renderA4InvoiceCanvas = async (element: HTMLElement): Promise<HTMLCanvasElement> => {
-    // Always render from a fixed A4 CSS canvas (794 x 1123px) so mobile exports are
-    // still physically A4 when saved as PNG/PDF. The visible preview remains responsive.
     const A4_W = 794;
     const A4_H = 1123;
     const clone = element.cloneNode(true) as HTMLElement;
@@ -719,7 +868,7 @@ export function InvoicePage() {
     const cloneInner = clone.firstElementChild as HTMLElement | null;
     if (cloneInner) {
       cloneInner.style.minHeight = `${A4_H}px`;
-      cloneInner.style.padding = '30px'; // 8mm at 96 CSS px/in, kept equal on all four sides.
+      cloneInner.style.padding = '30px';
       cloneInner.style.boxSizing = 'border-box';
     }
     clone.querySelectorAll<HTMLElement>('*').forEach((node) => {
@@ -742,7 +891,6 @@ export function InvoicePage() {
         scrollY: 0,
       });
 
-      // Normalize to an exact 2480 x 3508 A4 PNG canvas (300 DPI equivalent).
       const out = document.createElement('canvas');
       out.width = 2480;
       out.height = 3508;
@@ -873,8 +1021,6 @@ export function InvoicePage() {
   };
 
   const printInvoice = (invoice: Invoice) => {
-    // Save & Print first switches to the same preview DOM used by the Print button.
-    // This avoids popup blockers and works much more reliably on Android/iOS browsers.
     setSavedInvoice(invoice);
     setScreen('preview');
     window.setTimeout(() => {
@@ -1015,11 +1161,11 @@ export function InvoicePage() {
   }
 
   if (screen === 'preview' && savedInvoice) {
-    return <PreviewScreen invoice={savedInvoice} profile={businessProfile} bank={getInvoiceBank(savedInvoice)} onBack={() => { skipNextViewParamRef.current = true; router.replace('/invoice'); setSavedInvoice(null); setScreen('list'); }} onWhatsApp={() => shareInvoiceWhatsApp(savedInvoice)} onShare={() => shareInvoice(savedInvoice)} onDownload={() => downloadImage(savedInvoice)} onPrint={() => printInvoice(savedInvoice)} onExportDom={(format: 'png' | 'pdf', element: HTMLElement | null) => exportInvoiceFromDom(savedInvoice, format, element)} onPrintDom={(element: HTMLElement | null) => printInvoiceFromDom(element)} onEdit={() => { loadInvoiceForEdit(savedInvoice); setSavedInvoice(null); setScreen('sale'); router.replace('/invoice'); }} onDelete={() => deletePreviewInvoice(savedInvoice)} busy={busy} qrRef={qrRef} />;
+    return <PreviewScreen invoice={savedInvoice} profile={businessProfile} bank={getInvoiceBank(savedInvoice)} isTaxInvoice={isTaxInvoice} onBack={() => { skipNextViewParamRef.current = true; router.replace('/invoice'); setSavedInvoice(null); setScreen('list'); }} onWhatsApp={() => shareInvoiceWhatsApp(savedInvoice)} onShare={() => shareInvoice(savedInvoice)} onDownload={() => downloadImage(savedInvoice)} onPrint={() => printInvoice(savedInvoice)} onExportDom={(format: 'png' | 'pdf', element: HTMLElement | null) => exportInvoiceFromDom(savedInvoice, format, element)} onPrintDom={(element: HTMLElement | null) => printInvoiceFromDom(element)} onEdit={() => { loadInvoiceForEdit(savedInvoice); setSavedInvoice(null); setScreen('sale'); router.replace('/invoice'); }} onDelete={() => deletePreviewInvoice(savedInvoice)} busy={busy} qrRef={qrRef} />;
   }
 
   return <>
-    <SaleScreen businessProfile={businessProfile} mainBank={mainBank} invoiceNumber={invoiceNumber} setInvoiceNumber={setInvoiceNumber} date={date} setDate={setDate} creditMode={creditMode} setCreditMode={setCreditMode} customerQuery={customerQuery} setCustomerQuery={setCustomerQuery} customerPhone={customerPhone} handlePhone={handlePhone} customerAddress={customerAddress} setCustomerAddress={setCustomerAddress} selectedCustomer={selectedCustomer} selectCustomer={selectCustomer} customerSuggestions={customerSuggestions} customerSearchRef={customerSearchRef} customerSearchOpen={customerSearchOpen} setCustomerSearchOpen={setCustomerSearchOpen} onNewCustomer={openNewCustomer} customerError={customerError} clearCustomer={() => { setSelectedCustomer(null); setCustomerQuery(''); setCustomerPhone(''); setCustomerAddress(''); setCustomerSearchOpen(true); }} customerBalance={customerBalance} lines={lines} itemDiscount={itemDiscount} itemTax={itemTax} totalQty={totalQty} subtotal={subtotal} billDiscountMode={billDiscountMode} setBillDiscountMode={setBillDiscountMode} billDiscountValue={billDiscountValue} setBillDiscountValue={setBillDiscountValue} billTaxMode={billTaxMode} setBillTaxMode={setBillTaxMode} billTaxValue={billTaxValue} setBillTaxValue={setBillTaxValue} roundOff={roundOff} setRoundOff={setRoundOff} total={total} documentTotal={documentTotal} isReceiptMode={isReceiptMode} roundOffAmount={roundOffAmount} received={received} receivedAmount={receivedAmount} setReceivedAmount={setReceivedAmount} receiptTotalAmount={receiptTotalAmount} setReceiptTotalAmount={setReceiptTotalAmount} balanceDue={balanceDue} paymentMethod={paymentMethod} setPaymentMethod={(m) => { setPaymentMethod(m); setPaymentAccountId(''); }} paymentAccountId={paymentAccountId} setPaymentAccountId={setPaymentAccountId} bankAccounts={bankAccounts} supplyState={supplyState} setSupplyState={setSupplyState} description={description} setDescription={setDescription} attachmentName={attachmentName} onAttachment={handleAttachment} terms={terms} setTerms={setTerms} signatureEnabled={signatureEnabled} setSignatureEnabled={setSignatureEnabled} onBack={back} onItems={openItems} onEditLine={startEditLine} onSave={() => { void commitInvoice(true); }} onSaveNew={async () => { const invoice = await commitInvoice(false); if (invoice) reset(); }} onShare={saveAndShare} onPrint={saveAndPrint} busy={busy} onLedger={() => router.push('/ledger')} />
+    <SaleScreen businessProfile={businessProfile} mainBank={mainBank} invoiceNumber={invoiceNumber} setInvoiceNumber={setInvoiceNumber} date={date} setDate={setDate} creditMode={creditMode} setCreditMode={setCreditMode} customerQuery={customerQuery} setCustomerQuery={setCustomerQuery} customerPhone={customerPhone} handlePhone={handlePhone} customerAddress={customerAddress} setCustomerAddress={setCustomerAddress} selectedCustomer={selectedCustomer} selectCustomer={selectCustomer} customerSuggestions={customerSuggestions} customerSearchRef={customerSearchRef} customerSearchOpen={customerSearchOpen} setCustomerSearchOpen={setCustomerSearchOpen} onNewCustomer={openNewCustomer} customerError={customerError} clearCustomer={() => { setSelectedCustomer(null); setCustomerQuery(''); setCustomerPhone(''); setCustomerAddress(''); setCustomerSearchOpen(true); }} customerBalance={customerBalance} lines={lines} itemDiscount={itemDiscount} itemTax={itemTax} totalQty={totalQty} subtotal={subtotal} billDiscountMode={billDiscountMode} setBillDiscountMode={setBillDiscountMode} billDiscountValue={billDiscountValue} setBillDiscountValue={setBillDiscountValue} billTaxMode={billTaxMode} setBillTaxMode={setBillTaxMode} billTaxValue={billTaxValue} setBillTaxValue={setBillTaxValue} roundOff={roundOff} setRoundOff={setRoundOff} total={total} documentTotal={documentTotal} isReceiptMode={isReceiptMode} roundOffAmount={roundOffAmount} received={received} receivedAmount={receivedAmount} setReceivedAmount={setReceivedAmount} receiptTotalAmount={receiptTotalAmount} setReceiptTotalAmount={setReceiptTotalAmount} balanceDue={balanceDue} paymentMethod={paymentMethod} setPaymentMethod={(m) => { setPaymentMethod(m); setPaymentAccountId(''); }} paymentAccountId={paymentAccountId} setPaymentAccountId={setPaymentAccountId} bankAccounts={bankAccounts} supplyState={supplyState} setSupplyState={setSupplyState} description={description} setDescription={setDescription} attachmentName={attachmentName} onAttachment={handleAttachment} terms={terms} setTerms={setTerms} signatureEnabled={signatureEnabled} setSignatureEnabled={setSignatureEnabled} isTaxInvoice={isTaxInvoice} setIsTaxInvoice={setIsTaxInvoice} onBack={back} onItems={openItems} onEditLine={startEditLine} onSave={() => { void commitInvoice(true); }} onSaveNew={async () => { const invoice = await commitInvoice(false); if (invoice) reset(); }} onShare={saveAndShare} onPrint={saveAndPrint} busy={busy} onLedger={() => router.push('/ledger')} />
     <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
       <AddPartyDialogContent editParty={null} fields={partyFields} onSave={saveInlineParty} onCancel={() => setCustomerDialogOpen(false)} t={t} />
     </Dialog>
@@ -1027,7 +1173,7 @@ export function InvoicePage() {
 }
 
 interface SaleProps {
-  businessProfile: ReturnType<typeof useSettings>['businessProfile']; mainBank: any; invoiceNumber: string; setInvoiceNumber: (v: string) => void; date: string; setDate: (v: string) => void; creditMode: boolean; setCreditMode: (v: boolean) => void; customerQuery: string; setCustomerQuery: (v: string) => void; customerPhone: string; handlePhone: (v: string) => void; customerAddress: string; setCustomerAddress: (v: string) => void; selectedCustomer: LedgerParty | null; selectCustomer: (p: LedgerParty) => void; customerSuggestions: LedgerParty[]; customerSearchRef: React.RefObject<HTMLDivElement | null>; customerSearchOpen: boolean; setCustomerSearchOpen: (v: boolean) => void; onNewCustomer: () => void; customerError: LedgerParty | null; clearCustomer: () => void; customerBalance: number; lines: InvoiceLine[]; itemDiscount: number; itemTax: number; totalQty: number; subtotal: number; billDiscountMode: ValueMode; setBillDiscountMode: (v: ValueMode) => void; billDiscountValue: string; setBillDiscountValue: (v: string) => void; billTaxMode: ValueMode; setBillTaxMode: (v: ValueMode) => void; billTaxValue: string; setBillTaxValue: (v: string) => void; roundOff: boolean; setRoundOff: (v: boolean) => void; total: number; documentTotal: number; isReceiptMode: boolean; roundOffAmount: number; received: number; receivedAmount: string; setReceivedAmount: (v: string) => void; receiptTotalAmount: string; setReceiptTotalAmount: (v: string) => void; balanceDue: number; paymentMethod: PaymentMode; setPaymentMethod: (v: PaymentMode) => void; paymentAccountId: string; setPaymentAccountId: (v: string) => void; bankAccounts: any[]; supplyState: string; setSupplyState: (v: string) => void; description: string; setDescription: (v: string) => void; attachmentName: string; onAttachment: (f?: File) => void; terms: string; setTerms: (v: string) => void; signatureEnabled: boolean; setSignatureEnabled: (v: boolean) => void; onBack: () => void; onItems: () => void; onEditLine: (id: string) => void; onSave: () => void; onSaveNew: () => void; onShare: () => void; onPrint: () => void; busy: boolean; onLedger: () => void;
+  businessProfile: ReturnType<typeof useSettings>['businessProfile']; mainBank: any; invoiceNumber: string; setInvoiceNumber: (v: string) => void; date: string; setDate: (v: string) => void; creditMode: boolean; setCreditMode: (v: boolean) => void; customerQuery: string; setCustomerQuery: (v: string) => void; customerPhone: string; handlePhone: (v: string) => void; customerAddress: string; setCustomerAddress: (v: string) => void; selectedCustomer: LedgerParty | null; selectCustomer: (p: LedgerParty) => void; customerSuggestions: LedgerParty[]; customerSearchRef: React.RefObject<HTMLDivElement | null>; customerSearchOpen: boolean; setCustomerSearchOpen: (v: boolean) => void; onNewCustomer: () => void; customerError: LedgerParty | null; clearCustomer: () => void; customerBalance: number; lines: InvoiceLine[]; itemDiscount: number; itemTax: number; totalQty: number; subtotal: number; billDiscountMode: ValueMode; setBillDiscountMode: (v: ValueMode) => void; billDiscountValue: string; setBillDiscountValue: (v: string) => void; billTaxMode: ValueMode; setBillTaxMode: (v: ValueMode) => void; billTaxValue: string; setBillTaxValue: (v: string) => void; roundOff: boolean; setRoundOff: (v: boolean) => void; total: number; documentTotal: number; isReceiptMode: boolean; roundOffAmount: number; received: number; receivedAmount: string; setReceivedAmount: (v: string) => void; receiptTotalAmount: string; setReceiptTotalAmount: (v: string) => void; balanceDue: number; paymentMethod: PaymentMode; setPaymentMethod: (v: PaymentMode) => void; paymentAccountId: string; setPaymentAccountId: (v: string) => void; bankAccounts: any[]; supplyState: string; setSupplyState: (v: string) => void; description: string; setDescription: (v: string) => void; attachmentName: string; onAttachment: (f?: File) => void; terms: string; setTerms: (v: string) => void; signatureEnabled: boolean; setSignatureEnabled: (v: boolean) => void; isTaxInvoice: boolean; setIsTaxInvoice: (v: boolean) => void; onBack: () => void; onItems: () => void; onEditLine: (id: string) => void; onSave: () => void; onSaveNew: () => void; onShare: () => void; onPrint: () => void; busy: boolean; onLedger: () => void;
 }
 
 function CompactSelector({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
@@ -1180,6 +1326,15 @@ function SaleScreen(p: SaleProps) {
         {p.customerError && <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm"><b>Mobile number already registered.</b><p className="mt-1">This mobile number is already registered with another customer <b>{p.customerError.name}</b>. Please edit in Ledger.</p><Button size="sm" variant="outline" className="mt-2" onClick={p.onLedger}>Open Ledger</Button></div>}
       </section>
 
+      {/* नवीन: Tax Invoice चालू/बंद करण्यासाठीचे बटन (डीफॉल्ट No म्हणजेच false) */}
+      <section className="mx-2 flex items-center justify-between rounded-xl border bg-background p-3 shadow-sm">
+        <div>
+          <span className="text-sm font-semibold">{language === 'mr' ? 'Tax Invoice हवे आहे का?' : 'Tax Invoice?'}</span>
+          <p className="text-[11px] text-muted-foreground">{language === 'mr' ? 'कर आकारणीनुसार Tax Invoice दर्शवा' : 'Show Tax Invoice header & details'}</p>
+        </div>
+        <Switch checked={p.isTaxInvoice} onCheckedChange={p.setIsTaxInvoice} />
+      </section>
+
       {isReceipt ? <>
         <section className="mx-2 rounded-xl border bg-background p-3 shadow-sm">
           <Button type="button" variant="outline" onClick={p.onItems} className="h-11 w-full border border-sky-200 bg-sky-50 text-sky-800 font-semibold shadow-none hover:bg-sky-100 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300"><Plus className="mr-1 h-4 w-4" /> Add Items (Optional)</Button>
@@ -1278,8 +1433,6 @@ function ItemsScreen({
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // This screen owns its own scroll position. It is intentionally reset every
-  // time the Add Items screen mounts, so the item search starts at the top.
   useEffect(() => {
     const resetScroll = () => {
       scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
@@ -1301,7 +1454,6 @@ function ItemsScreen({
   const editNet = itemDraft.taxType === 'with' ? editTaxable : editTaxable + editTax;
 
   const openNewItemDialog = () => {
-    // Keep this screen mounted. Only the child dialog is opened.
     onSetSearchOpen(false);
     setItemDialogOpen(true);
   };
@@ -1412,7 +1564,6 @@ function ItemsScreen({
         </div>
       </div>
 
-      {/* The child dialog is mounted inside ItemsScreen, not the Sale screen. */}
       <NewItemDialog
         open={itemDialogOpen}
         onOpenChange={setItemDialogOpen}
@@ -1431,7 +1582,8 @@ function NewItemScreen({ draft, setDraft, onBack, onSave }: { draft: ItemDraft; 
 
 function Metric({ label, value }: { label: string; value: string }) { return <div className="rounded-lg bg-muted/50 p-2"><p className="text-[10px] text-muted-foreground">{label}</p><b>{value}</b></div>; }
 function SummaryRow({ label, value }: { label: string; value: string }) { return <div className="flex items-center justify-between"><span className="text-muted-foreground">{label}</span><b>{value}</b></div>; }
-function PreviewScreen({ invoice, profile, bank, onBack, onWhatsApp, onShare, onDownload, onPrint, onExportDom, onPrintDom, onEdit, onDelete, busy, qrRef }: any) {
+
+function PreviewScreen({ invoice, profile, bank, isTaxInvoice, onBack, onWhatsApp, onShare, onDownload, onPrint, onExportDom, onPrintDom, onEdit, onDelete, busy, qrRef }: any) {
   const [shareOpen, setShareOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const invoiceRef = useRef<HTMLDivElement | null>(null);
@@ -1440,11 +1592,11 @@ function PreviewScreen({ invoice, profile, bank, onBack, onWhatsApp, onShare, on
   useEffect(() => { if (!shareOpen) return; const close = (event: PointerEvent) => { if (menuRef.current && !menuRef.current.contains(event.target as Node)) setShareOpen(false); }; document.addEventListener('pointerdown', close, true); return () => document.removeEventListener('pointerdown', close, true); }, [shareOpen]);
   const exportDom = (format: 'png' | 'pdf') => onExportDom(format, invoiceRef.current);
   return <div className="vy-page-invoice min-h-screen bg-slate-100 pb-[calc(4.25rem+env(safe-area-inset-bottom))] dark:bg-slate-950">
-    <header className="no-print sticky top-0 z-30 border-b bg-background/95 px-3 py-2 backdrop-blur"><div className="mx-auto flex max-w-3xl items-center gap-2"><button type="button" onClick={onBack} className="rounded-full p-2 hover:bg-muted" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button><div className="min-w-0 flex-1"><h1 className="text-base font-bold">{isReceipt ? 'Payment Receipt Preview' : 'Invoice Preview'}</h1><p className="truncate text-[11px] text-muted-foreground">{invoice.invoiceNumber} • {money(invoice.total)}</p></div><div ref={menuRef} className="relative"><Button size="sm" type="button" onClick={() => setShareOpen((v) => !v)} disabled={busy}><Share2 className="mr-1 h-4 w-4" />Export<ChevronDown className="ml-1 h-3.5 w-3.5" /></Button>{shareOpen && <div role="menu" className="no-print absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border bg-background p-1 shadow-xl"><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); exportDom('png'); }}><ImageDown className="h-4 w-4" />Download PNG</button><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); exportDom('pdf'); }}><ReceiptText className="h-4 w-4" />Download PDF</button><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); onPrintDom(invoiceRef.current); }}><Printer className="h-4 w-4" />Print</button><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); void onWhatsApp(); }}><Share2 className="h-4 w-4" />WhatsApp</button></div>}</div></div></header>
+    <header className="no-print sticky top-0 z-30 border-b bg-background/95 px-3 py-2 backdrop-blur"><div className="mx-auto flex max-w-3xl items-center gap-2"><button type="button" onClick={onBack} className="rounded-full p-2 hover:bg-muted" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button><div className="min-w-0 flex-1"><h1 className="text-base font-bold">{isReceipt ? 'Payment Receipt Preview' : (isTaxInvoice ? 'Tax Invoice Preview' : 'Invoice Preview')}</h1><p className="truncate text-[11px] text-muted-foreground">{invoice.invoiceNumber} • {money(invoice.total)}</p></div><div ref={menuRef} className="relative"><Button size="sm" type="button" onClick={() => setShareOpen((v) => !v)} disabled={busy}><Share2 className="mr-1 h-4 w-4" />Export<ChevronDown className="ml-1 h-3.5 w-3.5" /></Button>{shareOpen && <div role="menu" className="no-print absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border bg-background p-1 shadow-xl"><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); exportDom('png'); }}><ImageDown className="h-4 w-4" />Download PNG</button><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); exportDom('pdf'); }}><ReceiptText className="h-4 w-4" />Download PDF</button><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); onPrintDom(invoiceRef.current); }}><Printer className="h-4 w-4" />Print</button><button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted" onClick={() => { setShareOpen(false); void onWhatsApp(); }}><Share2 className="h-4 w-4" />WhatsApp</button></div>}</div></div></header>
     <main className="mx-auto max-w-3xl p-2 sm:p-5 print:p-0">
       <div ref={invoiceRef} id="invoice-preview-export" className="invoice-a4 mx-auto w-full max-w-[794px] bg-white text-slate-900 ring-1 ring-slate-200 print:ring-0">
         <div className="p-[8mm] sm:p-[10mm]">
-          <div className="border-b-2 border-slate-900 pb-4"><div className="flex items-start justify-between gap-5"><div className="flex min-w-0 gap-3">{profile.businessLogoUrl && <Image src={profile.businessLogoUrl} alt="Business logo" width={56} height={56} unoptimized className="h-14 w-14 shrink-0 object-contain" />}<div className="min-w-0"><h2 className="text-xl font-extrabold tracking-tight">{profile.businessName || 'Business'}</h2>{profile.businessAddress && <p className="mt-1 text-[11px] leading-4 text-slate-600">{profile.businessAddress}</p>}<p className="text-[11px] leading-4 text-slate-600">{profile.phone || ''}{profile.email ? ` • ${profile.email}` : ''}</p>{profile.gstin && <p className="text-[11px] font-bold">GSTIN: {profile.gstin}</p>}</div></div><div className="shrink-0 text-right"><h3 className="text-lg font-extrabold tracking-wide">{isReceipt ? 'PAYMENT RECEIPT' : 'TAX INVOICE'}</h3><p className="mt-1 text-[11px] font-semibold">Invoice No: {invoice.invoiceNumber}</p><p className="text-[11px]">Date: {new Date(invoice.date).toLocaleDateString('en-IN')}</p></div></div></div>
+          <div className="border-b-2 border-slate-900 pb-4"><div className="flex items-start justify-between gap-5"><div className="flex min-w-0 gap-3">{profile.businessLogoUrl && <Image src={profile.businessLogoUrl} alt="Business logo" width={56} height={56} unoptimized className="h-14 w-14 shrink-0 object-contain" />}<div className="min-w-0"><h2 className="text-xl font-extrabold tracking-tight">{profile.businessName || 'Business'}</h2>{profile.businessAddress && <p className="mt-1 text-[11px] leading-4 text-slate-600">{profile.businessAddress}</p>}<p className="text-[11px] leading-4 text-slate-600">{profile.phone || ''}{profile.email ? ` • ${profile.email}` : ''}</p>{profile.gstin && isTaxInvoice && <p className="text-[11px] font-bold">GSTIN: {profile.gstin}</p>}</div></div><div className="shrink-0 text-right"><h3 className="text-lg font-extrabold tracking-wide">{isReceipt ? 'PAYMENT RECEIPT' : (isTaxInvoice ? 'TAX INVOICE' : 'INVOICE')}</h3><p className="mt-1 text-[11px] font-semibold">Invoice No: {invoice.invoiceNumber}</p><p className="text-[11px]">Date: {new Date(invoice.date).toLocaleDateString('en-IN')}</p></div></div></div>
           <div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-lg border border-slate-200 p-3"><p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Customer</p><p className="mt-1 text-sm font-bold">{invoice.customerName || 'Walk-in Customer'}</p>{invoice.customerPhone && <p className="text-[11px] text-slate-600">{invoice.customerPhone}</p>}{invoice.customerAddress && <p className="text-[11px] text-slate-600">{invoice.customerAddress}</p>}</div><div className="rounded-lg border border-slate-200 p-3"><p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Payment</p><p className="mt-1 text-sm font-bold">{invoice.paymentMethod}</p><p className="text-[11px] text-slate-600">Status: {invoice.paymentStatus || 'Paid'}</p>{invoice.stateOfSupply && <p className="text-[11px] text-slate-600">State: {invoice.stateOfSupply}</p>}</div></div>
           {!isReceipt ? <><table className="mt-4 w-full border-collapse text-[10px]"><thead><tr className="border-y-2 border-slate-800 bg-slate-50"><th className="p-2 text-left">Item</th><th className="p-2 text-right">Qty</th><th className="p-2 text-right">Rate</th><th className="p-2 text-right">Tax</th><th className="p-2 text-right">Amount</th></tr></thead><tbody>{invoice.items.map((raw: CartItem & { taxRate?: number }, i: number) => <tr key={i} className="border-b border-slate-200"><td className="p-2 font-medium">{raw.product.name}</td><td className="p-2 text-right">{raw.quantity}</td><td className="p-2 text-right">{money(raw.product.price)}</td><td className="p-2 text-right">{Number(raw.taxRate || 0)}%</td><td className="p-2 text-right font-semibold">{money(Number(raw.lineAmount || raw.quantity * raw.product.price))}</td></tr>)}</tbody></table><div className="mt-4 flex justify-end"><div className="w-72 text-[11px]"><SummaryRow label="Subtotal" value={money(invoice.subtotal)} /><SummaryRow label="Discount" value={`-${money(invoice.discount)}`} /><SummaryRow label="Tax" value={money(invoice.taxAmount || 0)} /><div className="mt-2 flex justify-between border-t-2 border-slate-900 pt-2 text-base font-extrabold"><span>Total Amount</span><span>{money(invoice.total)}</span></div><div className="mt-1 flex justify-between"><span>Received / Cash</span><span>{money(received)}</span></div><div className="flex justify-between"><span>Balance / Credit</span><span>{money(Number(invoice.balanceDue || 0))}</span></div></div></div></> : <div className="mt-4 grid grid-cols-3 gap-3 text-xs"><div className="rounded-lg border p-3"><p className="text-[9px] text-slate-500">Total Amount</p><b className="text-lg">{money(invoice.total)}</b></div><div className="rounded-lg border p-3"><p className="text-[9px] text-slate-500">Received / Cash</p><b className="text-lg">{money(received)}</b></div><div className="rounded-lg border p-3"><p className="text-[9px] text-slate-500">Balance / Credit</p><b className="text-lg">{money(Number(invoice.balanceDue || 0))}</b></div></div>}
           <div className="mt-5 grid grid-cols-[1fr_150px] gap-4 border-t-2 border-slate-800 pt-4"><div><h4 className="text-sm font-extrabold">Bank Details</h4>{bank ? <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]"><p><b>Bank:</b> {bank.bankName || '—'}</p><p><b>IFSC:</b> {bank.ifscCode || '—'}</p><p><b>A/C Holder:</b> {bank.accountHolderName || profile.ownerName || '—'}</p><p><b>A/C:</b> {bank.accountNumber ? `••••${String(bank.accountNumber).slice(-4)}` : '—'}</p><p className="col-span-2"><b>UPI ID:</b> {bank.upiId || '—'}</p></div> : <p className="mt-2 text-[10px] text-slate-500">Bank details not configured.</p>}{invoice.terms && <p className="mt-3 text-[9px] text-slate-500">{invoice.terms}</p>}</div>{bank?.upiId ? <div ref={qrRef} className="flex flex-col items-center justify-start border-l border-slate-200 pl-4"><QRCodeSVG value={buildUpiLink(bank.upiId, profile.businessName, invoice.total)} size={128} includeMargin /><p className="mt-1 text-[9px] font-bold tracking-wide">SCAN TO PAY</p></div> : <div className="border-l border-slate-200 pl-4 text-[9px] text-slate-500">UPI QR unavailable</div>}</div>

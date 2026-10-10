@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Copy,
     Check,
@@ -9,6 +9,7 @@ import {
     Trash2,
     Wallet,
     MoreVertical,
+    Share2,
     Landmark,
     AlertCircle,
 } from 'lucide-react';
@@ -57,6 +58,7 @@ import {
 
 import type { BankAccount, BankAccountType } from './types';
 import { QRCodeDisplay } from './qr-code-display';
+import { SharedBankAccountDialog } from './shared-bank-account-dialog';
 import { useAppData } from './app-data-context';
 import { cn } from '@/lib/utils';
 import { useSettings } from './settings-context';
@@ -64,7 +66,7 @@ import { localizeBankingValue } from './i18n';
 
 interface BankAccountCardProps {
     account: BankAccount;
-    onEdit: (account: BankAccount) => void;
+    onEdit: (account: BankAccount) => boolean | string | void;
     onDelete: (id: string) => void;
     compact?: boolean;
     displayBalance?: number;
@@ -75,6 +77,7 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
     const { t, language } = useSettings();
 
     const [qrOpen, setQrOpen] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [warningAlertOpen, setWarningAlertOpen] = useState(false);
@@ -87,6 +90,29 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
     const [editUpiId, setEditUpiId] = useState(account.upiId || '');
     const [editType, setEditType] = useState<BankAccountType>(account.accountType);
     const [editBalance, setEditBalance] = useState(String(account.balance));
+    const [editBranch, setEditBranch] = useState(account.branch || '');
+    const [editNickname, setEditNickname] = useState(account.nickname || '');
+    const [editOpeningDate, setEditOpeningDate] = useState(account.openingDate || '');
+    const [editStatus, setEditStatus] = useState(account.status || 'Active');
+    const [editShowOnInvoice, setEditShowOnInvoice] = useState(account.showOnInvoice !== false);
+    const [editNotes, setEditNotes] = useState(account.notes || '');
+    const [editError, setEditError] = useState('');
+
+    useEffect(() => {
+        setEditBankName(account.bankName);
+        setEditHolderName(account.accountHolderName);
+        setEditAccountNumber(account.accountNumber);
+        setEditIfsc(account.ifscCode);
+        setEditUpiId(account.upiId || '');
+        setEditType(account.accountType);
+        setEditBalance(String(account.balance));
+        setEditBranch(account.branch || '');
+        setEditNickname(account.nickname || '');
+        setEditOpeningDate(account.openingDate || '');
+        setEditStatus(account.status || 'Active');
+        setEditShowOnInvoice(account.showOnInvoice !== false);
+        setEditNotes(account.notes || '');
+    }, [account]);
 
     const maskedAccount = `••••${account.accountNumber ? account.accountNumber.slice(-4) : '****'}`;
     const upiString = `upi://pay?pa=${account.upiId}&pn=${encodeURIComponent(account.accountHolderName)}&am=&cu=INR`;
@@ -100,7 +126,11 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
     };
 
     const handleSaveEdit = () => {
-        onEdit({
+        if (!editBankName.trim() || !editHolderName.trim() || !editAccountNumber.trim()) {
+            setEditError('Bank Name, Account Holder आणि Account Number अनिवार्य आहेत.');
+            return;
+        }
+        const result = onEdit({
             ...account,
             bankName: editBankName.trim(),
             accountHolderName: editHolderName.trim(),
@@ -109,7 +139,22 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
             upiId: editUpiId.trim(),
             accountType: editType,
             balance: parseFloat(editBalance) || 0,
+            branch: editBranch.trim(),
+            nickname: editNickname.trim(),
+            openingDate: editOpeningDate || null,
+            status: editStatus,
+            showOnInvoice: editShowOnInvoice,
+            notes: editNotes.trim(),
         });
+        if (typeof result === 'string') {
+            setEditError(result);
+            return;
+        }
+        if (result === false) {
+            setEditError('Bank account could not be updated.');
+            return;
+        }
+        setEditError('');
         setEditOpen(false);
     };
 
@@ -164,9 +209,9 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
                                 <Pencil className="mr-2 h-4 w-4 text-blue-500" />
                                 <span>{t.edit}</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setQrOpen(true)} className="cursor-pointer">
-                                <QrCode className="mr-2 h-4 w-4 text-sky-600" />
-                                <span>{t.showQr}</span>
+                            <DropdownMenuItem onSelect={() => setShareOpen(true)} className="cursor-pointer">
+                                <Share2 className="mr-2 h-4 w-4 text-sky-600" />
+                                <span>Bank Share</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
@@ -177,6 +222,7 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <SharedBankAccountDialog account={account} showTrigger={false} open={shareOpen} onOpenChange={setShareOpen} />
                 </CardHeader>
 
                 <CardContent className={cn("relative z-10", compact ? "space-y-2 px-3 pb-3 pt-1" : "space-y-4 pt-2")}>
@@ -349,6 +395,17 @@ export function BankAccountCard({ account, onEdit, onDelete, compact = false, di
                                 />
                             </div>
                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2"><Label htmlFor="edit-branch">Branch</Label><Input id="edit-branch" value={editBranch} onChange={(e) => setEditBranch(e.target.value)} /></div>
+                            <div className="space-y-2"><Label htmlFor="edit-nickname">Nickname</Label><Input id="edit-nickname" value={editNickname} onChange={(e) => setEditNickname(e.target.value)} /></div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2"><Label htmlFor="edit-opening-date">Opening Date</Label><Input id="edit-opening-date" type="date" value={editOpeningDate} onChange={(e) => setEditOpeningDate(e.target.value)} /></div>
+                            <div className="space-y-2"><Label htmlFor="edit-status">Status</Label><Select value={editStatus} onValueChange={setEditStatus}><SelectTrigger id="edit-status"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Active">Active</SelectItem><SelectItem value="Inactive">Inactive</SelectItem><SelectItem value="Closed">Closed</SelectItem></SelectContent></Select></div>
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border px-3 py-2"><Label htmlFor="edit-show-invoice">Show on Invoice</Label><input id="edit-show-invoice" type="checkbox" checked={editShowOnInvoice} onChange={(e) => setEditShowOnInvoice(e.target.checked)} className="h-4 w-4" /></div>
+                        <div className="space-y-2"><Label htmlFor="edit-notes">Notes</Label><Input id="edit-notes" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} /></div>
+                        {editError && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">{editError}</p>}
                     </div>
                     <DialogFooter className="pt-2 mobile-entry-footer">
                         <Button variant="outline" onClick={() => setEditOpen(false)}>{t.cancel}</Button>

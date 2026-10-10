@@ -226,7 +226,7 @@ BEGIN
     FROM public.bank_accounts b
     WHERE b.user_id = auth.uid()
       AND regexp_replace(lower(coalesce(b.account_number, '')), '[^a-z0-9]', '', 'g') = v_account_key
-      AND regexp_replace(lower(coalesce(b.ifsc_code, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
+      AND regexp_replace(lower(coalesce(b.ifsc, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
   ) INTO v_has_access;
 
   IF NOT v_has_access THEN
@@ -240,7 +240,7 @@ BEGIN
   INTO v_base_balance
   FROM public.bank_accounts b
   WHERE regexp_replace(lower(coalesce(b.account_number, '')), '[^a-z0-9]', '', 'g') = v_account_key
-    AND regexp_replace(lower(coalesce(b.ifsc_code, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key;
+    AND regexp_replace(lower(coalesce(b.ifsc, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key;
 
   SELECT COALESCE(SUM(
     CASE
@@ -257,7 +257,7 @@ BEGIN
     ON t.source_account_id = b.id::text
     OR t.dest_account_id = b.id::text
   WHERE regexp_replace(lower(coalesce(b.account_number, '')), '[^a-z0-9]', '', 'g') = v_account_key
-    AND regexp_replace(lower(coalesce(b.ifsc_code, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key;
+    AND regexp_replace(lower(coalesce(b.ifsc, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key;
 
   RETURN v_base_balance + v_transaction_net;
 END;

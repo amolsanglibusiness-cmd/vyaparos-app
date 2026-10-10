@@ -19,6 +19,14 @@ export interface BankAccountRow extends OfflineRecord {
   account_type: string;
   balance: number;
   upi_id: string;
+  branch?: string;
+  nickname?: string;
+  opening_balance?: number;
+  opening_date?: string | null;
+  is_default?: boolean;
+  status?: string;
+  show_on_invoice?: boolean;
+  notes?: string;
   created_at: string;
 }
 

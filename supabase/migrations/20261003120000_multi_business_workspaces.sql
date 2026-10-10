@@ -140,14 +140,14 @@ BEGIN
     SELECT 1 FROM public.bank_accounts b
     WHERE public.is_business_member(b.business_id)
       AND regexp_replace(lower(coalesce(b.account_number, '')), '[^a-z0-9]', '', 'g') = v_account_key
-      AND regexp_replace(lower(coalesce(b.ifsc_code, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
+      AND regexp_replace(lower(coalesce(b.ifsc, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
   ) INTO v_has_access;
   IF NOT v_has_access THEN RETURN 0; END IF;
 
   SELECT COALESCE(SUM(b.balance), 0) INTO v_base_balance
   FROM public.bank_accounts b
   WHERE regexp_replace(lower(coalesce(b.account_number, '')), '[^a-z0-9]', '', 'g') = v_account_key
-    AND regexp_replace(lower(coalesce(b.ifsc_code, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
+    AND regexp_replace(lower(coalesce(b.ifsc, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
     AND public.is_business_member(b.business_id);
 
   SELECT COALESCE(SUM(CASE
@@ -159,7 +159,7 @@ BEGIN
   FROM public.transactions t
   JOIN public.bank_accounts b ON t.source_account_id = b.id::text OR t.dest_account_id = b.id::text
   WHERE regexp_replace(lower(coalesce(b.account_number, '')), '[^a-z0-9]', '', 'g') = v_account_key
-    AND regexp_replace(lower(coalesce(b.ifsc_code, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
+    AND regexp_replace(lower(coalesce(b.ifsc, '')), '[^a-z0-9]', '', 'g') = v_ifsc_key
     AND public.is_business_member(b.business_id)
     AND public.is_business_member(t.business_id);
 

@@ -18,10 +18,7 @@ import {
   Trash2,
   Edit2,
   ChevronLeft,
-  X,
   CheckCircle2,
-  TrendingUp,
-  TrendingDown,
   Wallet,
 } from 'lucide-react';
 
@@ -29,13 +26,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -47,6 +37,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSettings } from './settings-context';
+import { useMultiUser } from './multi-user-context';
 import { generateId } from './mock-data';
 import type { LedgerParty, LedgerEntry, LedgerPartyType, LedgerEntryType } from './types';
 import { useAppData, GALLA_ID } from './app-data-context';
@@ -92,6 +83,7 @@ function getPartyColor(party: LedgerParty) {
 
 export function LedgerPage() {
   const { t, businessProfile } = useSettings();
+  const { businessId } = useMultiUser();
   const { bankAccounts, addTransaction, updateTransaction, ledgerParties: parties, ledgerEntries: entries, addLedgerParty, updateLedgerParty, deleteLedgerParty, addLedgerEntry, updateLedgerEntry, deleteLedgerEntry } = useAppData();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'Customer' | 'Supplier'>('all');
@@ -118,6 +110,11 @@ export function LedgerPage() {
   const [eAmount, setEAmount] = useState('');
   const [eDescription, setEDescription] = useState('');
   const [eDate, setEDate] = useState(new Date().toISOString().slice(0, 10));
+
+  // स्क्रोल नेहमी पेजच्या वरच्या टोकाला नेण्यासाठी
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedPartyId]);
 
   const saveFullParty = (party: LedgerParty) => {
     addLedgerParty(party);
@@ -189,8 +186,6 @@ export function LedgerPage() {
     return { receivable, payable };
   }, [parties, getPartyBalance]);
 
-  // Keep the hook order stable: the full-screen Party view is rendered only
-  // after every hook in this component has been called.
   if (fullAddPartyOpen) {
     return <AddPartyFullPage onBack={() => setFullAddPartyOpen(false)} onSaved={saveFullParty} onSaveAndNew={saveFullPartyAndNew} />;
   }
@@ -344,8 +339,6 @@ export function LedgerPage() {
   const handleShareLedgerWhatsApp = async (party: LedgerParty) => {
     if (typeof window === 'undefined') return;
 
-    // Open a blank tab immediately from the user's click. Browsers can block
-    // window.open() when it is called only after an awaited Supabase request.
     const waTab = window.open('about:blank', '_blank');
 
     try {
@@ -375,19 +368,34 @@ export function LedgerPage() {
           }
         : null;
 
-      const { data, error } = await supabase
+      let token = '';
+      const existing = await supabase
         .from('ledger_share_links')
-        .insert({
-          party_id: party.id,
-          business_snapshot: businessSnapshot,
-          payment_snapshot: paymentSnapshot,
-        })
         .select('token')
-        .single();
-      if (error) throw error;
+        .eq('business_id', businessId)
+        .eq('party_id', party.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
 
-      const bridgeBase = 'https://www.sanglibusiness.in/p/ledger.html';
-      const shareUrl = `${bridgeBase}?t=${encodeURIComponent(data.token)}&s=pr`;
+      if (existing.data?.token) {
+        token = existing.data.token;
+      } else {
+        const { data, error } = await supabase
+          .from('ledger_share_links')
+          .insert({
+            business_id: businessId,
+            party_id: party.id,
+            business_snapshot: businessSnapshot,
+            payment_snapshot: paymentSnapshot,
+          })
+          .select('token')
+          .single();
+        if (error) throw error;
+        token = data.token;
+      }
+
+      const shareUrl = `https://vyaparos-app.vercel.app/t/${encodeURIComponent(token)}?s=pr`;
       const balance = getPartyBalance(party.id);
       const message = `Dear ${party.name},\n\nYour complete account/ledger history is available here:\n${shareUrl}\n\nCurrent balance: ${formatCurrency(Math.abs(balance))}\n\nYou can view all bills, receipts, payments, pending amounts and complete history without logging in.`;
       const phone = party.phone.replace(/[^0-9]/g, '');
@@ -397,35 +405,13 @@ export function LedgerPage() {
       if (waTab && !waTab.closed) {
         waTab.location.href = waUrl;
       } else {
-        // Popup blockers: fall back to same-tab navigation so the button
-        // still works reliably on desktop and mobile browsers.
         window.location.href = waUrl;
       }
       toast.success('WhatsApp ledger link ready');
     } catch (error) {
       if (waTab && !waTab.closed) waTab.close();
       console.error(error);
-      toast.error('Could not create public ledger link. Apply the new Supabase migration first.');
-    }
-  };
-
-  const handleWhatsAppReminder = (party: LedgerParty) => {
-    const balance = getPartyBalance(party.id);
-    if (balance <= 0) return;
-
-    const ownerUpi = bankAccounts[0]?.upiId ?? '';
-    const paymentLink = ownerUpi
-      ? `upi://pay?pa=${ownerUpi}&pn=${encodeURIComponent(bankAccounts[0]?.accountHolderName ?? 'Shop Owner')}&am=${balance}&cu=INR&tn=${encodeURIComponent('Udhari Payment')}`
-      : '';
-    const shopName = 'Rajesh Kirana Store';
-    const message = `Dear ${party.name},\n\nYou have a pending Udhari balance of ${formatCurrency(balance)} at ${shopName}.\n\nPlease clear your dues at your earliest convenience.\n\n${paymentLink ? `Pay via UPI: ${paymentLink}` : ''}\n\nThank you!\n${shopName}`;
-    const encodedMessage = encodeURIComponent(message);
-    const phone = party.phone.replace(/[^0-9]/g, '');
-    const countryPhone = phone.length === 10 ? `91${phone}` : phone;
-    const waUrl = `https://wa.me/${countryPhone}?text=${encodedMessage}`;
-
-    if (typeof window !== 'undefined') {
-      window.open(waUrl, '_blank');
+      toast.error('Could not create public ledger link.');
     }
   };
 
@@ -435,7 +421,6 @@ export function LedgerPage() {
     }
   };
 
-  // Party detail view
   if (selectedParty) {
     const balance = getPartyBalance(selectedParty.id);
     const isCustomer = selectedParty.type === 'Customer';
@@ -446,7 +431,6 @@ export function LedgerPage() {
 
     return (
       <div className="mx-auto max-w-4xl animate-fade-in-up">
-        {/* Back button */}
         <button
           onClick={() => setSelectedPartyId(null)}
           className="mb-4 flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -455,9 +439,7 @@ export function LedgerPage() {
           Back to Ledger
         </button>
 
-        {/* Customer / Supplier profile — mobile-first */}
         <div className="vy-customer-ledger-profile mb-5">
-          {/* Full-width mobile photo: approximately the top quarter of the phone */}
           <div className="vy-customer-ledger-photo-wrap">
             {selectedParty.photoUrl ? (
               <img
@@ -491,56 +473,63 @@ export function LedgerPage() {
             </div>
           </div>
 
-          {/* Mobile: icon-only actions */}
-          <div className="vy-customer-ledger-actions">
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => handleCall(selectedParty.phone)}
-              className="h-9 w-9 p-0"
-              aria-label={t.callNow}
-              title={t.callNow}
-            >
-              <Phone className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => void handleShareLedgerWhatsApp(selectedParty)}
-              className="h-9 w-9 p-0 border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-              aria-label="Share ledger on WhatsApp"
-              title="Share ledger on WhatsApp"
-            >
-              <MessageCircle className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => handleEditParty(selectedParty)}
-              className="h-9 w-9 p-0"
-              aria-label={t.editParty}
-              title={t.editParty}
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => handleDeleteParty(selectedParty.id)}
-              className="h-9 w-9 p-0 text-destructive hover:text-destructive"
-              aria-label={t.deleteParty}
-              title={t.deleteParty}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {/* अपडेटेड डार्क व्हॉट्सॲप ग्रीन बटण + मध्यम साईझ */}
+          <div className="vy-customer-ledger-actions flex flex-wrap items-center gap-2">
+  {/* Call Button */}
+  <Button
+    variant="outline"
+    size="sm"
+    type="button"
+    onClick={() => handleCall(selectedParty.phone)}
+    className="h-10 w-10 shrink-0 p-0"
+    aria-label={t.callNow}
+    title={t.callNow}
+  >
+    <Phone className="h-4 w-4" />
+  </Button>
+
+  {/* WhatsApp Button (फक्त आयकॉन आणि डार्क व्हॉट्सॲप ग्रीन रंग) */}
+  <Button
+    variant="ghost"
+    size="sm"
+    type="button"
+    onClick={() => void handleShareLedgerWhatsApp(selectedParty)}
+    style={{ backgroundColor: '#075e54', color: '#ffffff' }}
+    className="h-10 w-12 shrink-0 items-center justify-center p-0 !bg-[#075e54] !text-white hover:!bg-[#054c44] active:scale-[0.98] border-none shadow-md rounded-lg"
+    aria-label="Share Ledger"
+    title="Share Ledger"
+  >
+    <MessageCircle className="h-5 w-5 fill-white text-white" />
+  </Button>
+
+  {/* Edit Button */}
+  <Button
+    variant="outline"
+    size="sm"
+    type="button"
+    onClick={() => handleEditParty(selectedParty)}
+    className="h-10 w-10 shrink-0 p-0"
+    aria-label={t.editParty}
+    title={t.editParty}
+  >
+    <Edit2 className="h-4 w-4" />
+  </Button>
+
+  {/* Delete Button */}
+  <Button
+    variant="outline"
+    size="sm"
+    type="button"
+    onClick={() => handleDeleteParty(selectedParty.id)}
+    className="h-10 w-10 shrink-0 p-0 text-destructive hover:text-destructive"
+    aria-label={t.deleteParty}
+    title={t.deleteParty}
+  >
+    <Trash2 className="h-4 w-4" />
+  </Button>
+</div>
         </div>
 
-        {/* Contact Details */}
         <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-card p-3">
             <Phone className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -578,7 +567,6 @@ export function LedgerPage() {
           )}
         </div>
 
-        {/* Balance Summary */}
         <div className="mb-5 grid grid-cols-3 gap-3">
           <div className="rounded-xl border border-border/40 bg-card p-4 text-center">
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t.balanceGiven}</p>
@@ -600,7 +588,6 @@ export function LedgerPage() {
           </div>
         </div>
 
-        {/* Add Entry + Ledger History */}
         <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-semibold">{t.ledgerHistory}</h3>
@@ -704,7 +691,6 @@ export function LedgerPage() {
           )}
         </div>
 
-        {/* Add/Edit Party Dialog (reused for edit from detail view) */}
         <AddPartyDialog
           open={addPartyOpen}
           onOpenChange={(open) => {
@@ -723,10 +709,8 @@ export function LedgerPage() {
     );
   }
 
-  // Party list view
   return (
     <div className="vy-ref-ledger mx-auto max-w-4xl">
-      {/* Sticky Header */}
       <header className="sticky top-0 z-50 shrink-0 -mx-4 w-[calc(100%+2rem)] border-b bg-background/95 px-4 py-2.5 shadow-sm backdrop-blur sm:-mx-6 sm:w-[calc(100%+3rem)] sm:px-6 lg:mx-0 lg:w-full">
         <div className="flex min-h-10 items-center gap-2">
           <button type="button" onClick={() => window.history.back()} className="rounded-full p-2 hover:bg-muted" aria-label="Back">
@@ -757,7 +741,6 @@ export function LedgerPage() {
         </div>
       </header>
 
-      {/* Reference-style Ledger summary */}
       <div className="vy-ref-ledger-balance">
         <div><span>▣</span><div><small>Total Balance</small><b>{formatCurrency(totals.receivable + totals.payable)}</b><em>↑ 12% <i>(vs last month)</i></em></div></div>
       </div>
@@ -768,7 +751,6 @@ export function LedgerPage() {
         <div><span>▣</span><small>Active Parties</small><b>{filteredParties.length}</b><em>↑ 6%</em></div>
       </div>
 
-      {/* Search + Filter Tabs */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -788,7 +770,6 @@ export function LedgerPage() {
         </Tabs>
       </div>
 
-      {/* Party List */}
       {filteredParties.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16 text-center">
           <BookOpen className="mb-3 h-10 w-10 text-muted-foreground/40" />
@@ -876,7 +857,6 @@ export function LedgerPage() {
         </div>
       )}
 
-      {/* Add/Edit Party Dialog (reused from detail view) */}
       <AddPartyDialog
         open={addPartyOpen}
         onOpenChange={(open) => {

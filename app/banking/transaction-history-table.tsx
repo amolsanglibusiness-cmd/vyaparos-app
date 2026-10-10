@@ -68,7 +68,7 @@ interface TransactionHistoryTableProps {
   transactions: Transaction[];
   bankAccounts: BankAccount[];
   getAccountLabel: (id: string) => string;
-  onEdit: (txn: Transaction) => void;
+  onEdit: (txn: Transaction) => boolean | string | void;
   onDelete: (id: string) => void;
   onBillEdit?: (txn: Transaction) => void;
   mobileCardMode?: boolean;
@@ -98,7 +98,7 @@ export function TransactionHistoryTable({
   mobileCardMode = false,
 }: TransactionHistoryTableProps) {
   const { t, language, transactionCategories } = useSettings();
-  const { subSavings, gallaBalance, cashInHandBalance, invoices } = useAppData();
+  const { subSavings, gallaBalance, cashInHandBalance, invoices, getBankBalance } = useAppData();
   const [editTxn, setEditTxn] = useState<Transaction | null>(null);
 
   const formatCurrency = (amount: number) =>
@@ -156,6 +156,7 @@ export function TransactionHistoryTable({
   const [editDest, setEditDest] = useState('');
   const [editShopName, setEditShopName] = useState('');
   const [editExpenseItems, setEditExpenseItems] = useState<ExpenseItem[]>([]);
+  const [editError, setEditError] = useState('');
 
   const openEdit = (txn: Transaction) => {
     setEditTxn(txn);
@@ -173,7 +174,7 @@ export function TransactionHistoryTable({
 
   const handleSaveEdit = () => {
     if (!editTxn) return;
-    onEdit({
+    const updated = {
       ...editTxn,
       type: editType,
       amount: parseFloat(editAmount) || 0,
@@ -186,7 +187,27 @@ export function TransactionHistoryTable({
       isFromGalla: editSource === GALLA_ID,
       shopName: editShopName,
       expenseItems: editExpenseItems,
-    });
+    };
+    const sourceBank = bankAccounts.find((account) => account.id === updated.sourceAccountId);
+    const bankOutflow = updated.type === 'Expense' || updated.type === 'Transfer' || updated.type === 'Savings';
+    const available = sourceBank ? getBankBalance(sourceBank.id) : 0;
+    const oldSourceSame = editTxn.sourceAccountId === updated.sourceAccountId &&
+      (editTxn.type === 'Expense' || editTxn.type === 'Transfer' || editTxn.type === 'Savings');
+    const effectiveAvailable = available + (oldSourceSame ? Number(editTxn.amount) || 0 : 0);
+    if (sourceBank && bankOutflow && updated.amount > effectiveAvailable) {
+      setEditError(`बँक बॅलेन्स अपुरा आहे. उपलब्ध बॅलेन्स ₹${effectiveAvailable.toLocaleString('en-IN')}, व्यवहारासाठी ₹${updated.amount.toLocaleString('en-IN')} आवश्यक आहेत.`);
+      return;
+    }
+    const result = onEdit(updated);
+    if (typeof result === 'string') {
+      setEditError(result);
+      return;
+    }
+    if (result === false) {
+      setEditError('व्यवहार अपडेट करता आला नाही.');
+      return;
+    }
+    setEditError('');
     setEditTxn(null);
   };
 
@@ -196,7 +217,7 @@ export function TransactionHistoryTable({
     if (id === GALLA_ID) return gallaBalance;
     if (id === CASH_IN_HAND_ID) return cashInHandBalance;
     const bank = bankAccounts.find((account) => account.id === id);
-    if (bank) return bank.balance;
+    if (bank) return getBankBalance(bank.id);
     const saving = subSavings.find((account) => account.id === id);
     return saving?.depositAmount || 0;
   };
@@ -267,6 +288,7 @@ Total: ${formatCurrency(txn.amount)}`;
           <div className="space-y-1.5 lg:hidden">
             {transactions.map((txn) => {
               const balance = getCurrentBalance(txn.sourceAccountId);
+              const isShared = Boolean(txn.isShared);
               return (
                 <div key={txn.id} className="min-h-[82px] rounded-lg border border-border/70 bg-background px-2.5 py-2 shadow-sm">
                   <div className="flex items-center gap-2">
@@ -275,7 +297,7 @@ Total: ${formatCurrency(txn.amount)}`;
                         <p className="min-w-0 truncate font-serif text-[14px] font-semibold">{txn.description || localizeBankingValue(txn.type, language)}</p>
                         <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-medium uppercase text-emerald-700">{localizeBankingValue(txn.type, language)}</span>
                       </div>
-                      <p className="mt-0.5 truncate text-[10px] text-muted-foreground">{new Date(txn.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'})} · {txn.category}{txn.shopName ? ` · ${txn.shopName}` : ''}{txn.expenseItems?.length ? ` · ${txn.expenseItems.length} items` : ''}</p>
+                      <p className="mt-0.5 truncate text-[10px] text-muted-foreground">{new Date(txn.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'})}{txn.businessName ? ` · ${txn.businessName}` : ''} · {txn.category}{txn.shopName ? ` · ${txn.shopName}` : ''}{txn.expenseItems?.length ? ` · ${txn.expenseItems.length} items` : ''}</p>
                     </div>
                     <div className="shrink-0 text-right"><p className="text-[10px] text-muted-foreground">Total</p><p className="text-[13px] font-semibold">{formatMobileCurrency(txn.amount)}</p></div>
                     <div className="hidden shrink-0 text-right min-[390px]:block"><p className="text-[10px] text-muted-foreground">Balance</p><p className="text-[13px] font-semibold">{formatMobileCurrency(balance)}</p></div>
@@ -284,7 +306,7 @@ Total: ${formatCurrency(txn.amount)}`;
                         <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => printBill(txn)} aria-label="Print bill"><Printer className="h-4 w-4" /></Button>
                         <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => shareBill(txn)} aria-label="Share bill"><Share2 className="h-4 w-4" /></Button>
                       </>)}
-                      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={() => isBillTransaction(txn) && onBillEdit ? onBillEdit(txn) : openEdit(txn)}><Pencil className="mr-2 h-4 w-4" />{t.edit}</DropdownMenuItem><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(txn.id)}><Trash2 className="mr-2 h-4 w-4" />{t.delete}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+                      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem disabled={isShared} onClick={() => !isShared && (isBillTransaction(txn) && onBillEdit ? onBillEdit(txn) : openEdit(txn))}><Pencil className="mr-2 h-4 w-4" />{t.edit}</DropdownMenuItem><DropdownMenuItem disabled={isShared} className="text-destructive focus:text-destructive" onClick={() => !isShared && onDelete(txn.id)}><Trash2 className="mr-2 h-4 w-4" />{t.delete}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
                     </div>
                   </div>
                   <div className="mt-1 flex min-[390px]:hidden items-center justify-end border-t border-border/50 pt-1"><span className="mr-2 text-[10px] text-muted-foreground">Balance {formatMobileCurrency(balance)}</span></div>
@@ -309,6 +331,7 @@ Total: ${formatCurrency(txn.amount)}`;
             <TableBody>
               {transactions.map((txn) => {
                 const config = typeConfig[txn.type];
+                const isShared = Boolean(txn.isShared);
                 const TypeIcon = config.icon;
                 const TagIcon = txn.tag ? tagConfig[txn.tag].icon : null;
 
@@ -329,9 +352,9 @@ Total: ${formatCurrency(txn.amount)}`;
                     </TableCell>
                     <TableCell>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{txn.description}</p>
+                        <p className="truncate text-sm font-medium">{txn.description}{txn.isShared && <Badge variant="outline" className="ml-2 text-[9px]">Shared</Badge>}</p>
                         <p className="text-xs text-muted-foreground">
-                          {localizeBankingValue(txn.category, language)}{txn.shopName ? ` • ${txn.shopName}` : ''}{txn.expenseItems?.length ? ` • ${txn.expenseItems.length} items` : ''}
+                          {txn.businessName ? <span className="mr-1 font-medium text-primary">{txn.businessName} • </span> : null}{localizeBankingValue(txn.category, language)}{txn.shopName ? ` • ${txn.shopName}` : ''}{txn.expenseItems?.length ? ` • ${txn.expenseItems.length} items` : ''}
                           {txn.isFromGalla && (
                             <span className="ml-1.5 inline-flex items-center gap-0.5 text-amber-600">
                               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
@@ -382,13 +405,13 @@ Total: ${formatCurrency(txn.amount)}`;
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEdit(txn)}>
+                          <DropdownMenuItem disabled={isShared} onClick={() => !isShared && openEdit(txn)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             {t.edit}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => onDelete(txn.id)}
+                            onClick={() => !isShared && onDelete(txn.id)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             {t.delete}
@@ -540,6 +563,7 @@ Total: ${formatCurrency(txn.amount)}`;
               </div>
             )}
           </div>
+          {editError && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">{editError}</p>}
           <DialogFooter className="pt-2 mobile-entry-footer">
             <Button variant="outline" onClick={() => setEditTxn(null)}>{t.cancel}</Button>
             <Button onClick={handleSaveEdit}>{t.saveChangesBtn}</Button>

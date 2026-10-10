@@ -9,6 +9,12 @@ export interface BankAccount {
   accountType: BankAccountType;
   balance: number;
   upiId: string;
+  branch: string;
+  nickname: string;
+  openingDate: string | null;
+  status: string;
+  showOnInvoice: boolean;
+  notes: string;
   createdAt: string;
 }
 
@@ -59,6 +65,9 @@ export interface Transaction {
   shopName?: string;
   expenseItems?: ExpenseItem[];
   createdAt: string;
+  /** True when this row is visible because its bank account is shared across businesses. */
+  isShared?: boolean;
+  businessName?: string;
 }
 
 // Financial Goals
